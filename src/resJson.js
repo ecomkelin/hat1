@@ -1,9 +1,9 @@
 const success = async(ctx, ctxBody) => {
-    const {data, message, paramObj} = ctxBody;
-    // console.log("[@/resJson success] data: ", data);
-    console.log("[@/resJson success] message: ", message);
+    // console.log("[@/resJson success] data: ", ctxBody.data);
+    console.log("[@/resJson success] position: ", ctxBody.position);
+    console.log("[@/resJson success] message: ", ctxBody.message);
     ctx.status = 200;
-    ctx.body = {status: 200, message, data, paramObj};
+    ctx.body = {status: 200, ...ctxBody};
     return;
 }
 const failure = async(ctx, ctxBody) => {
@@ -21,7 +21,7 @@ const failure = async(ctx, ctxBody) => {
     console.log("[@/resJson failure] position: ", position);
     console.log("[@/resJson failure] message: ", message);
     ctx.status = 400;
-    ctx.body = {status: 400, position, message};
+    ctx.body = {status: 400, ...ctxBody};
     return;
 }
 

@@ -6,6 +6,7 @@ const dbSchema = new Schema({
     name: String,
     desp: String,
 
+    type: String,
     url: String
 });
 

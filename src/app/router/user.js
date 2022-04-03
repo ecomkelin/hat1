@@ -1,13 +1,16 @@
-const router = require('@koa/router')({prefix: '/b1/user'});
+const router = require('@koa/router')({prefix: '/User'});
 
-const CTuser = require("../controller/user");
-const VFuser = require("../middle/user");
+const UserCT = require("../controller/User");
+const UserMD = require("../middle/User");
 
-router.post("/register", VFuser.register, CTuser.register);
-router.post("/login", CTuser.login);
-router.post("/list", CTuser.list);
-router.post("/profile", CTuser.profile);
+router.post("/create", UserMD.create, UserCT.create);
+router.post("/delete/:id", UserCT.delete);
+router.post("/edit/:id", UserCT.edit);
+router.post("/delMany/:id", UserCT.delMany);
 
-router.post("/avatar", CTuser.avatar)
+router.post("/info/:id", UserCT.info);
+router.post("/list", UserCT.list);
+
+
 
 module.exports = router;

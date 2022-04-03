@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const router = require('@koa/router')();
+const router = require('@koa/router')({prefix: "/b1"});
 
 fs.readdirSync(__dirname).forEach(file => {
     // console.log(file);

@@ -1,89 +1,84 @@
-const {DIR_UPLOAD} = require("../../config/const_sys");
-const DSuser = require("../dbServer/user");
+const UserDS = require("../dbServer/User");
 const resJson = require("../../resJson");
-const fs = require('fs');
-const path = require('path');
 
-// post
-exports.register = async(ctx, next) => {
-    const position = "controller user register";
+exports.create = async(ctx, next) => {
+    const position = "controller User create";
     try{
+        const payload = null;
         const obj = ctx.request.body;
 
-        const res = await DSuser.postUser(obj);
+        const res = await UserDS.User_create(payload, obj);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }
 };
 
-// get list
+// User_delete
+exports.delete = async(ctx, next) => {
+    const position = "controller User delete";
+    try{
+        const payload = null;
+        const id = ctx.request.params.id;
+
+        const res = await UserDS.User_delete(payload , id);
+        return resJson.success(ctx, res);
+    } catch(err) {
+        return resJson.errs(ctx, {position, err});
+    }
+}
+// User_edit
+exports.edit = async(ctx, next) => {
+    const position = "controller User edit";
+    try{
+        const payload = null;
+        const id = ctx.request.params.id;
+        const paramObj = ctx.request.body;
+
+        const res = await UserDS.User_put(payload, id, paramObj);
+        return resJson.success(ctx, res);
+    } catch(err) {
+        return resJson.errs(ctx, {position, err});
+    }
+}
+
+exports.delMany = async(ctx, next) => {
+    const position = "controller User delMany";
+    try{
+        const payload = null;
+        const paramObj = ctx.request.body;
+        const {matchObj = {}} = paramObj;
+
+        const res = await UserDS.User_delMany(payload, matchObj);
+        return resJson.success(ctx, res);
+    } catch(err) {
+        return resJson.errs(ctx, {position, err});
+    }
+}
+
+// User_info
+exports.info = async(ctx, next) => {
+    const position = "controller User info";
+    try{
+        const payload = null;
+        const id = ctx.request.params.id;
+        const paramObj = ctx.request.body;
+
+        const res = await UserDS.User_get(payload, id, paramObj);
+        return resJson.success(ctx, res);
+    } catch(err) {
+        return resJson.errs(ctx, {position, err});
+    }
+}
+
+// User_list
 exports.list = async(ctx, next) => {
-    const position = "controller user list";
+    const position = "controller User list";
     try{
+        const payload = null;
         const paramObj = ctx.request.body;
 
-        const res = await DSuser.getUserList(paramObj);
-        return resJson.success(ctx, res);
-    } catch(err) {
-        return resJson.errs(ctx, {position, err});
-    }
-}
-
-// get info (auth with [code, pwd])
-exports.login = async(ctx, next) => {
-    const position = "controller user login";
-    try{
-        const {code, pwd} = ctx.request.body;
-
-        const res = await DSuser.getUser({code, pwd});
-        return resJson.success(ctx, res);
-    } catch(err) {
-        return resJson.errs(ctx, {position, err});
-    }
-};
-
-// get info
-exports.profile = async(ctx, next) => {
-    const position = "controller user profile";
-    try{
-        const paramObj = ctx.request.body;
-
-        const res = await DSuser.getUser(paramObj);
-        return resJson.success(ctx, res);
-    } catch(err) {
-        return resJson.errs(ctx, {position, err});
-    }
-}
-
-// upload
-exports.avatar = async(ctx, next) => {
-    const position = "controller user avatar";
-    try{
-        const files = ctx.request.files;
-        const obj = ctx.request.body.obj;
-
-        // if(file) {
-        //     const date = new Date();
-        //     const year = date.getFullYear();
-        //     const month = date.getMonth();
-        //     const day = date.getDate();
-        //     const dir = DIR_UPLOAD+year+month+day;
-        //     if(!fs.existsSync(dir)) {
-        //         fs.mkdirSync(dir, {
-        //             recursive: true
-        //         })
-        //     }
-        //     // 文件的存储名称
-
-        //     const filename = 'name' + '-' + Date.now() + path.extname(file.path);
-        //     console.log(filename)
-        // }
-        
-
-
-        const res = await DSuser.getUser();
-        res.data.obj = obj;
+        const res = await UserDS.User_getMany(payload, paramObj);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});

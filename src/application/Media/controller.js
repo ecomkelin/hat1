@@ -4,7 +4,7 @@ const path = require('path');
 
 // upload
 exports.upload = async(ctx, next) => {
-    const position = "controller media upload";
+    const position = "controller Media upload";
     try{
         const files = ctx.request.files;
         const obj = ctx.request.body.obj;

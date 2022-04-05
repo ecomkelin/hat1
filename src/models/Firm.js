@@ -1,7 +1,7 @@
 const {
     conn1,
     // conn2
-} = require("./conn_dbs");
+} = require("./_connDBs");
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;

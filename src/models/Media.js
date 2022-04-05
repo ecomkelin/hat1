@@ -10,4 +10,4 @@ const dbSchema = new Schema({
     url: String
 });
 
-module.exports = mongoose.model('k2_image_DB', dbSchema);
+module.exports = mongoose.model('h1_Media_DB', dbSchema);

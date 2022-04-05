@@ -20,7 +20,7 @@ server.use(koaBody({// 配置可以上传文件的 koa-body
 
 // const routerUser = require('./router/User');
 // server.use(routerUser.routes());
-const router = require("./app/router/_config.js");
+const router = require("./router");
 server.use(router.routes());
 server.use(router.allowedMethods()); // 比如 login 用了 get 则报 405
 

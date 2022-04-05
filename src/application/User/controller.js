@@ -1,4 +1,4 @@
-const UserDS = require("../dbServer/User");
+const UserDS = require("./dbServer");
 const resJson = require("../../resJson");
 
 exports.create = async(ctx, next) => {
@@ -7,21 +7,21 @@ exports.create = async(ctx, next) => {
         const payload = null;
         const obj = ctx.request.body;
 
-        const res = await UserDS.User_create(payload, obj);
+        const res = await UserDS.post_User(payload, obj);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }
 };
 
-// User_delete
+// delete_User
 exports.delete = async(ctx, next) => {
     const position = "controller User delete";
     try{
         const payload = null;
         const id = ctx.request.params.id;
 
-        const res = await UserDS.User_delete(payload , id);
+        const res = await UserDS.delete_User(payload , id);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
@@ -35,26 +35,19 @@ exports.edit = async(ctx, next) => {
         const id = ctx.request.params.id;
         const paramObj = ctx.request.body;
 
-        const res = await UserDS.User_put(payload, id, paramObj);
+        const res = await UserDS.put_User(payload, id, paramObj);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }
 }
 
-exports.delMany = async(ctx, next) => {
-    const position = "controller User delMany";
-    try{
-        const payload = null;
-        const paramObj = ctx.request.body;
-        const {matchObj = {}} = paramObj;
 
-        const res = await UserDS.User_delMany(payload, matchObj);
-        return resJson.success(ctx, res);
-    } catch(err) {
-        return resJson.errs(ctx, {position, err});
-    }
-}
+
+
+
+
+
 
 // User_info
 exports.info = async(ctx, next) => {
@@ -64,7 +57,7 @@ exports.info = async(ctx, next) => {
         const id = ctx.request.params.id;
         const paramObj = ctx.request.body;
 
-        const res = await UserDS.User_get(payload, id, paramObj);
+        const res = await UserDS.get_User(payload, id, paramObj);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
@@ -78,7 +71,7 @@ exports.list = async(ctx, next) => {
         const payload = null;
         const paramObj = ctx.request.body;
 
-        const res = await UserDS.User_getMany(payload, paramObj);
+        const res = await UserDS.get_UserMany(payload, paramObj);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});

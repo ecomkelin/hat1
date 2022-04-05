@@ -1,7 +1,7 @@
 const {
     conn1,
     // conn2
-} = require("./conn_dbs");
+} = require("../_app/conn_dbs");
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
@@ -47,13 +47,13 @@ const dbSchema = {
     at_codeUpd: {type: Date, default: null},		// 只读 上次账户修改时间
 
     at_crt: Date,                                       // 创建时间
-    User_crt_db: {type: ObjectId, ref: "User_db"},       // 创建人
+    Firm_crt_db: {type: ObjectId, ref: "Firm_db"},       // 创建人
 
     at_upd: Date,                                       // 最近一次更新时间
-    User_upd_dbs: [{type: ObjectId, ref: "User_db"}],    // 除了自己更新的人
+    Firm_upd_dbs: [{type: ObjectId, ref: "Firm_db"}],    // 除了自己更新的人
     upds: [{
         at_upd: Date,
-        User_upd_dbs: [{type: ObjectId, ref: "User_db"}],    // 除了自己更新的人
+        Firm_upd_dbs: [{type: ObjectId, ref: "Firm_db"}],    // 除了自己更新的人
     }],
 	
     at_login: Date,                                     // 最近一次登录
@@ -66,11 +66,11 @@ const dbSchema = {
 
 
 
-const UserDB1 = conn1.model("h1_User_dbs", new Schema(dbSchema));
-// const UserDB2 = conn2.model("k2_User_DB", new Schema(dbSchema));
+const FirmDB1 = conn1.model("h1_Firm_dbs", new Schema(dbSchema));
+// const FirmDB2 = conn2.model("k2_Firm_DB", new Schema(dbSchema));
 
 module.exports = {
     dbSchema,
-    UserDB1,
-    // UserDB2
+    FirmDB1,
+    // FirmDB2
 };

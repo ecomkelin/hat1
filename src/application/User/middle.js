@@ -8,8 +8,8 @@ const {isObjectId} = require("../../extra/judge/is_ObjectId");
 const {failure, errs} = require("../../resJson");
 const { UserSchema, restrict_User } = require(path.resolve(process.cwd(), "src/models/User"));
 
-exports.create = async(ctx, next) => {
-    const position = "@/app/middle/User.js create";
+exports.add = async(ctx, next) => {
+    const position = "@/app/middle/User.js add";
     try {
         const body = ctx.request.body;
         const keys = Object.keys(restrict_User);
@@ -127,10 +127,6 @@ exports.list = async(ctx, next) => {
         }
 
         for(key in select) {
-            if(!Object.keys(UserSchema).includes(key)) {
-                delete select[key];
-                continue;
-            }
             if(select[key] != 1 && select[key] != 0) {
                 select[select[key]] = "$"+key;
                 delete select[key];
@@ -161,7 +157,7 @@ exports.list = async(ctx, next) => {
     
 }
 
-exports.delete = async(ctx, next) => {
+exports.del = async(ctx, next) => {
     const position = "@/app/middle/User.js delete";
     try {
         if(!isObjectId(ctx.request.params.id)) return failure(ctx, {position, message});
@@ -175,7 +171,7 @@ exports.delete = async(ctx, next) => {
 
 
 exports.edit = async(ctx, next) => {
-    const position = "@/app/middle/User.js info";
+    const position = "@/app/middle/User.js edit";
     try {
         if(!isObjectId(ctx.request.params.id)) return failure(ctx, {position, message});
 
@@ -188,10 +184,11 @@ exports.edit = async(ctx, next) => {
 
 
 
-exports.info = async(ctx, next) => {
-    const position = "@/app/middle/User.js info";
+exports.detail = async(ctx, next) => {
+    const position = "@/app/middle/User.js detail";
     try {
-        if(!isObjectId(ctx.request.params.id)) return failure(ctx, {position, message});
+        const id = ctx.request.params.id;
+        if(!isObjectId(id)) return failure(ctx, {position, message:"请传递正确的id信息", id: id});
 
         await next();
     } catch(err) {

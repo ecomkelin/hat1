@@ -10,10 +10,10 @@ const ObjectId = Schema.Types.ObjectId;
 const UserSchema = {
     // 权限即所属信息
     is_usable: {type: Boolean, default: true},                  // 是否可用
-    Firm_db: {type: ObjectId, ref: "Firm_db"},                  // 所属公司
+    Firm_db: {type: ObjectId, ref: "h1_Firm_dbs"},              // 所属公司
     roleNum: {type: Number},                                    // 所属部门，或者说我们可以根据这个 来决定用户的界面
-    Shop_db: {type: ObjectId, ref: "Shop_db"},                  // 所属分公司
-    permissions: [{type: String}],                              // 用户权限
+    Shop_db: {type: ObjectId, ref: "h1_Shop_dbs"},              // 所属分公司
+    auths: [{type: String}],                                    // 用户权限
 
     // 登录信息
     code: {type: String},                                       // <手动/自动> 管理员可添加修改，注册自动生成
@@ -29,9 +29,9 @@ const UserSchema = {
     sortNum: {type: Number},
 
     addrObjs: [{
-		City_dbs : {type: ObjectId, ref: "City_db"},
+		City_dbs : {type: ObjectId, ref: "h1_City_dbs"},
 		name: {type: String},
-		address: {type: String},
+		addr: {type: String},
 		postcode: {type: String},
 		phone: {type: String},
 		note: {type: String},
@@ -39,13 +39,13 @@ const UserSchema = {
 
     // 创建及修改信息
     at_crt: {type: Date},                                       // 创建时间
-    User_crt_db: {type: ObjectId, ref: "User_db"},       // 创建人
+    User_crt_db: {type: ObjectId, ref: "h1_User_dbs"},       // 创建人
 
     at_upd: {type: Date},                                       // 最近一次更新时间
-    User_upd_db: {type: ObjectId, ref: "User_db"},    // 除了自己更新的人
+    User_upd_db: {type: ObjectId, ref: "h1_User_dbs"},    // 除了自己更新的人
     updObjs: [{
         at_upd: {type: Date},
-        User_upd_db: {type: ObjectId, ref: "User_db"},    // 除了自己更新的人
+        User_upd_db: {type: ObjectId, ref: "h1_User_dbs"},    // 除了自己更新的人
     }],
 	
     // 账号登录修改信息
@@ -60,8 +60,6 @@ const UserSchema = {
 }
 const UserDB1 = conn1.model("h1_User_dbs", new Schema(UserSchema));
 // const UserDB2 = conn2.model("k2_User_DB", new Schema(UserSchema));
-
-
 
 
 

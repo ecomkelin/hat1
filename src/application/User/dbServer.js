@@ -8,9 +8,9 @@ const {
 
 const format_phonePre = require("../../extra/format/phonePre");
 
-const existUser = (matchObj={}) => {
+const exist = (matchObj={}) => {
     return new Promise(async(resolve, reject) => {
-        const position = "@/app/dbServer/User existUser[const]";
+        const position = "@/app/dbServer/User exist[const]";
         try {
             const exist = await UserDB1.findOne(matchObj, {_id: 1})
             if(!exist) return resolve({status: 400, position, message: "数据库中无此用户信息"});
@@ -22,9 +22,9 @@ const existUser = (matchObj={}) => {
     })
 }
 
-exports.post_User = (payload, obj) => {
+exports.create = (payload, obj) => {
     return new Promise(async(resolve, reject) => {
-        const position = "@/app/dbServer/User post_User";
+        const position = "@/app/dbServer/User create";
         try{
             // 读取数据
             const {code, name, pwd, phoneNum, desp} = obj;
@@ -37,7 +37,7 @@ exports.post_User = (payload, obj) => {
             if(!email) email = undefined;
             // 判断数据
             const matchObj = {code};
-            const res_exist = await existUser(matchObj)
+            const res_exist = await exist(matchObj)
             res_exist.status = 400;
             res_exist.position = position + " | " +res_exist.position;
             if(res_exist.status === 200) return resolve(res_exist);
@@ -57,15 +57,15 @@ exports.post_User = (payload, obj) => {
     });
 };
 
-exports.put_User = (payload, id) => {
-    const position = "@/app/dbServer/User put_User";
+exports.update = (payload, id) => {
+    const position = "@/app/dbServer/User update";
     return new Promise(async(resolve, reject) => {
         try{
             // 还要加入 payload
             const matchObj = {_id: id};
 
             // 判断数据
-            const res_exist = await existUser(matchObj);
+            const res_exist = await exist(matchObj);
             res_exist.position = position + " | " + res_exist.position;
             if(res_exist.status === 400) return resolve(res_exist);
 
@@ -82,8 +82,8 @@ exports.put_User = (payload, id) => {
     });
 }
 
-exports.delete_User = (payload, id) => {
-    const position = "@/app/dbServer/User delete_User";
+exports.deleteOne = (payload, id) => {
+    const position = "@/app/dbServer/User deleteOne";
     return new Promise(async(resolve, reject) => {
         try{
             /* 读取数据 */
@@ -91,7 +91,7 @@ exports.delete_User = (payload, id) => {
             // matchObj 还要加入 payload
 
             /* 判断数据 */
-            const res_exist = await existUser(matchObj);
+            const res_exist = await exist(matchObj);
             res_exist.position = position + " | " + res_exist.position;
             if(res_exist.status === 400) return resolve(res_exist);
 
@@ -123,8 +123,8 @@ exports.delete_User = (payload, id) => {
 
 
 
-exports.get_User = (payload, id, paramObj={}) => {
-    const position = "@/app/dbServer/User get_User";
+exports.findOne = (payload, id, paramObj={}) => {
+    const position = "@/app/dbServer/User findOne";
     return new Promise(async(resolve, reject) => {
         try{
             const {matchObj={}, projectObj, populate} = paramObj;
@@ -145,8 +145,8 @@ exports.get_User = (payload, id, paramObj={}) => {
     });
 };
 
-exports.get_UserMany = (payload, paramObj={}) => {
-    const position = "@/app/dbServer/User get_UserMany";
+exports.find = (payload, paramObj={}) => {
+    const position = "@/app/dbServer/User find";
     return new Promise(async(resolve, reject) => {
         try{
             // to do 查找数据库

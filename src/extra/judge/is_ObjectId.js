@@ -1,5 +1,9 @@
-const { ObjectId } = require('mongoose').Types;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const objectId = Schema.Types.ObjectId;
+exports.ObjectId = objectId;
 
+const { ObjectId } = require('mongoose').Types;
 exports.isObjectId = id => ObjectId.isValid(id);
 
 exports.isObjectIds = (ids) => {

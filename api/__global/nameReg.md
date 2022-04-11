@@ -1,5 +1,5 @@
 数据库字段
-    数据库文档名称 h[n]_Xxxx_dbs 如： h1_User_dbs h1_City_dbs
+    数据库文档名称 h[n]_Xxxx_dbs 如： hat_User_dbs hat_City_dbs
 
     string类型 为小写   code name 
         词组为驼峰式

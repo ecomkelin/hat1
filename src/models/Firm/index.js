@@ -1,13 +1,15 @@
 const {
     conn1,
     // conn2
-} = require("./_connDBs");
+} = require("../_connDBs");
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
-const dbSchema = {
+const docName = require("../_docName");
+
+const doc = {
     // 权限即所属信息
     is_usable: Boolean,                             // 是否可用
     is_active: Boolean,                             // 是否被激活验证
@@ -62,15 +64,13 @@ const dbSchema = {
         at_login: Date,                                     // 最近一次登录
         City_login_db: {type: ObjectId, ref: "City_db"},     // 最近一次登录的城市
     }
-}
+};
 
-
-
-const FirmDB1 = conn1.model("h1_Firm_dbs", new Schema(dbSchema));
-// const FirmDB2 = conn2.model("k2_Firm_DB", new Schema(dbSchema));
+const model1 = conn1.model(docName.User, new Schema(doc));
+// const model2 = conn2.model(docName.User, new Schema(doc));
 
 module.exports = {
-    dbSchema,
-    FirmDB1,
-    // FirmDB2
+    model1,
+    // model2,
+    doc,
 };

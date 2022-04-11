@@ -66,7 +66,7 @@ const dbSchema = {
 
 
 
-const FirmDB1 = conn1.model("h1_Firm_dbs", new Schema(dbSchema));
+const FirmDB1 = conn1.model("hat_Firm_dbs", new Schema(dbSchema));
 // const FirmDB2 = conn2.model("k2_Firm_DB", new Schema(dbSchema));
 
 module.exports = {

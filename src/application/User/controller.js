@@ -1,13 +1,13 @@
 const UserDS = require("./dbServer");
 const resJson = require("../../resJson");
 
-exports.add = async(ctx, next) => {
-    const position = "controller User add";
+exports.create = async(ctx, next) => {
+    const position = "controller User create";
     try{
         const payload = null;
-        const obj = ctx.request.body;
+        const body = ctx.request.body;
 
-        const res = await UserDS.create(payload, obj);
+        const res = await UserDS.create(payload, body);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
@@ -15,7 +15,7 @@ exports.add = async(ctx, next) => {
 };
 
 // deleteOne
-exports.del = async(ctx, next) => {
+exports.delete = async(ctx, next) => {
     const position = "controller User del";
     try{
         const payload = null;
@@ -27,15 +27,15 @@ exports.del = async(ctx, next) => {
         return resJson.errs(ctx, {position, err});
     }
 }
-// User_edit
-exports.edit = async(ctx, next) => {
-    const position = "controller User edit";
+// User_modify
+exports.modify = async(ctx, next) => {
+    const position = "controller User modify";
     try{
         const payload = null;
         const id = ctx.request.params.id;
-        const paramObj = ctx.request.body;
+        const body = ctx.request.body;
 
-        const res = await UserDS.update(payload, id, paramObj);
+        const res = await UserDS.update(payload, id, body);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
@@ -51,7 +51,7 @@ exports.edit = async(ctx, next) => {
 
 // User_detail
 exports.detail = async(ctx, next) => {
-    const position = "controller User edit";
+    const position = "controller User detail";
     try{
         const payload = null;
         const id = ctx.request.params.id;

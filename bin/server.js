@@ -1,4 +1,4 @@
-const {DIR_API, DIR_PUBLIC, DIR_UPLOAD} = require("./config/const_sys");
+const {DIR_API, DIR_PUBLIC, DIR_UPLOAD} = require("../src/config/const_sys");
 
 const koa = require('koa');
 const server = new koa();

@@ -1,23 +1,8 @@
-
 const path = require('path');
 
 const Model = require(path.resolve(process.cwd(), "src/models/User"));
 
 const format_phonePre = require("../../extra/format/phonePre");
-
-const exist = (match={}, select={}) => {
-    return new Promise(async(resolve, reject) => {
-        const position = "@/app/dbServer exist[const]";
-        try {
-            const object = await Model.model1.findOne(match, select)
-            if(!object) return resolve({status: 400, position, message: "数据库中无此用户信息"});
-            return resolve({status: 200, data: {object}, position, message: "数据库中有此用户"});
-        } catch(err) {
-            console.log(position, err);
-            return reject({status: 500, position, err});
-        }
-    })
-}
 
 exports.create = (payload, body) => {
     return new Promise(async(resolve, reject) => {
@@ -31,13 +16,9 @@ exports.create = (payload, body) => {
             body.phone = phoneNum ? body.phonePre+phoneNum : undefined;
 
             // 判断数据
-            const matchSame = {code};
-            const res_same = await exist(matchSame, {_id: 1});
-            if(res_same.status === 200) {
-                res_same.status = 400;
-                res_same.position = position + " | " +res_same.position;
-                return resolve(res_same);
-            }
+            const match = {code};
+            const res_same = await this.findOne(payload, {match, select: {_id: 1}});
+            if(res_same.status === 200) return resolve({status: 400, position, message: "数据库中已存在此用户"});
 
             // 写入
             const object = await Model.model1.create(body);
@@ -75,20 +56,16 @@ exports.update = (payload, id, body) => {
             const match = {_id: id};
 
             // 判断数据
-            const res_exist = await exist(match);
+            const res_exist = await this.findOne(payload, {match: {_id: id}});
             res_exist.position = position + " | " + res_exist.position;
             if(res_exist.status === 400) return resolve(res_exist);
             const objOrg = res_exist.data.object;
 
             // 判断数据
             if(objOrg.code !== body.code) {
-                const matchSame = {_id: {"$ne": id}, code: body.code};
-                const res_same = await exist(matchSame, {_id: 1});
-                if(res_same.status === 200) {
-                    res_same.status = 400;
-                    res_same.position = position + " | " +res_same.position;
-                    return resolve(res_same);
-                }
+                const match = {_id: {"$ne": id}, code: body.code};
+                const res_same = await this.findOne(payload, {match, select: {_id: 1}});
+                if(res_same.status === 200) return resolve({status: 400, position, message: "数据库中有相同的编号"});
             }
 
             const object = await Model.model1.update(match, {$set: body});
@@ -126,7 +103,7 @@ exports.deleteOne = (payload, id) => {
             // match 还要加入 payload
 
             /* 判断数据 */
-            const res_exist = await exist(match, {_id: 1});
+            const res_exist = await this.findOne(payload, {match, select: {_id: 1}});
             res_exist.position = position + " | " + res_exist.position;
             if(res_exist.status === 400) return resolve(res_exist);
 
@@ -172,12 +149,11 @@ exports.deleteMany = (payload, match) => {
 
 
 
-exports.findOne = (payload, id, paramObj={}) => {
+exports.findOne = (payload, paramObj={}) => {
     const position = "@/app/dbServer findOne";
     return new Promise(async(resolve, reject) => {
         try{
             const {match={}, select, populate} = paramObj;
-            match._id = id;
             // match 还要加入 payload
 
             const object = await Model.model1.findOne(match, select)
@@ -199,15 +175,24 @@ exports.find = (payload, paramObj={}) => {
     return new Promise(async(resolve, reject) => {
         try{
             // to do 查找数据库
-            const {match={}, select, skip=0, limit=50, sort={}, populate} = paramObj;
-            console.log(match)
+            const {match={}, select, skip=0, limit=50, sort={}, populate, search={}} = paramObj;
+            const {fields, keywords} = search;
             // match 还要加入 payload
             const objects = await Model.model1.find(match, select)
                 .skip(skip).limit(limit)
                 .sort(sort)
                 .populate(populate);
             if(!objects) return resolve({status: 400, position, message: "数据库中无此数据"});
-            return resolve({status: 200, message: "获取用户列表成功", data: {objects}, paramObj: {
+            let object = null;
+            if(objects.length > 0 && fields && keywords) {
+                if(!match["$or"]) match["$or"] = [];
+                fields.forEach(field => {
+                    match["$or"].push({[field]: { $regex: keywords, $options: '$i' }})
+                });
+                const res_obj = await this.findOne(payload, {match, select, populate});
+                if(res_obj.status === 200) object = res_obj.data.object;
+            }
+            return resolve({status: 200, message: "获取用户列表成功", data: {objects, object}, paramObj: {
                 match,select, skip, limit, sort, populate
             }});
         } catch(err) {

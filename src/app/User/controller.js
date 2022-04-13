@@ -54,10 +54,9 @@ exports.detail = async(ctx, next) => {
     const position = "controller User detail";
     try{
         const payload = null;
-        const id = ctx.request.params.id;
         const paramObj = ctx.request.body;
 
-        const res = await UserDS.findOne(payload, id, paramObj);
+        const res = await UserDS.findOne(payload, paramObj);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});

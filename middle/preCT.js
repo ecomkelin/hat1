@@ -3,13 +3,9 @@
     也会跳过一些不合理的要求 比如 post时 给了多出的数据库的字段
 */
 const path = require('path');
-const {ObjectId, isObjectId} = require("../extra/judge/is_ObjectId");
+const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "src/extra/judge/is_ObjectId"));
 
-const {failure, errs} = require("../resJson");
-
-
-
-
+const {failure, errs} = require(path.resolve(process.cwd(), "src/resJson"));
 
 exports.create = doc => async(ctx, next) => {
     const position = "@/middle/preCT.js create";
@@ -152,7 +148,6 @@ exports.detail = doc => async(ctx, next) => {
         if(message) return failure(ctx, {position, message}); 
         if(!paramObj.match) paramObj.match = {};
         paramObj.match._id = id;
-        console.log(paramObj)
         ctx.request.body = paramObj;
         await next();
     } catch(err) {

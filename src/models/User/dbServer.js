@@ -1,8 +1,7 @@
 const path = require('path');
+const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
 
-const Model = require(path.resolve(process.cwd(), "src/models/User"));
-
-const format_phonePre = require("../../extra/format/phonePre");
+const DB = require("./index");
 
 exports.create = (payload, body) => {
     return new Promise(async(resolve, reject) => {
@@ -21,13 +20,12 @@ exports.create = (payload, body) => {
             if(res_same.status === 200) return resolve({status: 400, position, message: "数据库中已存在此用户"});
 
             // 写入
-            const object = await Model.model1.create(body);
+            const object = await DB.model1.create(body);
 
             /* 返回 */
             if(!object) return resolve({status: 400, position, message: "创建User失败"});
             return resolve({status: 200, data: {object}});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });
@@ -37,13 +35,12 @@ exports.insertMany = (payload, bodys) => {
         const position = "@/app/dbServer insertMany";
         try{
             // 写入
-            const objects = await Model.model1.insertMany(bodys);
+            const objects = await DB.model1.insertMany(bodys);
 
             /* 返回 */
             if(!objects) return resolve({status: 400, position, message: "创建User失败"});
             return resolve({status: 200, data: {objects}});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });
@@ -68,12 +65,11 @@ exports.update = (payload, id, body) => {
                 if(res_same.status === 200) return resolve({status: 400, position, message: "数据库中有相同的编号"});
             }
 
-            const object = await Model.model1.update(match, {$set: body});
+            const object = await DB.model1.update(match, {$set: body});
             if(!object) return resolve({status: 400, message: "更新失败"});
             /* 返回 */
             return resolve({status: 200, data: {object}, message: "更新成功"});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });
@@ -83,12 +79,11 @@ exports.updateMany = (payload, match, setObj) => {
     const position = "@/app/dbServer updateMany";
     return new Promise(async(resolve, reject) => {
         try{
-            const updMany = await Model.model1.updateMany(match, setObj);
+            const updMany = await DB.model1.updateMany(match, setObj);
             if(!updMany) return resolve({status: 400, message: "批量更新失败"});
             /* 返回 */
             return resolve({status: 200, data: {object}, message: "批量更新成功"});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });
@@ -108,13 +103,12 @@ exports.deleteOne = (payload, id) => {
             if(res_exist.status === 400) return resolve(res_exist);
 
             /* 删除数据 */
-            const del = await Model.model1.deleteOne(match)
+            const del = await DB.model1.deleteOne(match)
             if(del.deletedCount === 0) return resolve({status: 400, message: "删除失败"});
 
             /* 返回 */
             return resolve({status: 200, message: "删除成功"});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });
@@ -124,12 +118,11 @@ exports.deleteMany = (payload, match) => {
     return new Promise(async(resolve, reject) => {
         try{
             /* 删除数据 */
-            const deleteMany = await Model.model1.deleteMany(match)
+            const deleteMany = await DB.model1.deleteMany(match)
 
             /* 返回 */
             return resolve({status: 200, message: "删除成功"});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });
@@ -156,15 +149,14 @@ exports.findOne = (payload, paramObj={}) => {
             const {match={}, select, populate} = paramObj;
             // match 还要加入 payload
 
-            const object = await Model.model1.findOne(match, select)
+            const object = await DB.model1.findOne(match, select)
                 .populate(populate);
-            // console.log(object)
+
             if(!object) return resolve({status: 400, position, message: "数据库中无此数据"});
             return resolve({status: 200, message: "查看用户详情成功", data: {object}, paramObj: {
                 match,select, populate
             }});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });
@@ -178,7 +170,7 @@ exports.find = (payload, paramObj={}) => {
             const {match={}, select, skip=0, limit=50, sort={}, populate, search={}} = paramObj;
             const {fields, keywords} = search;
             // match 还要加入 payload
-            const objects = await Model.model1.find(match, select)
+            const objects = await DB.model1.find(match, select)
                 .skip(skip).limit(limit)
                 .sort(sort)
                 .populate(populate);
@@ -196,7 +188,6 @@ exports.find = (payload, paramObj={}) => {
                 match,select, skip, limit, sort, populate
             }});
         } catch(err) {
-            console.log(position, err);
             return reject({status: 500, position, err});
         }
     });

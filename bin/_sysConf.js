@@ -8,7 +8,6 @@ module.exports = {
     // DB_SERVER2: "mongodb://localhost/hat2",
 
     DIR_ROOT: process.cwd(),
-    DIR_API: path.resolve(process.cwd(), "api/"),
     DIR_PUBLIC: path.resolve(process.cwd(), "public/"),
     DIR_UPLOAD: path.resolve(process.cwd(), "public/upload/"),
 }

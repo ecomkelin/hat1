@@ -1,10 +1,9 @@
-const {DIR_API, DIR_PUBLIC, DIR_UPLOAD} = require("../src/config/const_sys");
+const {DIR_PUBLIC, DIR_UPLOAD} = require("./_sysConf");
 
 const koa = require('koa');
 const server = new koa();
 
 const koaStatic = require('koa-static');
-server.use(koaStatic(DIR_API));
 server.use(koaStatic(DIR_PUBLIC));
 
 const koaBody = require('koa-body');

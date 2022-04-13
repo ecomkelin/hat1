@@ -1,4 +1,5 @@
-const {PHONE_PRE} = require("../../config/const_var");
+const path = require('path');
+const {PHONE_PRE} = require(path.join(process.cwd(), "src/config/const_var"));
 module.exports = (phonePre) => {
 	if(phonePre === undefined || phonePre === null) return PHONE_PRE;
 

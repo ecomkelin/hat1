@@ -1,5 +1,6 @@
-const UserDS = require("./dbServer");
-const resJson = require("../../resJson");
+const path = require('path');
+const resJson = require(path.resolve(process.cwd(), "src/resJson"));
+const UserDS = require(path.resolve(process.cwd(), "src/models/User/dbServer"));
 
 exports.create = async(ctx, next) => {
     const position = "controller User create";

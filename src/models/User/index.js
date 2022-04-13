@@ -1,13 +1,13 @@
+const path = require('path');
 const {
     conn1,
     // conn2
-} = require("../connDBs");
+} = require(path.join(process.cwd(), "bin/connDBs"));
+const docName = require("../_docConf");
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
-
-const docName = require("../docName");
 
 const doc = {
     // _id: {type: ObjectId, is_auto: true},
@@ -59,7 +59,7 @@ const doc = {
     sortNum: {type: Number},
 
     addrObjs: [{
-		City_dbs : {type: ObjectId, ref: docName.City},
+		City_dbs : {type: String},
 		name: {type: String},
 		addr: {type: String},
 		postcode: {type: String},

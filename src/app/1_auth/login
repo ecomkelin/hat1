@@ -9,7 +9,7 @@ module.exports = docName => async(ctx, next) => {
     try{
 		const DS = (docName === "User") ? UserDS : null;	// 判断是哪个数据库在登录
 
-		const res_payload = await obt_object(ctx.request.body, DS);
+		const res_payload = await obt_payload(ctx.request.body, DS);
 		if(res_payload.status !== 200) return resJson.failure(ctx, res_payload);
 
 		return resJson.success(ctx, {...res_payload, position, message: "登录成功"})
@@ -20,8 +20,8 @@ module.exports = docName => async(ctx, next) => {
     }
 };
 
-const obt_object = (body, DS) => {
-	const position = "obt_object"
+const obt_payload = (body, DS) => {
+	const position = "obt_payload"
 	return new Promise(async(resolve, reject) => {
 		try {
 			const type_login = body.type_login;

@@ -35,7 +35,6 @@ const doc = {
         required: true,
         minLength: 6,
         maxLength: 12,
-        select: 0,
     },
 
     // 基础信息

@@ -55,7 +55,7 @@ exports.create = doc => async(ctx, next) => {
         return errs(ctx, {position, err});
     }
 }
-exports.modify = doc => async(ctx, next) => {
+exports.update = doc => async(ctx, next) => {
     const position = "@/middle/preCT.js modify";
     try {
         if(!isObjectId(ctx.request.params.id)) return failure(ctx, {position, message});
@@ -117,7 +117,7 @@ exports.delete = doc => async(ctx, next) => {
 
 
 
-exports.list = doc => async(ctx, next) => {
+exports.find = doc => async(ctx, next) => {
     const position = "@/middle/preCT.js list";
     try {
         const body = ctx.request.body;
@@ -134,7 +134,7 @@ exports.list = doc => async(ctx, next) => {
     }
     
 }
-exports.detail = doc => async(ctx, next) => {
+exports.findOne = doc => async(ctx, next) => {
     const position = "@/middle/preCT.js detail";
     try {
         const id = ctx.request.params.id;

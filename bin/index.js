@@ -1,3 +1,4 @@
+require('dotenv').config();
 const {SERVER_PORT} = require("./_sysConf");
 const server = require("./server")
 

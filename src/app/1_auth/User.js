@@ -36,7 +36,7 @@ exports.modify = async(ctx, next) => {
         const id = ctx.request.params.id;
         const body = ctx.request.body;
 
-        const res = await UserDS.update(payload, id, body);
+        const res = await UserDS.updateOne(payload, id, body);
         return resJson.success(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});

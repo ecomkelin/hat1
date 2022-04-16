@@ -10,7 +10,6 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
 const doc = {
-    // _id: {type: ObjectId, is_auto: true},
     // 权限即所属信息
     is_usable: {type: Boolean, default: true},                  // 是否可用
     Firm_db: {type: ObjectId, ref: docName.Firm},              // 所属公司
@@ -22,8 +21,8 @@ const doc = {
     code: {
         type: String,
         required: true,
-        minLength: 4,
-        maxLength: 20,
+        minLen: 4,
+        maxLen: 20,
         regexp: '^[a-zA-Z0-9]*$',
         regErrMsg: "只能为数字或字符",
         is_fixed: true,
@@ -33,15 +32,21 @@ const doc = {
     pwd: {
         type: String,
         required: true,
-        minLength: 6,
-        maxLength: 12,
+        minLen: 6,
+        maxLen: 12,
+        as: 0
+    },
+    refreshToken: {
+        type: String,
+        is_auto: true,
+        as: 0
     },
 
     // 基础信息
     name: {
         type: String,
-        minLength: 4,
-        maxLength: 20,
+        minLen: 4,
+        maxLen: 20,
         regexp: '^[a-zA-Z0-9]*$',
     },
     img_url: {type: String},

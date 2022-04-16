@@ -1,18 +1,24 @@
 const path = require('path');
 const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
+const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
 
 const DB = require("./index");
 
-exports.create = (payload, body) => {
+exports.create = (payload, createObj) => {
     return new Promise(async(resolve, reject) => {
-        const position = "@/app/dbServer create";
+        const position = "User-DS create";
         try{
             // 读取数据
-            const {code, phoneNum} = body;
+            const {code, phoneNum} = createObj;
 
             // 操作数据
-            body.phonePre = phoneNum ? format_phonePre(body.phonePre) : undefined;
-            body.phone = phoneNum ? body.phonePre+phoneNum : undefined;
+            createObj.phonePre = phoneNum ? format_phonePre(createObj.phonePre) : undefined;
+            createObj.phone = phoneNum ? createObj.phonePre+phoneNum : undefined;
+            if(createObj.pwd) {
+                const res_pwd = await bcryptMD.encrypt_Prom(createObj.pwd);
+                if(res_pwd.status !== 200) return resolve(res_pwd);
+                createObj.pwd = res_pwd.data.hash_bcrypt;
+            }
 
             // 判断数据
             const match = {code};
@@ -20,7 +26,7 @@ exports.create = (payload, body) => {
             if(res_same.status === 200) return resolve({status: 400, position, message: "数据库中已存在此用户"});
 
             // 写入
-            const object = await DB.model1.create(body);
+            const object = await DB.model1.create(createObj);
 
             /* 返回 */
             if(!object) return resolve({status: 400, position, message: "创建User失败"});
@@ -30,12 +36,12 @@ exports.create = (payload, body) => {
         }
     });
 };
-exports.insertMany = (payload, bodys) => {
+exports.insertMany = (payload, insertObjs) => {
     return new Promise(async(resolve, reject) => {
-        const position = "@/app/dbServer insertMany";
+        const position = "User-DS insertMany";
         try{
             // 写入
-            const objects = await DB.model1.insertMany(bodys);
+            const objects = await DB.model1.insertMany(insertObjs);
 
             /* 返回 */
             if(!objects) return resolve({status: 400, position, message: "创建User失败"});
@@ -45,8 +51,8 @@ exports.insertMany = (payload, bodys) => {
         }
     });
 };
-exports.update = (payload, id, body) => {
-    const position = "@/app/dbServer update";
+exports.updateOne = (payload, id, setObj) => {
+    const position = "User-DS updateOne";
     return new Promise(async(resolve, reject) => {
         try{
             // 还要加入 payload
@@ -59,13 +65,24 @@ exports.update = (payload, id, body) => {
             const objOrg = res_exist.data.object;
 
             // 判断数据
-            if(objOrg.code !== body.code) {
-                const match = {_id: {"$ne": id}, code: body.code};
+            if(setObj.code && objOrg.code !== setObj.code) {
+                const match = {_id: {"$ne": id}, code: setObj.code};
                 const res_same = await this.findOne(payload, {match, select: {_id: 1}});
                 if(res_same.status === 200) return resolve({status: 400, position, message: "数据库中有相同的编号"});
             }
 
-            const object = await DB.model1.update(match, {$set: body});
+            if(setObj.pwd) {
+                const res_pwd = await bcryptMD.encrypt_Prom(setObj.pwd);
+                if(res_pwd.status !== 200) return resolve(res_pwd);
+                setObj.pwd = res_pwd.data.hash_bcrypt;
+            }
+            // if(setObj.refreshToken) {
+            //     const res_refreshToken = await bcryptMD.encrypt_Prom(setObj.refreshToken+ ' re');
+            //     if(res_refreshToken.status !== 200) return resolve(res_refreshToken);
+            //     setObj.refreshToken = res_refreshToken.data.hash_bcrypt;
+            // }
+
+            const object = await DB.model1.updateOne(match, {$set: setObj});
             if(!object) return resolve({status: 400, message: "更新失败"});
             /* 返回 */
             return resolve({status: 200, data: {object}, message: "更新成功"});
@@ -76,7 +93,7 @@ exports.update = (payload, id, body) => {
 }
 
 exports.updateMany = (payload, match, setObj) => {
-    const position = "@/app/dbServer updateMany";
+    const position = "User-DS updateMany";
     return new Promise(async(resolve, reject) => {
         try{
             const updMany = await DB.model1.updateMany(match, setObj);
@@ -90,7 +107,7 @@ exports.updateMany = (payload, match, setObj) => {
 }
 
 exports.deleteOne = (payload, id) => {
-    const position = "@/app/dbServer deleteOne";
+    const position = "User-DS deleteOne";
     return new Promise(async(resolve, reject) => {
         try{
             /* 读取数据 */
@@ -114,7 +131,7 @@ exports.deleteOne = (payload, id) => {
     });
 }
 exports.deleteMany = (payload, match) => {
-    const position = "@/app/dbServer deleteOne";
+    const position = "User-DS deleteOne";
     return new Promise(async(resolve, reject) => {
         try{
             /* 删除数据 */
@@ -143,7 +160,7 @@ exports.deleteMany = (payload, match) => {
 
 
 exports.findOne = (payload, paramObj={}) => {
-    const position = "@/app/dbServer findOne";
+    const position = "User-DS findOne";
     return new Promise(async(resolve, reject) => {
         try{
             const {match={}, select, populate} = paramObj;
@@ -163,7 +180,7 @@ exports.findOne = (payload, paramObj={}) => {
 };
 
 exports.find = (payload, paramObj={}) => {
-    const position = "@/app/dbServer find";
+    const position = "User-DS find";
     return new Promise(async(resolve, reject) => {
         try{
             // to do 查找数据库

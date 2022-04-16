@@ -24,12 +24,12 @@ exports.create = doc => async(ctx, next) => {
                 return failure(ctx, {position, message: `[${key}] 字段的字符串长度必须为 [${doc[key].trimLength}]`});
             }
 
-            if(doc[key].minLength && doc[key].minLength > body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLength} ~ ${doc[key].maxLength}]`});
+            if(doc[key].minLen && doc[key].minLen > body[key].length) {
+                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
             }
             
-            if(doc[key].maxLength &&  doc[key].maxLength < body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLength} ~ ${doc[key].maxLength}]`});
+            if(doc[key].maxLen &&  doc[key].maxLen < body[key].length) {
+                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
             }
             
             if(doc[key].regexp) {
@@ -55,7 +55,7 @@ exports.create = doc => async(ctx, next) => {
         return errs(ctx, {position, err});
     }
 }
-exports.update = doc => async(ctx, next) => {
+exports.updateOne = doc => async(ctx, next) => {
     const position = "@/middle/preCT.js modify";
     try {
         if(!isObjectId(ctx.request.params.id)) return failure(ctx, {position, message});
@@ -78,12 +78,12 @@ exports.update = doc => async(ctx, next) => {
                 return failure(ctx, {position, message: `[${key}] 字段的字符串长度必须为 [${doc[key].trimLength}]`});
             }
 
-            if(doc[key].minLength && doc[key].minLength > body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLength} ~ ${doc[key].maxLength}]`});
+            if(doc[key].minLen && doc[key].minLen > body[key].length) {
+                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
             }
             
-            if(doc[key].maxLength &&  doc[key].maxLength < body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLength} ~ ${doc[key].maxLength}]`});
+            if(doc[key].maxLen &&  doc[key].maxLen < body[key].length) {
+                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
             }
             
             if(doc[key].regexp) {
@@ -163,17 +163,20 @@ exports.findOne = doc => async(ctx, next) => {
 
 
 
-
-
-const isField = (doc, field) => {
-    if(field === "_id") return true;
-    if(doc && doc[field]) return true;
-    return false;
-}
-const isFieldType = (doc, field, type) => {
-    if(field === "_id") return type === ObjectId ? true : false;
-    if(doc && doc[field]) return type === doc[field].type ? true: false;
-    return false;
+const obt_docField = (doc, field) => {
+    if(field === "_id") return {type: ObjectId};
+    if(!doc) return null;
+    if(doc[field]) return doc[field];
+    const keys = field.split('.');
+    if(keys.length !== 2) return null;
+    const [key1, key2] = keys;
+    if(!doc[key1]) return null;
+    const fld = doc[key1];
+    if(fld instanceof Object) {
+        const fd = (fld instanceof Array) ? fld[0][key2] : fld[key2];
+        if(fd) return fd;
+    };
+    return null;
 }
 
 const format_get = (body, doc) => {
@@ -195,8 +198,9 @@ const format_get = (body, doc) => {
                 search.fields  = (search.fields instanceof Array) ? search.fields : [search.fields];
                 for(i in search.fields) {
                     const field = search.fields[i];
-                    if(!isField(doc, field)) return {message: `数据库中无 此字段： search参数[${field}] 传递错误`};
-                    if(!isFieldType(doc, field, String)) return {message: `search参数[${field}] 传递错误, 应该传递类型为<String>的<field>`};
+                    const docField = obt_docField(doc, field);
+                    if(!docField) return {message: `数据库中无 此字段： search参数[${field}] 传递错误`};
+                    if(docField.type !== String) return {message: `search参数[${field}] 传递错误, 应该传递类型为<String>的<field>`};
                     matchObj["$or"].push({[field]: { $regex: keywords, $options: '$i' }});
                 }
             }
@@ -204,44 +208,51 @@ const format_get = (body, doc) => {
         }
         if(matchObj["$or"].length === 0) delete matchObj["$or"];
         for(key in match) {
-            if(!isField(doc, key)) continue;
-            if(isFieldType(doc, key, ObjectId) && !isObjectId(match[key]) ) return {message: `[match.${key}] 类型为 ObjectId`};
-            if(isFieldType(doc, key, String)) {
+            const docField = obt_docField(doc, key);
+            if(!docField) continue;
+            if(docField.type === ObjectId && !isObjectId(match[key]) ) return {message: `[match.${key}] 类型为 ObjectId`};
+            if(docField.type === String) {
                 matchObj[key] = {$regex: match[key], $options: '$i'}
             } else {
                 matchObj[key] = match[key];
             }
         }
         for(key in includes) {
-            if(!isField(doc, key)) continue;
-            if(isFieldType(doc, key, ObjectId) && !isObjectId(includes[key]) ) return {message: `[includes.${key}] 类型为 ObjectId`};
+            const docField = obt_docField(doc, key);
+            if(!docField) continue;
+            if(docField.type === ObjectId && !isObjectId(includes[key]) ) return {message: `[includes.${key}] 类型为 ObjectId`};
             matchObj[key] = {"$in": includes[key]};
         }
         for(key in excludes) {
-            if(!isField(doc, key)) continue;
-            if(isFieldType(doc, key, ObjectId) && !isObjectId(excludes[key]) ) return {message: `[excludes.${key}] 类型为 ObjectId`};
+            const docField = obt_docField(doc, key);
+            if(!docField) continue;
+            if(docField.type === ObjectId && !isObjectId(excludes[key]) ) return {message: `[excludes.${key}] 类型为 ObjectId`};
             matchObj[key] = {"$nin": excludes[key]};
         }
         for(key in lte) {
-            if(!isField(doc, key)) continue;
-            if(!isFieldType(doc, key, Number)) return {message: `应该传递 Number 类型的Field [${key}] 不是Number类型`};
+            const docField = obt_docField(doc, key);
+            if(!docField) continue;
+            if(docField.type !==  Number) return {message: `应该传递 Number 类型的Field [${key}] 不是Number类型`};
             matchObj[key] = {"$lte": lte[key]};
         }
     
         for(key in gte) {
-            if(!isField(doc, key)) continue;
-            if(!isFieldType(doc, key, Number))  return {message: `应该传递 Number 类型的Field [${key}] 不是Number类型`};
+            const docField = obt_docField(doc, key);
+            if(!docField) continue;
+            if(docField.type !==  Number)  return {message: `应该传递 Number 类型的Field [${key}] 不是Number类型`};
             matchObj[key] = {"$gte": gte[key]};
         }
         for(key in at_before) {
-            if(!isField(doc, key)) continue;
-            if(!isFieldType(doc, key, Date))  return {message: `应该传递 Date 类型的Field [${key}] 不是Date类型`};
+            const docField = obt_docField(doc, key);
+            if(!docField) continue;
+            if(docField.type !==  Date)  return {message: `应该传递 Date 类型的Field [${key}] 不是Date类型`};
             const before = (new Date(at_before[key]).setHours(23,59,59,999));
             matchObj[key] = {"$lte": before};
         }
         for(key in at_after) {
-            if(!isField(doc, key)) continue;
-            if(!isFieldType(doc, key, Date))  return {message: `应该传递 Date 类型的Field [${key}] 不是Date类型`};
+            const docField = obt_docField(doc, key);
+            if(!docField) continue;
+            if(docField.type !==  Date)  return {message: `应该传递 Date 类型的Field [${key}] 不是Date类型`};
             const after = (new Date(at_after[key]).setHours(0,0,0,0));
             matchObj[key] = {"$gte": after};
         }
@@ -262,23 +273,29 @@ const format_get = (body, doc) => {
     }
 
     for(key in select) {
-        if(!isField(doc, key)) return {message: `数据库中 没有[${key}]field, 不能写在<select>下`};
-        if(select[key] != 1 && select[key] != 0) {
-            select[select[key]] = "$"+key;
-            delete select[key];
+        const docField = obt_docField(doc, key);
+        if(!docField) return {message: `数据库中 没有[${key}]field, 不能写在<select>下`};
+        if(docField.as === 0) {
+            select[key] = 0;
+        } else {
+            if(select[key] != 1 && select[key] != 0) {
+                select[select[key]] = "$"+key;
+                delete select[key];
+            }
         }
+        
     }
     // 必须隐藏的值
     for(key in doc) {
-        if(doc[key].select === 0 && select[key] === 1) {
-            return {message: `[select.${key}] 的值 不能为1`};
+        if(doc[key].as === 0) {
+            select[key] = 0;
         }
     }
     paramObj.select = select;
 
     if(sort) {
         for(key in sort) {
-            if(!isField(doc, key)) return {message: `数据库中 没有[${key}]field, 不能写在<sort>下`};
+            if(!obt_docField(doc, key)) return {message: `数据库中 没有[${key}]field, 不能写在<sort>下`};
             if(sort[key] !== -1 && sort[key] !== "-1") {
                 sort[key] = 1
             }

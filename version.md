@@ -1,3 +1,4 @@
+V 2.0.0	调整结构
 V 1.8.0	bcrypt & moment
 V 1.7.0	login
 V 1.6.0	调整了新的文件结构

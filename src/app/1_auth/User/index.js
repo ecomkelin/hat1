@@ -1,6 +1,6 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "src/resJson"));
-const UserDS = require(path.resolve(process.cwd(), "src/models/User/dbServer"));
+const DB = require("./db");
 
 exports.create = async(ctx, next) => {
     const position = "controller User create";
@@ -8,8 +8,8 @@ exports.create = async(ctx, next) => {
         const payload = null;
         const body = ctx.request.body;
 
-        const res = await UserDS.create(payload, body);
-        return resJson.success(ctx, res);
+        const res = await DB.create(payload, body);
+        return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }
@@ -22,8 +22,8 @@ exports.delete = async(ctx, next) => {
         const payload = null;
         const id = ctx.request.params.id;
 
-        const res = await UserDS.deleteOne(payload , id);
-        return resJson.success(ctx, res);
+        const res = await DB.deleteOne(payload , id);
+        return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }
@@ -36,8 +36,8 @@ exports.modify = async(ctx, next) => {
         const id = ctx.request.params.id;
         const body = ctx.request.body;
 
-        const res = await UserDS.updateOne(payload, id, body);
-        return resJson.success(ctx, res);
+        const res = await DB.updateOne(payload, id, body);
+        return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }
@@ -57,8 +57,8 @@ exports.detail = async(ctx, next) => {
         const payload = null;
         const paramObj = ctx.request.body;
 
-        const res = await UserDS.findOne(payload, paramObj);
-        return resJson.success(ctx, res);
+        const res = await DB.findOne(payload, paramObj);
+        return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }
@@ -71,8 +71,8 @@ exports.list = async(ctx, next) => {
         const payload = null;
         const paramObj = ctx.request.body;
 
-        const res = await UserDS.find(payload, paramObj);
-        return resJson.success(ctx, res);
+        const res = await DB.find(payload, paramObj);
+        return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
     }

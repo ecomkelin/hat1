@@ -1,9 +1,11 @@
 const path = require('path');
+const { Model } = require('./User/db');
 const resJson = require(path.resolve(process.cwd(), "src/resJson"));
-const UserDS = require(path.resolve(process.cwd(), "src/models/User/dbServer"));
 const jwtMD = require(path.resolve(process.cwd(), "middle/jwt"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
 const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
+
+const UserModel = require("./User/db").Model;
 
 
 
@@ -11,7 +13,7 @@ const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/ph
 exports.refresh = docName => async(ctx, next) => {
 	const position = "refresh";
 	try {
-		const DS = (docName === "b1") ? UserDS : null;	// 判断是哪个数据库在登录
+		const Model = (docName === "b1") ? UserModel : null;	// 判断是哪个数据库在登录
 
 		const res_payload = await jwtMD.token_VerifyProm(ctx.request.headers['authorization']);
 		if(res_payload.status !== 200) return resJson.failure(ctx, {...res_payload, position});
@@ -19,16 +21,12 @@ exports.refresh = docName => async(ctx, next) => {
 
 		if(!is_refresh) return resJson.failure(ctx, {position, message: "refresh header 后面需要加 re"});
 
-		const res_object = await DS.findOne({}, {match: {_id: payload._id}});
-		if(!res_object) return resJson.failure(ctx, {position, message: "授权错误, 请重新登录"});
-		const object = res_object.data.object;
+		const object = await Model.findOne({query: {_id: payload._id}});
+		if(!object) return resJson.failure(ctx, {position, message: "授权错误, 请重新登录"});
 
 		// if(token !== object.refreshToken) return resJson.failure(ctx, {position, message: "refreshToken 不匹配"});
 
-		const accessToken = jwtMD.generateToken(payload);
-		const refreshToken = jwtMD.generateToken(payload, true);
-
-		await UserDS.updateOne({}, payload._id, {refreshToken, at_login: new Date()});
+		const {accessToken, refreshToken} = getToken(payload, Model);
 
 		return resJson.success(ctx, {
 			data: {accessToken, refreshToken, payload},
@@ -44,17 +42,14 @@ exports.refresh = docName => async(ctx, next) => {
 exports.login = docName => async(ctx, next) => {
     const position = "login";
     try{
-		const DS = (docName === "b1") ? UserDS : null;	// 判断是哪个数据库在登录
+		const Model = (docName === "b1") ? UserModel : null;	// 判断是哪个数据库在登录
 
-		const res_object = await obt_object(ctx.request.body, DS);
+		const res_object = await objectObt_Prom(ctx.request.body, Model);
 		if(res_object.status !== 200) return resJson.failure(ctx, res_object);
 		const object = res_object.data.object;
 		const payload = jwtMD.generatePayload(object);
 
-		const accessToken = jwtMD.generateToken(payload);
-		const refreshToken = jwtMD.generateToken(payload, true);
-
-		UserDS.updateOne({}, payload._id, {refreshToken, at_login: new Date()});
+		const {accessToken, refreshToken} = getToken(payload, Model);
 
 		return resJson.success(ctx, {
 			data: {payload, accessToken, refreshToken},
@@ -65,9 +60,17 @@ exports.login = docName => async(ctx, next) => {
         return resJson.errs(ctx, {position, err});
     }
 };
+const getToken = (payload, Model) => {
+	const accessToken = jwtMD.generateToken(payload);
+	const refreshToken = jwtMD.generateToken(payload, true);
 
-const obt_object = (body, DS) => {
-	const position = "obt_object";
+	Model.updateOne({_id: payload._id}, {refreshToken, at_login: new Date()});
+	return {
+		accessToken, refreshToken
+	}
+}
+const objectObt_Prom = (body, Model) => {
+	const position = "objectObt_Prom";
 	return new Promise(async(resolve, reject) => {
 		try {
 			const type_login = body.type_login;
@@ -85,9 +88,8 @@ const obt_object = (body, DS) => {
 					match.phone = phoneNum ? phonePre+phoneNum : undefined;
 				}
 
-				const res_object = await DS.findOne({}, {match, select: {}});
-				if(res_object.status !== 200) return resolve({status: 400, position, message: "账号错误"});
-				const object = res_object.data.object;
+				const object = await Model.findOne({query: match, project: {}});
+				if(!object) return resolve({status: 400, position, message: "账号错误"});
 
 				const res_pwd_match = await bcryptMD.matchBcryptProm(hat.pwd, object.pwd);
 				if(res_pwd_match.status != 200) return resolve({status: 400, position, message: "密码错误"});

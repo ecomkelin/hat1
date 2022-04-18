@@ -27,11 +27,11 @@ exports.create = doc => async(ctx, next) => {
             if(doc[key].minLen && doc[key].minLen > body[key].length) {
                 return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
             }
-            
+
             if(doc[key].maxLen &&  doc[key].maxLen < body[key].length) {
                 return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
             }
-            
+
             if(doc[key].regexp) {
                 const regexp = new RegExp(doc[key].regexp);
                 if(!regexp.test(body[key])) {
@@ -121,9 +121,6 @@ exports.find = doc => async(ctx, next) => {
     const position = "@/middle/preCT.js list";
     try {
         const body = ctx.request.body;
-        if(!body.skip) body.skip = 0;
-        if(!body.limit) body.limit = 50;
-        if(!body.sort) body.sort = {sort: -1, at_crt: -1};
         const {message, paramObj} = format_get(body, doc);
         if(message) return failure(ctx, {position, message}); 
 
@@ -211,11 +208,7 @@ const format_get = (body, doc) => {
             const docField = obt_docField(doc, key);
             if(!docField) continue;
             if(docField.type === ObjectId && !isObjectId(match[key]) ) return {message: `[match.${key}] 类型为 ObjectId`};
-            if(docField.type === String) {
-                matchObj[key] = {$regex: match[key], $options: '$i'}
-            } else {
-                matchObj[key] = match[key];
-            }
+            matchObj[key] = match[key];
         }
         for(key in includes) {
             const docField = obt_docField(doc, key);
@@ -276,19 +269,12 @@ const format_get = (body, doc) => {
         const docField = obt_docField(doc, key);
         if(!docField) return {message: `数据库中 没有[${key}]field, 不能写在<select>下`};
         if(docField.as === 0) {
-            select[key] = 0;
+            delete select[key];
         } else {
-            if(select[key] != 1 && select[key] != 0) {
+            if(select[key] != 1) {
                 select[select[key]] = "$"+key;
                 delete select[key];
             }
-        }
-        
-    }
-    // 必须隐藏的值
-    for(key in doc) {
-        if(doc[key].as === 0) {
-            select[key] = 0;
         }
     }
     paramObj.select = select;

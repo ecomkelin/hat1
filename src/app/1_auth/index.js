@@ -5,15 +5,12 @@ const jwtMD = require(path.resolve(process.cwd(), "middle/jwt"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
 const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
 
-const UserModel = require("./User/db").Model;
-
 
 
 /* 用refreshToken刷新 accessToken */
-exports.refresh = docName => async(ctx, next) => {
+exports.refresh = Model => async(ctx, next) => {
 	const position = "refresh";
 	try {
-		const Model = (docName === "b1") ? UserModel : null;	// 判断是哪个数据库在登录
 
 		const res_payload = await jwtMD.token_VerifyProm(ctx.request.headers['authorization']);
 		if(res_payload.status !== 200) return resJson.failure(ctx, {...res_payload, position});
@@ -39,11 +36,9 @@ exports.refresh = docName => async(ctx, next) => {
 }
 
 
-exports.login = docName => async(ctx, next) => {
+exports.login = Model => async(ctx, next) => {
     const position = "login";
     try{
-		const Model = (docName === "b1") ? UserModel : null;	// 判断是哪个数据库在登录
-
 		const res_object = await objectObt_Prom(ctx.request.body, Model);
 		if(res_object.status !== 200) return resJson.failure(ctx, res_object);
 		const object = res_object.data.object;

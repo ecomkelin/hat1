@@ -3,8 +3,9 @@ const {LIMIT_FIND} = require(path.join(process.cwd(), "src/config/const_var"));
 const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
 
-const Model = require(path.resolve(process.cwd(), "src/models/1_auth/User/model"));
+const Model = require(path.resolve(process.cwd(), "src/models/1_auth/User"));
 
+exports.doc = Model.doc;
 exports.Model = Model;
 
 exports.create = (payload, createObj) => new Promise(async(resolve, reject) => {

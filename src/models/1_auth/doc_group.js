@@ -6,7 +6,6 @@ module.exports = {
         minLen: 4,
         maxLen: 20,
         regexp: '^[a-zA-Z0-9]*$',
-        regErrMsg: "只能为数字或字符",
         is_fixed: true,
     },                                       // <手动/自动> 管理员可添加修改，注册自动生成
     phone: {type: String, is_auto: true},                                      // <半自动> phonePre+phoneNum

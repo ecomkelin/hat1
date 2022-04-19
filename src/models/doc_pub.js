@@ -11,7 +11,6 @@ module.exports = {
 		minLen: 4,
 		maxLen: 20,
 		regexp: '^[a-zA-Z0-9]*$',
-		regErrMsg: "只能为数字或字符",
 		is_fixed: true,
 	},
 	name: {

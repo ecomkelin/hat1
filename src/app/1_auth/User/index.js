@@ -2,6 +2,9 @@ const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "src/resJson"));
 const DB = require("./db");
 
+exports.doc = DB.doc;
+exports.Model = DB.Model;
+
 exports.create = async(ctx, next) => {
     const position = "controller User create";
     try{

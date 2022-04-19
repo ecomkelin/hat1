@@ -15,6 +15,7 @@ const {
 const model1 = conn1.model(docName.User, new Schema(doc));
 // const model2 = conn2.model(docName.User, new Schema(doc));
 
+exports.doc = doc;
 /* read */
 const readDB = model1;
 exports.aggregate = (pipelines, options) => new Promise(async(resolve, reject) => {

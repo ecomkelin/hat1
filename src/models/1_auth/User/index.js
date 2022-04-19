@@ -1,4 +1,4 @@
-const docName = require("../../_doc/nameMap").User;
+const docName = require("../../_doc/collections").User;
 const doc = require("./doc");
 
 const mongoc = require("../../js/mongoCommand")(docName, doc);

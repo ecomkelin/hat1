@@ -1,5 +1,5 @@
 const path = require('path');
-const { Model } = require('./User/db');
+const { Model } = require('../User/db');
 const resJson = require(path.resolve(process.cwd(), "src/resJson"));
 const jwtMD = require(path.resolve(process.cwd(), "middle/jwt"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));

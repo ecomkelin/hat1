@@ -17,6 +17,7 @@ exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
         // 操作数据
         docObj.phonePre = phoneNum ? format_phonePre(docObj.phonePre) : undefined;
         docObj.phone = phoneNum ? docObj.phonePre+phoneNum : undefined;
+
         if(docObj.pwd) {
             const hash_bcrypt = await bcryptMD.encrypt_prom(docObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});

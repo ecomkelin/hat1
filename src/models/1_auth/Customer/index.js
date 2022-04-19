@@ -12,8 +12,8 @@ const {
     // db_slave1
 } = require(path.join(process.cwd(), "bin/connDBs"));
 
-const DBmaster = db_master.model(docName.User, new Schema(doc));
-// const DBslave1 = db_slave1.model(docName.User, new Schema(doc));
+const DBmaster = db_master.model(docName.Customer, new Schema(doc));
+// const DBslave1 = db_slave1.model(docName.Customer, new Schema(doc));
 
 exports.doc = doc;
 /* read */

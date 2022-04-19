@@ -1,5 +1,5 @@
 const path = require('path');
-const {LIMIT_FIND} = require(path.join(process.cwd(), "src/config/const_var"));
+const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/_sysConf"));
 const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
 

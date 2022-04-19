@@ -12,7 +12,7 @@ exports.refresh = Model => async(ctx, next) => {
 	const position = "refresh";
 	try {
 
-		const res_payload = await jwtMD.token_VerifyProm(ctx.request.headers['authorization']);
+		const res_payload = await jwtMD.tokenVerify_Prom(ctx.request.headers['authorization']);
 		if(res_payload.status !== 200) return resJson.failure(ctx, {...res_payload, position});
 		const {token, is_refresh, payload} = res_payload.data;
 
@@ -86,7 +86,7 @@ const objectObt_Prom = (body, Model) => {
 				const object = await Model.findOne({query: match, project: {}});
 				if(!object) return resolve({status: 400, position, message: "账号错误"});
 
-				const res_pwd_match = await bcryptMD.matchBcryptProm(hat.pwd, object.pwd);
+				const res_pwd_match = await bcryptMD.matchBcrypt_Prom(hat.pwd, object.pwd);
 				if(res_pwd_match.status != 200) return resolve({status: 400, position, message: "密码错误"});
 
 				return resolve({status: 200, data: {object}});

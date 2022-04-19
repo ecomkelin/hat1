@@ -13,7 +13,7 @@ exports.obtain_headersInfo = (headersToken) => {
 }
 
 /* ================================ 验证 ================================ */
-exports.token_VerifyProm = (headersToken)=> {
+exports.tokenVerify_Prom = (headersToken)=> {
 	return new Promise(async(resolve, reject) => {
 		try {
 			const {token, is_refresh} = this.obtain_headersInfo(headersToken);
@@ -26,7 +26,7 @@ exports.token_VerifyProm = (headersToken)=> {
 				return resolve({status: 200, data: {token, is_refresh, payload}});
 			})
 		} catch(error) {
-			return reject({status: 400, message: '[resolve token_VerifyProm]'});
+			return reject({status: 400, message: '[resolve tokenVerify_Prom]'});
 		}
 	})
 }

@@ -18,14 +18,14 @@ exports.create = async(ctx, next) => {
     }
 };
 
-// deleteOne
-exports.delete = async(ctx, next) => {
+// remove
+exports.remove = async(ctx, next) => {
     const position = "controller User del";
     try{
         const payload = null;
         const id = ctx.request.params.id;
 
-        const res = await DB.deleteOne(payload , id);
+        const res = await DB.remove(payload , id);
         return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
@@ -39,7 +39,7 @@ exports.modify = async(ctx, next) => {
         const id = ctx.request.params.id;
         const body = ctx.request.body;
 
-        const res = await DB.updateOne(payload, id, body);
+        const res = await DB.modify(payload, id, body);
         return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
@@ -60,7 +60,7 @@ exports.detail = async(ctx, next) => {
         const payload = null;
         const paramObj = ctx.request.body;
 
-        const res = await DB.findOne(payload, paramObj);
+        const res = await DB.detail(payload, paramObj);
         return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});
@@ -74,7 +74,7 @@ exports.list = async(ctx, next) => {
         const payload = null;
         const paramObj = ctx.request.body;
 
-        const res = await DB.find(payload, paramObj);
+        const res = await DB.list(payload, paramObj);
         return resJson.all(ctx, res);
     } catch(err) {
         return resJson.errs(ctx, {position, err});

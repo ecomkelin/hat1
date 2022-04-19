@@ -8,19 +8,19 @@ const Model = require(path.resolve(process.cwd(), "src/models/1_auth/User"));
 exports.doc = Model.doc;
 exports.Model = Model;
 
-exports.create = (payload, createObj) => new Promise(async(resolve, reject) => {
+exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
     const position = "User-DS create";
     try{
         // 读取数据
-        const {code, phoneNum} = createObj;
+        const {code, phoneNum} = docObj;
 
         // 操作数据
-        createObj.phonePre = phoneNum ? format_phonePre(createObj.phonePre) : undefined;
-        createObj.phone = phoneNum ? createObj.phonePre+phoneNum : undefined;
-        if(createObj.pwd) {
-            const res_pwd = await bcryptMD.encrypt_Prom(createObj.pwd);
-            if(res_pwd.status !== 200) return resolve(res_pwd);
-            createObj.pwd = res_pwd.data.hash_bcrypt;
+        docObj.phonePre = phoneNum ? format_phonePre(docObj.phonePre) : undefined;
+        docObj.phone = phoneNum ? docObj.phonePre+phoneNum : undefined;
+        if(docObj.pwd) {
+            const hash_bcrypt = await bcryptMD.encrypt_prom(docObj.pwd);
+            if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
+            docObj.pwd = hash_bcrypt;
         }
 
         // 判断数据
@@ -29,7 +29,7 @@ exports.create = (payload, createObj) => new Promise(async(resolve, reject) => {
         if(objOrg) return resolve({status: 400, position, message: "数据库中已存在此用户"});
 
         // 写入
-        const object = await Model.insertOne(createObj);
+        const object = await Model.insertOne(docObj);
 
         /* 返回 */
         if(!object) return resolve({status: 400, position, message: "创建User失败"});
@@ -39,11 +39,11 @@ exports.create = (payload, createObj) => new Promise(async(resolve, reject) => {
     }
 });
 
-exports.insertMany = (payload, insertObjs) =>  Promise(async(resolve, reject) => {
-    const position = "User-DS insertMany";
+exports.createMany = (payload, docObjs) =>  Promise(async(resolve, reject) => {
+    const position = "User-DS createMany";
     try{
         // 写入
-        const objects = await Model.insertMany(insertObjs);
+        const objects = await Model.insertMany(docObjs);
 
         /* 返回 */
         if(!objects) return resolve({status: 400, position, message: "创建User失败"});
@@ -53,8 +53,8 @@ exports.insertMany = (payload, insertObjs) =>  Promise(async(resolve, reject) =>
     }
 });
 
-exports.updateOne = (payload, id, setObj) => new Promise(async(resolve, reject) => {
-    const position = "User-DS updateOne";
+exports.modify = (payload, id, setObj) => new Promise(async(resolve, reject) => {
+    const position = "User-DS modify";
     try{
         // 还要加入 payload
         const match = {_id: id};
@@ -71,15 +71,10 @@ exports.updateOne = (payload, id, setObj) => new Promise(async(resolve, reject) 
         }
 
         if(setObj.pwd) {
-            const res_pwd = await bcryptMD.encrypt_Prom(setObj.pwd);
-            if(res_pwd.status !== 200) return resolve(res_pwd);
-            setObj.pwd = res_pwd.data.hash_bcrypt;
+            const hash_bcrypt = await bcryptMD.encrypt_prom(setObj.pwd);
+            if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
+            setObj.pwd = hash_bcrypt;
         }
-        // if(setObj.refreshToken) {
-        //     const res_refreshToken = await bcryptMD.encrypt_Prom(setObj.refreshToken+ ' re');
-        //     if(res_refreshToken.status !== 200) return resolve(res_refreshToken);
-        //     setObj.refreshToken = res_refreshToken.data.hash_bcrypt;
-        // }
 
         const object = await Model.updateOne(match, setObj);
         if(!object) return resolve({status: 400, message: "更新失败"});
@@ -91,8 +86,8 @@ exports.updateOne = (payload, id, setObj) => new Promise(async(resolve, reject) 
 });
 
 
-exports.updateMany = (payload, match, setObj) => new Promise(async(resolve, reject) => {
-    const position = "User-DS updateMany";
+exports.modifyMany = (payload, match, setObj) => new Promise(async(resolve, reject) => {
+    const position = "User-DS modifyMany";
     try{
         const updMany = await Model.updateMany(match, setObj);
         if(!updMany) return resolve({status: 400, message: "批量更新失败"});
@@ -104,8 +99,8 @@ exports.updateMany = (payload, match, setObj) => new Promise(async(resolve, reje
 });
 
 
-exports.deleteOne = (payload, id) => new Promise(async(resolve, reject) => {
-    const position = "User-DS deleteOne";
+exports.remove = (payload, id) => new Promise(async(resolve, reject) => {
+    const position = "User-DS remove";
     try{
         /* 读取数据 */
         const match = {_id: id};
@@ -126,11 +121,11 @@ exports.deleteOne = (payload, id) => new Promise(async(resolve, reject) => {
     }
 });
 
-exports.deleteMany = (payload, match) => new Promise(async(resolve, reject) => {
-    const position = "User-DS deleteOne";
+exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
+    const position = "User-DS removeMany";
     try{
         /* 删除数据 */
-        const deleteMany = await Model.deleteMany(match)
+        const dels = await Model.deleteMany(match)
 
         /* 返回 */
         return resolve({status: 200, message: "删除成功"});
@@ -153,8 +148,8 @@ exports.deleteMany = (payload, match) => new Promise(async(resolve, reject) => {
 
 
 
-exports.findOne = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
-    const position = "User-DS findOne";
+exports.detail = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
+    const position = "User-DS detail";
     try{
         const {match={}, select, populate} = paramObj;
         // match 还要加入 payload
@@ -170,8 +165,8 @@ exports.findOne = (payload, paramObj={}) => new Promise(async(resolve, reject) =
     }
 });
 
-exports.find = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
-    const position = "User-DS find";
+exports.list = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
+    const position = "User-DS list";
     try{
         // to do 查找数据库
         const {match={}, select, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;

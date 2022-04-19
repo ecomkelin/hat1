@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
-const docName = require("./_docConf");
+const docName = require("./nameMap");
 
 module.exports = {
 	code: {
@@ -32,4 +32,7 @@ module.exports = {
         at_upd: {type: Date, is_auto: true},
         User_upd_db: {type: ObjectId, ref: docName.User, is_auto: true},    // 除了自己更新的人
     }],
-}
+
+	Firm_db: {type: ObjectId, ref: docName.Firm, is_fixed: true},              // 所属公司
+	Shop_db: {type: ObjectId, ref: docName.Shop, is_fixed: true},              // 所属分公司
+};

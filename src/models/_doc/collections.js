@@ -6,4 +6,5 @@ module.exports = {
 
 	"Firm": "hat_Firm_dbs",
 	"Shop": "hat_Shop_dbs",
+	"City": "hat_City_dbs",
 }

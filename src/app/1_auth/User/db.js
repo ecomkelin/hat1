@@ -29,6 +29,10 @@ exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
         const objOrg = await Model.findOne({query, projection: {_id: 1}});
         if(objOrg) return resolve({status: 400, position, message: "数据库中已存在此用户"});
 
+        docObj.at_crt = docObj.at_upd = new Date();
+        // docObj.crt_User = docObj.upd_User = payload;
+        // docObj.Firm = payload.Firm;
+
         // 写入
         const object = await Model.insertOne(docObj);
 

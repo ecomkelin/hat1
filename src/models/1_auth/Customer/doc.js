@@ -6,6 +6,6 @@ module.exports = {
 
     ...doc_group,
 
-    // 公司员工信息
+    // 会员信息
 	vip: {type: Number}
 };

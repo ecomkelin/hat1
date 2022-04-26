@@ -3,7 +3,7 @@ const moment = require('moment');
 exports.all = async(ctx, ctxBody) => {
     console.log("--------------------- all ---------------------");
     console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
-    const {position, message} = ctxBody;
+    let {position, message} = ctxBody;
     if(position) console.log("[@/resJson success] position: ", position);
     if(message) console.log("[@/resJson success] message: ", message);
     console.log();
@@ -14,7 +14,7 @@ exports.all = async(ctx, ctxBody) => {
 exports.success = async(ctx, ctxBody) => {
     console.log("----------------- success -----------------");
     console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
-    const {position, message} = ctxBody;
+    let {position, message} = ctxBody;
     if(position) console.log("[@/resJson success] position: ", position);
     if(message) console.log("[@/resJson success] message: ", message);
     console.log();
@@ -25,7 +25,7 @@ exports.success = async(ctx, ctxBody) => {
 exports.failure = async(ctx, ctxBody) => {
     console.log("----------------- failure -----------------");
     console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
-    const {position, message} = ctxBody;
+    let {position, message} = ctxBody;
     
     if(position) console.log("[@/resJson failure] position: ", position);
     if(message) console.log("[@/resJson failure] message: ", message);
@@ -39,6 +39,7 @@ exports.failure = async(ctx, ctxBody) => {
 exports.errs = async(ctx, ctxBody) => {
     console.log("-------------------- errs --------------------");
     console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
+    if(ctxBody.err) ctxBody.err = ctxBody.err.message;
     let {position="没有传递错误码[position]", err="没有传递错误值[err]"} = ctxBody;
     console.error("[@/resJson errs] position: ", position);
     console.error("[@/resJson errs] err: ", err);

@@ -9,21 +9,21 @@ const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/ph
 
 /* 用refreshToken刷新 accessToken */
 exports.refresh = Model => async(ctx, next) => {
-	const position = "refresh";
+	let position = "refresh";
 	try {
 
-		const res_payload = await jwtMD.tokenVerify_Prom(ctx.request.headers['authorization']);
+		let res_payload = await jwtMD.tokenVerify_Prom(ctx.request.headers['authorization']);
 		if(res_payload.status !== 200) return resJson.failure(ctx, {...res_payload, position});
-		const {token, is_refresh, payload} = res_payload.data;
+		let {token, is_refresh, payload} = res_payload.data;
 
 		if(!is_refresh) return resJson.failure(ctx, {position, message: "refresh header 后面需要加 re"});
 
-		const object = await Model.findOne({query: {_id: payload._id}});
+		let object = await Model.findOne({query: {_id: payload._id}});
 		if(!object) return resJson.failure(ctx, {position, message: "授权错误, 请重新登录"});
 
 		// if(token !== object.refreshToken) return resJson.failure(ctx, {position, message: "refreshToken 不匹配"});
 
-		const {accessToken, refreshToken} = getToken(payload, Model);
+		let {accessToken, refreshToken} = getToken(payload, Model);
 
 		return resJson.success(ctx, {
 			data: {accessToken, refreshToken, payload},
@@ -37,14 +37,14 @@ exports.refresh = Model => async(ctx, next) => {
 
 
 exports.login = Model => async(ctx, next) => {
-    const position = "login";
+    let position = "login";
     try{
-		const res_object = await objectObt_Prom(ctx.request.body, Model);
+		let res_object = await objectObt_Prom(ctx.request.body, Model);
 		if(res_object.status !== 200) return resJson.failure(ctx, res_object);
-		const object = res_object.data.object;
-		const payload = jwtMD.generatePayload(object);
+		let object = res_object.data.object;
+		let payload = jwtMD.generatePayload(object);
 
-		const {accessToken, refreshToken} = getToken(payload, Model);
+		let {accessToken, refreshToken} = getToken(payload, Model);
 
 		return resJson.success(ctx, {
 			data: {payload, accessToken, refreshToken},
@@ -56,8 +56,8 @@ exports.login = Model => async(ctx, next) => {
     }
 };
 const getToken = (payload, Model) => {
-	const accessToken = jwtMD.generateToken(payload);
-	const refreshToken = jwtMD.generateToken(payload, true);
+	let accessToken = jwtMD.generateToken(payload);
+	let refreshToken = jwtMD.generateToken(payload, true);
 
 	Model.updateOne({_id: payload._id}, {refreshToken, at_login: new Date()});
 	return {
@@ -65,14 +65,14 @@ const getToken = (payload, Model) => {
 	}
 }
 const objectObt_Prom = (body, Model) => {
-	const position = "objectObt_Prom";
+	let position = "objectObt_Prom";
 	return new Promise(async(resolve, reject) => {
 		try {
-			const type_login = body.type_login;
+			let type_login = body.type_login;
 			if(type_login === "hat") {
-				const hat = body.hat;
+				let hat = body.hat;
 				if(!hat) return resolve({status: 400, position, message: "请输入正确的 hat 参数 "});
-				const match = {};
+				let match = {};
 				if(hat.code) {
 					match.code = hat.code.replace(/^\s*/g,"");
 				} else if(hat.email) {
@@ -83,10 +83,10 @@ const objectObt_Prom = (body, Model) => {
 					match.phone = phoneNum ? phonePre+phoneNum : undefined;
 				}
 
-				const object = await Model.findOne({query: match, project: {}});
+				let object = await Model.findOne({query: match, project: {}});
 				if(!object) return resolve({status: 400, position, message: "账号错误"});
 
-				const res_pwd_match = await bcryptMD.matchBcrypt_Prom(hat.pwd, object.pwd);
+				let res_pwd_match = await bcryptMD.matchBcrypt_Prom(hat.pwd, object.pwd);
 				if(res_pwd_match.status != 200) return resolve({status: 400, position, message: "密码错误"});
 
 				return resolve({status: 200, data: {object}});

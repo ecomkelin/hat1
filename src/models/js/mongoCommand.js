@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const path = require('path');
-const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/_sysConf"));
 
 const {
     db_master,
@@ -26,16 +25,16 @@ module.exports = (docName, doc) => {
 	});
 	const countDocuments = (query, options) => new Promise(async(resolve, reject) => {
 		try {
-			const count = await DBread0.countDocuments(query);
+			let count = await DBread0.countDocuments(query);
 			return resolve(count);
 		} catch(err) {
 			reject(err);
 		}
 	});
 
-	const find = ({query, projection, skip=0, limit=LIMIT_FIND, sort, populate}) => new Promise(async(resolve, reject) => {
+	const find = ({query, projection, skip=0, limit=0, sort, populate}) => new Promise(async(resolve, reject) => {
 		try {
-			const objects = await DBread0.find(query, projection)
+			let objects = await DBread0.find(query, projection)
 				.skip(skip).limit(limit)
 				.sort(sort)
 				.populate(populate);
@@ -46,7 +45,7 @@ module.exports = (docName, doc) => {
 	});
 	const findOne = ({query, projection, populate}) => new Promise(async(resolve, reject) => {
 		try {
-			const object = await DBread0.findOne(query, projection)
+			let object = await DBread0.findOne(query, projection)
 				.populate(populate);
 			return resolve(object);
 		} catch(err) {
@@ -57,7 +56,7 @@ module.exports = (docName, doc) => {
 	const distinct = (field, query, options) => new Promise(async(resolve, reject) => {
 		try {
 			field = String(field);
-			const dist = await DBread0.distinct(field, query);
+			let dist = await DBread0.distinct(field, query);
 			return resolve(dist);
 		} catch(err) {
 			reject(err);
@@ -68,7 +67,7 @@ module.exports = (docName, doc) => {
 	const DBwrite = DBmaster;
 	const insertOne = (document, options) => new Promise(async(resolve, reject) => {
 		try {
-			const object = await DBwrite.create(document);
+			let object = await DBwrite.create(document);
 			return resolve(object);
 		} catch(err) {
 			reject(err);
@@ -76,7 +75,7 @@ module.exports = (docName, doc) => {
 	});
 	const insertMany = (documents, options) => new Promise(async(resolve, reject) => {
 		try {
-			const object = await DBwrite.insertMany(documents);
+			let object = await DBwrite.insertMany(documents);
 			return resolve(object);
 		} catch(err) {
 			reject(err);
@@ -85,7 +84,7 @@ module.exports = (docName, doc) => {
 
 	const updateOne = (filter={}, update, options) => new Promise(async(resolve, reject) => {
 		try {
-			const object = await DBwrite.updateOne(filter, update, options);
+			let object = await DBwrite.updateOne(filter, update, options);
 			return resolve(object);
 		} catch(err) {
 			reject(err);
@@ -93,7 +92,7 @@ module.exports = (docName, doc) => {
 	});
 	const updateMany = (filter={}, update, options) => new Promise(async(resolve, reject) => {
 		try {
-			const object = await DBwrite.updateMany(filter, update, options);
+			let object = await DBwrite.updateMany(filter, update, options);
 			return resolve(object);
 		} catch(err) {
 			reject(err);
@@ -102,7 +101,7 @@ module.exports = (docName, doc) => {
 
 	const deleteOne = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
-			const del = await DBwrite.deleteOne(filter);
+			let del = await DBwrite.deleteOne(filter);
 			return resolve(del);
 		} catch(err) {
 			reject(err);
@@ -110,7 +109,7 @@ module.exports = (docName, doc) => {
 	});
 	const deleteMany = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
-			const dels = await DBwrite.deleteMany(filter);
+			let dels = await DBwrite.deleteMany(filter);
 			return resolve(dels);
 		} catch(err) {
 			reject(err);

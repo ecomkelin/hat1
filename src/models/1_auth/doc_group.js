@@ -27,12 +27,12 @@ module.exports = {
 	img_url: {type: String},
     phonePre: {
         type: String,
-        trimLength: 4,
+        trimLen: 4,
         regexp: '^[0-9]*$',
     },
     phoneNum: {
         type: String,
-        trimLength: 10,
+        trimLen: 10,
         regexp: '^[0-9]*$',
     },
 

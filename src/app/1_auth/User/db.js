@@ -2,42 +2,44 @@ const path = require('path');
 const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/_sysConf"));
 const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
-
+const UniqParam = require(path.resolve(process.cwd(), "middle/docUniqParam"));
 const Model = require(path.resolve(process.cwd(), "src/models/1_auth/User"));
 
 exports.doc = Model.doc;
 exports.Model = Model;
 
 exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
-    const position = "User-DS create";
+    let position = "User-DS create";
     try{
         // 读取数据
-        const {code, phoneNum} = docObj;
+        let {code, phoneNum} = docObj;
 
         // 操作数据
         docObj.phonePre = phoneNum ? format_phonePre(docObj.phonePre) : undefined;
         docObj.phone = phoneNum ? docObj.phonePre+phoneNum : undefined;
 
         if(docObj.pwd) {
-            const hash_bcrypt = await bcryptMD.encrypt_prom(docObj.pwd);
+            let hash_bcrypt = await bcryptMD.encrypt_prom(docObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
             docObj.pwd = hash_bcrypt;
         }
 
-        // 判断数据
-        const query = {code};
-        const objOrg = await Model.findOne({query, projection: {_id: 1}});
-        if(objOrg) return resolve({status: 400, position, message: "数据库中已存在此用户"});
-
+        // 写入 auto 数据
         docObj.at_crt = docObj.at_upd = new Date();
         // docObj.crt_User = docObj.upd_User = payload;
         // docObj.Firm = payload.Firm;
 
+        // 判断数据
+        let [flag, query] = UniqParam(Model.doc, docObj);
+        if(!flag) return resolve({status: 400, position, message: query});
+        let objSame = await Model.findOne({query, projection: {_id: 1}});
+        if(objSame) return resolve({status: 400, position, message: "数据库中已存在此用户"});
+
         // 写入
-        const object = await Model.insertOne(docObj);
+        let object = await Model.insertOne(docObj);
+        if(!object) return resolve({status: 400, position, message: "创建object失败"});
 
         /* 返回 */
-        if(!object) return resolve({status: 400, position, message: "创建User失败"});
         return resolve({status: 200, data: {object}});
     } catch(err) {
         return reject({status: 500, position, err});
@@ -45,43 +47,49 @@ exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
 });
 
 exports.createMany = (payload, docObjs) =>  Promise(async(resolve, reject) => {
-    const position = "User-DS createMany";
+    let position = "User-DS createMany";
     try{
+        let orgObjs = await Model.find({query: {}, projection: {code: 1}});
         // 写入
-        const objects = await Model.insertMany(docObjs);
+        let objects = await Model.insertMany(docObjs);
 
         /* 返回 */
-        if(!objects) return resolve({status: 400, position, message: "创建User失败"});
+        if(!objects) return resolve({status: 400, position, message: "创建objects失败"});
         return resolve({status: 200, data: {objects}});
     } catch(err) {
         return reject({status: 500, position, err});
     }
 });
 
-exports.modify = (payload, id, setObj) => new Promise(async(resolve, reject) => {
-    const position = "User-DS modify";
+exports.modify = (payload, id, setObj={}) => new Promise(async(resolve, reject) => {
+    let position = "User-DS modify";
     try{
         // 还要加入 payload
-        const match = {_id: id};
+        let match = {_id: id};
 
         // 判断数据
-        const objOrg = await Model.findOne({query: {_id: id}});
+        let objOrg = await Model.findOne({query: match});
         if(!objOrg) return resolve({status: 400, position, message:"数据库中无此数据"});
 
-        // 判断数据
-        if(setObj.code && objOrg.code !== setObj.code) {
-            const match = {_id: {"$ne": id}, code: setObj.code};
-            const objSame = await Model.findOne({query: match, projection: {_id: 1}});
-            if(objSame) return resolve({status: 400, position, message: "数据库中有相同的编号"});
-        }
-
+        // 操作数据
         if(setObj.pwd) {
-            const hash_bcrypt = await bcryptMD.encrypt_prom(setObj.pwd);
+            let hash_bcrypt = await bcryptMD.encrypt_prom(setObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
             setObj.pwd = hash_bcrypt;
         }
 
-        const object = await Model.updateOne(match, setObj);
+        if(objOrg.code === setObj.code) {
+            delete setObj.code;
+        }
+
+        // 判断数据
+        let [flag, query] = UniqParam(Model.doc, setObj);
+        if(!flag) return resolve({status: 400, position, message: query});
+        let objSame = await Model.findOne({query, projection: {_id: 1}});
+        if(objSame) return resolve({status: 400, position, message: "数据库中已存在此用户"});
+
+        // 修改数据
+        let object = await Model.updateOne(match, setObj);
         if(!object) return resolve({status: 400, message: "更新失败"});
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "更新成功"});
@@ -92,9 +100,9 @@ exports.modify = (payload, id, setObj) => new Promise(async(resolve, reject) => 
 
 
 exports.modifyMany = (payload, match, setObj) => new Promise(async(resolve, reject) => {
-    const position = "User-DS modifyMany";
+    let position = "User-DS modifyMany";
     try{
-        const updMany = await Model.updateMany(match, setObj);
+        let updMany = await Model.updateMany(match, setObj);
         if(!updMany) return resolve({status: 400, message: "批量更新失败"});
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "批量更新成功"});
@@ -105,18 +113,18 @@ exports.modifyMany = (payload, match, setObj) => new Promise(async(resolve, reje
 
 
 exports.remove = (payload, id) => new Promise(async(resolve, reject) => {
-    const position = "User-DS remove";
+    let position = "User-DS remove";
     try{
         /* 读取数据 */
-        const match = {_id: id};
+        let match = {_id: id};
         // match 还要加入 payload
 
         /* 判断数据 */
-        const objOrg = await Model.findOne({query: match, projection: {_id: 1}});
+        let objOrg = await Model.findOne({query: match, projection: {_id: 1}});
         if(!objOrg) return resolve({status: 400, position, message: "数据库中无此数据"});
 
         /* 删除数据 */
-        const del = await Model.deleteOne(match)
+        let del = await Model.deleteOne(match)
         if(del.deletedCount === 0) return resolve({status: 400, message: "删除失败"});
 
         /* 返回 */
@@ -127,10 +135,10 @@ exports.remove = (payload, id) => new Promise(async(resolve, reject) => {
 });
 
 exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
-    const position = "User-DS removeMany";
+    let position = "User-DS removeMany";
     try{
         /* 删除数据 */
-        const dels = await Model.deleteMany(match)
+        let dels = await Model.deleteMany(match)
 
         /* 返回 */
         return resolve({status: 200, message: "删除成功"});
@@ -154,12 +162,12 @@ exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
 
 
 exports.detail = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
-    const position = "User-DS detail";
+    let position = "User-DS detail";
     try{
-        const {match={}, select, populate} = paramObj;
+        let {match={}, select, populate} = paramObj;
         // match 还要加入 payload
 
-        const object = await Model.findOne({query: match, projection: select, populate});
+        let object = await Model.findOne({query: match, projection: select, populate});
 
         if(!object) return resolve({status: 400, position, message: "数据库中无此数据"});
         return resolve({status: 200, message: "查看用户详情成功", data: {object}, paramObj: {
@@ -171,24 +179,24 @@ exports.detail = (payload, paramObj={}) => new Promise(async(resolve, reject) =>
 });
 
 exports.list = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
-    const position = "User-DS list";
+    let position = "User-DS list";
     try{
         // to do 查找数据库
-        const {match={}, select, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
+        let {match={}, select, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
         if(!sort) sort = {sortNum: -1, at_crt: -1};
         // match 还要加入 payload
-        const count = await Model.countDocuments(match);
+        let count = await Model.countDocuments(match);
 
-        const objects = await Model.find({query: match, projection: select, skip, limit, sort, populate});
+        let objects = await Model.find({query: match, projection: select, skip, limit, sort, populate});
 
         let object = null;
-        const {fields, keywords} = search;
+        let {fields, keywords} = search;
         if(objects.length > 0 && fields && keywords) {
             match["$or"] = [];
             fields.forEach(field => {
                 match["$or"].push({[field]: { $regex: keywords, $options: '$i' }})
             });
-            const res_obj = await Model.findOne({query: match, projection: select, populate});
+            let res_obj = await Model.findOne({query: match, projection: select, populate});
             if(res_obj.status === 200) object = res_obj.data.object;
         }
         return resolve({status: 200, message: "获取用户列表成功", data: {count, objects, object, skip, limit}, paramObj: {

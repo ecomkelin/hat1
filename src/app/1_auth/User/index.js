@@ -14,6 +14,7 @@ exports.create = async(ctx, next) => {
         let res = await DB.create(payload, body);
         return resJson.all(ctx, res);
     } catch(err) {
+        console.log(err)
         return resJson.errs(ctx, {position, err});
     }
 };

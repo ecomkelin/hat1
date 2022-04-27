@@ -12,7 +12,7 @@ doc.js 文件一般会包含 公共
 如果同时用了 global 和 group 则以group为准
 ### doc.js field的结构
 	fieldName: {
-		/* type default ref  为mongoose 系统默认值 同时required也算是默认的， 只是我们也会有规则 */
+		/* type default ref  为mongoose 系统默认值 同时required和unique也算是默认的， 只是我们也会有规则 */
 		type: "类型" 			 	// 最重要的数据 一定要有。 类型: String, Number, Date, Boolean, ObjectId
 		default: "",
 		/* ================== 只有 type 为 Object 的数据才有以下数据 ================== */

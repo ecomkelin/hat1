@@ -7,37 +7,37 @@ const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "src/extra/ju
 
 const {failure, errs} = require(path.resolve(process.cwd(), "src/resJson"));
 
+const regFieldFilter = (doc, body, key) => {
+    if(!doc[key]) {
+        return `没有[${key}] 此字段`;
+    }
+    if(doc[key].is_auto) {
+        return `[${key}]为自动生成数据, 不可操作`;
+    }
+
+    if(doc[key].trimLen && doc[key].trimLen !== body[key].length) {
+        return `[${key}] 字段的字符串长度必须为 [${doc[key].trimLen}]`;
+    }
+    if(doc[key].minLen && doc[key].minLen > body[key].length) {
+        return `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`;
+    }
+    if(doc[key].maxLen &&  doc[key].maxLen < body[key].length) {
+        return `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`;
+    }
+    if(doc[key].regexp) {
+        let regexp = new RegExp(doc[key].regexp);
+        if(!regexp.test(body[key])) {
+            return `[${key}] 的规则： [${doc[key].regErrMsg}]`;
+        }
+    }
+}
 exports.create = doc => async(ctx, next) => {
     let position = "@/middle/preCT.js create";
     try {
         let body = ctx.request.body;
-
         for(key in body) {
-            if(!doc[key]) {
-                return failure(ctx, {position, message: `没有[${key}] 此字段`});
-            }
-            if(doc[key].is_auto) {
-                return failure(ctx, {position, message: `[${key}]为自动生成数据, 不可手动添加`});
-            }
-
-            if(doc[key].trimLen && doc[key].trimLen !== body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度必须为 [${doc[key].trimLen}]`});
-            }
-
-            if(doc[key].minLen && doc[key].minLen > body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
-            }
-
-            if(doc[key].maxLen &&  doc[key].maxLen < body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
-            }
-
-            if(doc[key].regexp) {
-                let regexp = new RegExp(doc[key].regexp);
-                if(!regexp.test(body[key])) {
-                    return failure(ctx, {position, message: `[${key}] 的规则： [${doc[key].regErrMsg}]`});
-                }
-            }
+            let message = regFieldFilter(doc, body, key);
+            if(message) return failure(ctx, {position, message});
         }
         for(key in doc) {
             // 先判断是否可以为空
@@ -49,7 +49,6 @@ exports.create = doc => async(ctx, next) => {
                 if(body[key] === null || body[key] === undefined) continue; // 如果前台没有给数据则可以跳过 不判断后续
             }
         }
-
         await next();
     } catch(err) {
         return errs(ctx, {position, err});
@@ -61,36 +60,11 @@ exports.updateOne = doc => async(ctx, next) => {
         if(!isObjectId(ctx.request.params.id)) return failure(ctx, {position, message});
         let body = ctx.request.body;
         for(key in body) {
-            if(!doc[key]) {
-                return failure(ctx, {position, message: `没有[${key}] 此字段`});
-            }
-            if(doc[key].is_auto) {
-                return failure(ctx, {position, message: `[${key}]为自动生成数据, 不可手动修改`});
-            }
+            let message = regFieldFilter(doc, body, key);
+            if(message) return failure(ctx, {position, message});
+
             if(doc[key].is_is_fixed) {
                 return failure(ctx, {position, message: `[${key}]为不可修改数据`});
-            }
-            
-            // 先判断是否可以为空
-            if(doc[key].required !== true, body[key] === null) continue;
-
-            if(doc[key].trimLen && doc[key].trimLen !== body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度必须为 [${doc[key].trimLen}]`});
-            }
-
-            if(doc[key].minLen && doc[key].minLen > body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
-            }
-            
-            if(doc[key].maxLen &&  doc[key].maxLen < body[key].length) {
-                return failure(ctx, {position, message: `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
-            }
-            
-            if(doc[key].regexp) {
-                let regexp = new RegExp(doc[key].regexp);
-                if(!regexp.test(body[key])) {
-                    return failure(ctx, {position, message: `[${key}] 的规则： [${doc[key].regErrMsg}]`});
-                }
             }
         }
         await next();
@@ -98,6 +72,10 @@ exports.updateOne = doc => async(ctx, next) => {
         return errs(ctx, {position, err});
     }
 }
+
+
+
+
 
 
 exports.delete = doc => async(ctx, next) => {

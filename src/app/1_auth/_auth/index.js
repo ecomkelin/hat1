@@ -1,10 +1,9 @@
 const path = require('path');
 const { Model } = require('../User/db');
-const resJson = require(path.resolve(process.cwd(), "src/resJson"));
+const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 const jwtMD = require(path.resolve(process.cwd(), "middle/jwt"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
-const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
-
+const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
 
 
 /* 用refreshToken刷新 accessToken */
@@ -64,37 +63,37 @@ const getToken = (payload, Model) => {
 		accessToken, refreshToken
 	}
 }
-const objectObt_Prom = (body, Model) => {
-	let position = "objectObt_Prom";
-	return new Promise(async(resolve, reject) => {
-		try {
-			let type_login = body.type_login;
-			if(type_login === "hat") {
-				let hat = body.hat;
-				if(!hat) return resolve({status: 400, position, message: "请输入正确的 hat 参数 "});
-				let match = {};
-				if(hat.code) {
-					match.code = hat.code.replace(/^\s*/g,"");
-				} else if(hat.email) {
-					match.email = hat.email.replace(/^\s*/g,"");
-				} else {
-					let {phonePre, phoneNum} = hat;
-					phonePre = phoneNum ? format_phonePre(phonePre) : undefined;
-					match.phone = phoneNum ? phonePre+phoneNum : undefined;
-				}
 
-				let object = await Model.findOne({query: match, project: {}});
-				if(!object) return resolve({status: 400, position, message: "账号错误"});
+const objectObt_Prom = (body, Model) => new Promise(async(resolve, reject) => {
+	try {
+		let position = "objectObt_Prom";
 
-				let res_pwd_match = await bcryptMD.matchBcrypt_Prom(hat.pwd, object.pwd);
-				if(res_pwd_match.status != 200) return resolve({status: 400, position, message: "密码错误"});
-
-				return resolve({status: 200, data: {object}});
+		let type_login = body.type_login;
+		if(type_login === "hat") {
+			let hat = body.hat;
+			if(!hat) return resolve({status: 400, position, message: "请输入正确的 hat 参数 "});
+			let match = {};
+			if(hat.code) {
+				match.code = hat.code.replace(/^\s*/g,"");
+			} else if(hat.email) {
+				match.email = hat.email.replace(/^\s*/g,"");
 			} else {
-				return resolve({status: 400, position, message: "请输入正确的 [type_login] 类型为String ['hat', 'google', 'facebook', 'weixin'] "});
+				let {phonePre, phoneNum} = hat;
+				phonePre = phoneNum ? format_phonePre(phonePre) : undefined;
+				match.phone = phoneNum ? phonePre+phoneNum : undefined;
 			}
-		} catch(err) {
-			return reject({status: 500, position, err});
+
+			let object = await Model.findOne({query: match, project: {}});
+			if(!object) return resolve({status: 400, position, message: "账号错误"});
+
+			let res_pwd_match = await bcryptMD.matchBcrypt_Prom(hat.pwd, object.pwd);
+			if(res_pwd_match.status != 200) return resolve({status: 400, position, message: "密码错误"});
+
+			return resolve({status: 200, data: {object}});
+		} else {
+			return resolve({status: 400, position, message: "请输入正确的 [type_login] 类型为String ['hat', 'google', 'facebook', 'weixin'] "});
 		}
-	})
-}
+	} catch(err) {
+		return reject({status: 500, position, err});
+	}
+});

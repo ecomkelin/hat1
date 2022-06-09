@@ -3,11 +3,11 @@
     也会跳过一些不合理的要求 比如 post时 给了多出的数据库的字段
 */
 const path = require('path');
-const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "src/extra/judge/is_ObjectId"));
+const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "bin/extra/judge/is_ObjectId"));
 
-const {failure, errs} = require(path.resolve(process.cwd(), "src/resJson"));
+const {failure, errs} = require(path.resolve(process.cwd(), "bin/response/resJson"));
 
-const regFieldFilter = (doc, body, key) => {
+const regFieldFilter = (doc, obj, key) => {
     if(!doc[key]) {
         return `没有[${key}] 此字段`;
     }
@@ -15,43 +15,43 @@ const regFieldFilter = (doc, body, key) => {
         return `[${key}]为自动生成数据, 不可操作`;
     }
 
-    if(doc[key].trimLen && doc[key].trimLen !== body[key].length) {
+    if(doc[key].trimLen && doc[key].trimLen !== obj[key].length) {
         return `[${key}] 字段的字符串长度必须为 [${doc[key].trimLen}]`;
     }
-    if(doc[key].minLen && doc[key].minLen > body[key].length) {
+    if(doc[key].minLen && doc[key].minLen > obj[key].length) {
         return `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`;
     }
-    if(doc[key].maxLen &&  doc[key].maxLen < body[key].length) {
+    if(doc[key].maxLen &&  doc[key].maxLen < obj[key].length) {
         return `[${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`;
     }
     if(doc[key].regexp) {
         let regexp = new RegExp(doc[key].regexp);
-        if(!regexp.test(body[key])) {
+        if(!regexp.test(obj[key])) {
             return `[${key}] 的规则： [${doc[key].regErrMsg}]`;
         }
     }
 }
-exports.createFilter = (doc, body) => {
-    for(key in body) {
-        let message = regFieldFilter(doc, body, key);
+exports.createFilter = (doc, crtObj) => {
+    for(key in crtObj) {
+        let message = regFieldFilter(doc, crtObj, key);
         if(message) return message;
     }
     for(key in doc) {
         // 先判断是否可以为空
         if(doc[key].required === true) {
-            if(body[key] === null || body[key] === undefined) {
+            if(crtObj[key] === null || crtObj[key] === undefined) {
                 return `创建时 必须添加 [${key}] 字段`;
             }
         } else {
-            if(body[key] === null || body[key] === undefined) continue; // 如果前台没有给数据则可以跳过 不判断后续
+            if(crtObj[key] === null || crtObj[key] === undefined) continue; // 如果前台没有给数据则可以跳过 不判断后续
         }
     }
 }
 
-exports.modifyFilter = (doc, body, id) => {
+exports.modifyFilter = (doc, updObj, id) => {
     if(!isObjectId(id)) return 'id 必须为 ObjectId 类型';
-    for(key in body) {
-        let message = regFieldFilter(doc, body, key);
+    for(key in updObj) {
+        let message = regFieldFilter(doc, updObj, key);
         if(message) return message;
 
         if(doc[key].is_is_fixed) {
@@ -63,30 +63,33 @@ exports.modifyFilter = (doc, body, id) => {
 
 
 
-exports.removeFilter = (doc, body, id) => {
+exports.removeFilter = (doc, id) => {
     if(!isObjectId(id)) return `请传递正确的id信息`;
 }
 
 
 
 
-exports.listFilter = (doc, body) => {
-    let paramObj = {}; 
-    let message = format_get(body, doc, paramObj);
-    if(message) return message;
-    body = paramObj;
+exports.listFilter = (doc, paramList) => {
+    let paramTemp = {}; 
+    let message = format_get(paramList, doc, paramTemp);
+    if(message) return {message};
+
+    let paramObj = paramTemp;
+    return {paramObj};
 }
-exports.detailFilter = (doc, body, id) => {
-    if(!isObjectId(id)) return "请传递正确的id信息";
-    delete body.skip;
-    delete body.limit;
-    delete body.sort;
-    let paramObj = {};
-    let message = format_get(body, doc, paramObj);
-    if(message) return message;
-    if(!paramObj.match) paramObj.match = {};
-    paramObj.match._id = id;
-    body = paramObj;
+exports.detailFilter = (doc, paramDetail, id) => {
+    if(!isObjectId(id)) return {message: "请传递正确的id信息"};
+    delete paramDetail.skip;
+    delete paramDetail.limit;
+    delete paramDetail.sort;
+    let paramTemp = {};
+    let message = format_get(paramDetail, doc, paramTemp);
+    if(message) return {message};
+    if(!paramTemp.match) paramTemp.match = {};
+    paramTemp.match._id = id;
+    paramObj = paramTemp;
+    return {paramObj}
 }
 
 
@@ -111,8 +114,8 @@ const obt_docField = (doc, field) => {
     return null;
 }
 
-const format_get = (body, doc, paramObj) => {
-    let {filter, select={}, skip, limit, sort, populate} = body;
+const format_get = (paramObj, doc, paramTemp) => {
+    let {filter, select={}, skip, limit, sort, populate} = paramObj;
 
     if(filter) {
         let matchObj = {"$or" : []};
@@ -135,7 +138,7 @@ const format_get = (body, doc, paramObj) => {
                     matchObj["$or"].push({[field]: { $regex: keywords, $options: '$i' }});
                 }
             }
-            paramObj.search = search;
+            paramTemp.search = search;
         }
         if(matchObj["$or"].length === 0) delete matchObj["$or"];
         for(key in match) {
@@ -183,22 +186,22 @@ const format_get = (body, doc, paramObj) => {
             let after = (new Date(at_after[key]).setHours(0,0,0,0));
             matchObj[key] = {"$gte": after};
         }
-        paramObj.match = matchObj;
+        paramTemp.match = matchObj;
     }
 
     if(skip) {
         if(isNaN(skip) || skip < 0) {
             return `您的 [skip = ${skip}] 参数传递错误, 应该是正整数`;
         }
-        paramObj.skip = skip;
+        paramTemp.skip = skip;
     }
 
-    paramObj.limit = 0; // 在此只判断数值
+    paramTemp.limit = 0; // 在此只判断数值
     if(limit) {
         if(isNaN(limit) || limit < 0) {
             return `您的 [limit = ${limit}] 参数传递错误, 应该是正整数`;
         }
-        paramObj.limit = limit;
+        paramTemp.limit = limit;
     } 
 
     for(key in select) {
@@ -213,7 +216,7 @@ const format_get = (body, doc, paramObj) => {
             }
         }
     }
-    paramObj.select = select;
+    paramTemp.select = select;
 
     if(sort) {
         for(key in sort) {
@@ -222,7 +225,7 @@ const format_get = (body, doc, paramObj) => {
                 sort[key] = 1
             }
         }
-        paramObj.sort = sort;
+        paramTemp.sort = sort;
     }
 
     if(populate) {
@@ -235,6 +238,6 @@ const format_get = (body, doc, paramObj) => {
         } else {
             return "您的 [populate] 参数传递错误, 应该是正整数";
         }
-        paramObj.populate = populate;
+        paramTemp.populate = populate;
     }
 }

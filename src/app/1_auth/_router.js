@@ -7,7 +7,7 @@ router.post("/b1/collections", ctx => ctx.body= { status: 200, collections: Obje
 
 /* ============================= User Datebase ============================= */
 const UserCT = require("./User");
-router.post("/b1/collection/User", ctx => ctx.body= { status: 200, doc: UserCT.doc } );
+router.post("/b1/collection/User", ctx => ctx.body= { status: 200, doc: UserCT.doc } );	// 暴露给开发人员 User集合 的字段 field
 
 router.post("/b1/User/list", UserCT.list);
 router.post("/b1/User/detail/:id", UserCT.detail);

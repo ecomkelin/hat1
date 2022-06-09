@@ -13,23 +13,21 @@ exports.obtain_headersInfo = (headersToken) => {
 }
 
 /* ================================ 验证 ================================ */
-exports.tokenVerify_Prom = (headersToken)=> {
-	return new Promise(async(resolve, reject) => {
-		try {
-			let {token, is_refresh} = this.obtain_headersInfo(headersToken);
+exports.tokenVerify_Prom = (headersToken)=> new Promise(async(resolve, reject) => {
+	try {
+		let {token, is_refresh} = this.obtain_headersInfo(headersToken);
 
-			if(!token) return  resolve({status: 400, message: "请您传递 headers 空格后第第二个token信息"});
-			let token_secret = is_refresh ? process.env.REFRESH_TOKEN_SECRET:process.env.ACCESS_TOKEN_SECRET;
+		if(!token) return  resolve({status: 400, message: "请您传递 headers 空格后第第二个token信息"});
+		let token_secret = is_refresh ? process.env.REFRESH_TOKEN_SECRET:process.env.ACCESS_TOKEN_SECRET;
 
-			jsonwebtoken.verify(token, token_secret, (expired, payload) => {
-				if(expired) return resolve({status: 401, message: "token错误或过期", expired});
-				return resolve({status: 200, data: {token, is_refresh, payload}});
-			})
-		} catch(error) {
-			return reject({status: 400, message: '[resolve tokenVerify_Prom]'});
-		}
-	})
-}
+		jsonwebtoken.verify(token, token_secret, (expired, payload) => {
+			if(expired) return resolve({status: 401, message: "token错误或过期", expired});
+			return resolve({status: 200, data: {token, is_refresh, payload}});
+		})
+	} catch(error) {
+		return reject({status: 400, message: '[resolve tokenVerify_Prom]'});
+	}
+})
 
 
 /* ================================ 签名 ================================ */

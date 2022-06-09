@@ -1,3 +1,4 @@
+/* 数据库中 集合映射的名字 */
 module.exports = {
 	// auth
 	"Customer": "hat_Customer_dbs",

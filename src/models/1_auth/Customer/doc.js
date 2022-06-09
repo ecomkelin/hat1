@@ -1,8 +1,8 @@
-const doc_global = require("../../_doc/global");
+const docGlobal = require("../../_doc/docGlobal");
 const doc_group = require("../doc_group");
 
 module.exports = {
-    ...doc_global,
+    ...docGlobal,
 
     ...doc_group,
 

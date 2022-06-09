@@ -4,7 +4,7 @@
   "description": "basic System",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./bin/index.js",
+    "dev": "nodemon ./bin/server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

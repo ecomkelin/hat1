@@ -1,8 +1,6 @@
 const path = require('path');
-const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/_sysConf"));
-const format_phonePre = require(path.resolve(process.cwd(), "src/extra/format/phonePre"));
+const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
-const UniqParam = require(path.resolve(process.cwd(), "middle/docUniqParam"));
 const Model = require(path.resolve(process.cwd(), "src/models/1_auth/User"));
 
 exports.doc = Model.doc;
@@ -23,17 +21,6 @@ exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
             if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
             docObj.pwd = hash_bcrypt;
         }
-
-        // 写入 auto 数据
-        docObj.at_crt = docObj.at_upd = new Date();
-        // docObj.crt_User = docObj.upd_User = payload;
-        // docObj.Firm = payload.Firm;
-
-        // 判断数据
-        let [flag, query] = UniqParam(Model.doc, docObj);
-        if(!flag) return resolve({status: 400, position, message: query});
-        let objSame = await Model.findOne({query, projection: {_id: 1}});
-        if(objSame) return resolve({status: 400, position, message: "数据库中已存在此用户"});
 
         // 写入
         let object = await Model.insertOne(docObj);
@@ -61,35 +48,21 @@ exports.createMany = (payload, docObjs) =>  Promise(async(resolve, reject) => {
     }
 });
 
-exports.modify = (payload, id, setObj={}) => new Promise(async(resolve, reject) => {
+exports.modify = (payload, id, updObj={}) => new Promise(async(resolve, reject) => {
     let position = "User-DS modify";
     try{
         // 还要加入 payload
         let match = {_id: id};
 
-        // 判断数据
-        let objOrg = await Model.findOne({query: match});
-        if(!objOrg) return resolve({status: 400, position, message:"数据库中无此数据"});
-
         // 操作数据
-        if(setObj.pwd) {
-            let hash_bcrypt = await bcryptMD.encrypt_prom(setObj.pwd);
+        if(updObj.pwd) {
+            let hash_bcrypt = await bcryptMD.encrypt_prom(updObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
-            setObj.pwd = hash_bcrypt;
+            updObj.pwd = hash_bcrypt;
         }
-
-        if(objOrg.code === setObj.code) {
-            delete setObj.code;
-        }
-
-        // 判断数据
-        let [flag, query] = UniqParam(Model.doc, setObj);
-        if(!flag) return resolve({status: 400, position, message: query});
-        let objSame = await Model.findOne({query, projection: {_id: 1}});
-        if(objSame) return resolve({status: 400, position, message: "数据库中已存在此用户"});
 
         // 修改数据
-        let object = await Model.updateOne(match, setObj);
+        let object = await Model.updateOne(match, updObj);
         if(!object) return resolve({status: 400, message: "更新失败"});
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "更新成功"});
@@ -181,14 +154,9 @@ exports.detail = (payload, paramObj={}) => new Promise(async(resolve, reject) =>
 exports.list = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     let position = "User-DS list";
     try{
-        // to do 查找数据库
-        let {match={}, select, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
-        if(!sort) sort = {sortNum: -1, at_crt: -1};
-        // match 还要加入 payload
-        let count = await Model.countDocuments(match);
+        // paramObjmatch 加入 payload
 
         let objects = await Model.find({query: match, projection: select, skip, limit, sort, populate});
-
         let object = null;
         let {fields, keywords} = search;
         if(objects.length > 0 && fields && keywords) {

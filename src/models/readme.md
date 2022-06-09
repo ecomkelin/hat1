@@ -6,7 +6,7 @@
 
 ## doc.js 是数据库集合的结构
 doc.js 文件一般会包含 公共
-### ./_doc/global.js
+### ./_doc/docGlobal.js
 公共集合的field， 包含了大部分的field
 ### 每个文件夹下的/doc_group.js 包含了 本组的公共集合
 如果同时用了 global 和 group 则以group为准

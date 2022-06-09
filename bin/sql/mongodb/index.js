@@ -1,17 +1,31 @@
 /* 数据库连接文件 */
 const mongoose = require('mongoose');
-
+/**
+ * 主从数据库
+ * 数据库的读写分离
+ */
 db_master = mongoose.createConnection(process.env.DB_MASTER, { useNewUrlParser: true, useUnifiedTopology: true});
 //db_slave1 = mongoose.createConnection(process.env.DB_SLAVE1, { useNewUrlParser: true, useUnifiedTopology: true});
 
 
-const Schema = mongoose.Schema;
 
+
+
+/**
+ * 数据库方法打包文件
+ */
+const Schema = mongoose.Schema;
 const docSame = require("./docSame");
 const path = require('path');
 const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/server/_sysConf"));
 
 // 暴露mongodb的方法 以及model的doc即所有field
+/**
+ * @param {由models中各个数据库中index文件提供 系统初始化的时候就被加载到各个index文件中去 不会根据每次访问重新加载DBmaster及方法}
+ * @param {数据库名称} docName 
+ * @param {文档中的field} doc 添加数据库 用于添加到此Model中暴露出去
+ * @returns 暴露各种数据库方法
+ */
 module.exports = (docName, doc) => {
 	const DBmaster = db_master.model(docName, new Schema(doc));
 	// const DBslave1 = db_slave1.model(docName, new Schema(doc));
@@ -34,34 +48,7 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const find = ({query, projection, skip=0, limit=0, sort, populate}) => new Promise(async(resolve, reject) => {
-		try {
-			let objects = await DBread0.find(query, projection)
-				.skip(skip).limit(limit)
-				.sort(sort)
-				.populate(populate);
-			return resolve(objects);
-		} catch(err) {
-			reject(err);
-		}
-	});
-	const list = (paramObj={}) => new Promise(async(resolve, reject) => {
-		try {
-			// to do 查找数据库
-			let {match: query={}, select: projection, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
-			if(!sort) sort = {sortNum: -1, at_crt: -1};
-
-			let count = await DBread0.countDocuments(query);
-
-			let objects = await DBread0.find(query, projection)
-				.skip(skip).limit(limit)
-				.sort(sort)
-				.populate(populate);
-			return resolve(objects);
-		} catch(err) {
-			reject(err);
-		}
-	});
+	const list = require("./method/list")(DBread0);
 	const findOne = ({query, projection, populate}) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await DBread0.findOne(query, projection)
@@ -150,5 +137,5 @@ module.exports = (docName, doc) => {
 	});
 
 	// 暴露出所有数据库方法
-	return {doc, aggregate, countDocuments, list, find, findOne, distinct, insertMany, insertOne, updateMany, updateOne, deleteOne, deleteMany};
+	return {doc, aggregate, countDocuments, list, findOne, distinct, insertMany, insertOne, updateMany, updateOne, deleteOne, deleteMany};
 }

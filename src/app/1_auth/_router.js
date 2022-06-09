@@ -21,5 +21,14 @@ const Auth = require("./_auth");
 router.post("/b1/login", Auth.login(ModelUser));
 router.post("/b1/refresh", Auth.refresh(ModelUser));
 
+// /* ============================= Customer Datebase ============================= */
+// const CustomerCT = require("./Customer");
+// router.post("/b1/collection/Customer", ctx => ctx.body= { status: 200, doc: CustomerCT.doc } );	// 暴露给开发人员 Customer集合 的字段 field
+
+// router.post("/b1/Customer/list", CustomerCT.list);
+// router.post("/b1/Customer/detail/:id", CustomerCT.detail);
+// router.post("/b1/Customer/create", CustomerCT.create);
+// router.post("/b1/Customer/remove/:id", CustomerCT.remove);
+// router.post("/b1/Customer/modify/:id", CustomerCT.modify);
 
 module.exports = router;

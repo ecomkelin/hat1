@@ -37,4 +37,15 @@ module.exports = {
 
 	Firm_db: {type: ObjectId, ref: docName.Firm, is_fixed: true},              // 所属公司
 	Shop_db: {type: ObjectId, ref: docName.Shop, is_fixed: true},              // 所属分公司
+
+
+	// 员工编号： {code: "001", Firm: "firmId"} xd公司中是否有 001这个员工编号
+	// 产品名称： {nome: '002', Brand: 'brandId', Supplier: 'supplierId'} // 这个供应商的这个品牌下 产品的名称不能相同
+	// 折扣映射： Brand.uniq = ["Supplier"]; 添加折扣文档时 同一个供应商不能有相同的品牌
+	// const field = {
+	//     // type: ...
+	//     // is_auto: ...
+	//     // uniq: ['field1', 'field2']
+	// }
+	// field.uniq = ['field1', 'field2'];
 };

@@ -1,13 +1,12 @@
 const path = require('path');
 const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
 const bcryptMD = require(path.resolve(process.cwd(), "middle/bcrypt"));
-const Model = require(path.resolve(process.cwd(), "src/models/1_auth/User"));
+const Model = require(path.resolve(process.cwd(), "src/models/1_auth/Customer"));
 
 exports.doc = Model.doc;
 exports.Model = Model;
 
 exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
-    let position = "User-DS create";
     try{
         // 读取数据
         let {code, phoneNum} = docObj;
@@ -18,38 +17,36 @@ exports.create = (payload, docObj) => new Promise(async(resolve, reject) => {
 
         if(docObj.pwd) {
             let hash_bcrypt = await bcryptMD.encrypt_prom(docObj.pwd);
-            if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
+            if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
             docObj.pwd = hash_bcrypt;
         }
 
         // 写入
         let object = await Model.insertOne(docObj);
-        if(!object) return resolve({status: 400, position, message: "创建object失败"});
+        if(!object) return resolve({status: 400, message: "创建object失败"});
 
         /* 返回 */
         return resolve({status: 200, data: {object}});
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });
 
 exports.createMany = (payload, docObjs) =>  Promise(async(resolve, reject) => {
-    let position = "User-DS createMany";
     try{
         let orgObjs = await Model.find({query: {}, projection: {code: 1}});
         // 写入
         let objects = await Model.insertMany(docObjs);
 
         /* 返回 */
-        if(!objects) return resolve({status: 400, position, message: "创建objects失败"});
+        if(!objects) return resolve({status: 400, message: "创建objects失败"});
         return resolve({status: 200, data: {objects}});
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });
 
 exports.modify = (payload, id, updObj={}) => new Promise(async(resolve, reject) => {
-    let position = "User-DS modify";
     try{
         // 还要加入 payload
         let match = {_id: id};
@@ -57,7 +54,7 @@ exports.modify = (payload, id, updObj={}) => new Promise(async(resolve, reject) 
         // 操作数据
         if(updObj.pwd) {
             let hash_bcrypt = await bcryptMD.encrypt_prom(updObj.pwd);
-            if(!hash_bcrypt) return resolve({status: 400, position, message: "密码加密失败"});
+            if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
             updObj.pwd = hash_bcrypt;
         }
 
@@ -67,26 +64,24 @@ exports.modify = (payload, id, updObj={}) => new Promise(async(resolve, reject) 
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "更新成功"});
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });
 
 
 exports.modifyMany = (payload, match, setObj) => new Promise(async(resolve, reject) => {
-    let position = "User-DS modifyMany";
     try{
         let updMany = await Model.updateMany(match, setObj);
         if(!updMany) return resolve({status: 400, message: "批量更新失败"});
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "批量更新成功"});
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });
 
 
 exports.remove = (payload, id) => new Promise(async(resolve, reject) => {
-    let position = "User-DS remove";
     try{
         /* 读取数据 */
         let match = {_id: id};
@@ -94,7 +89,7 @@ exports.remove = (payload, id) => new Promise(async(resolve, reject) => {
 
         /* 判断数据 */
         let objOrg = await Model.findOne({query: match, projection: {_id: 1}});
-        if(!objOrg) return resolve({status: 400, position, message: "数据库中无此数据"});
+        if(!objOrg) return resolve({status: 400, message: "数据库中无此数据"});
 
         /* 删除数据 */
         let del = await Model.deleteOne(match)
@@ -103,12 +98,11 @@ exports.remove = (payload, id) => new Promise(async(resolve, reject) => {
         /* 返回 */
         return resolve({status: 200, message: "删除成功"});
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });
 
 exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
-    let position = "User-DS removeMany";
     try{
         /* 删除数据 */
         let dels = await Model.deleteMany(match)
@@ -116,7 +110,7 @@ exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
         /* 返回 */
         return resolve({status: 200, message: "删除成功"});
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });
 
@@ -135,24 +129,22 @@ exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
 
 
 exports.detail = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
-    let position = "User-DS detail";
     try{
         let {match={}, select, populate} = paramObj;
         // 根据 payload 过滤 match select
 
         let object = await Model.findOne({query: match, projection: select, populate});
 
-        if(!object) return resolve({status: 400, position, message: "数据库中无此数据"});
+        if(!object) return resolve({status: 400, message: "数据库中无此数据"});
         return resolve({status: 200, message: "查看用户详情成功", data: {object}, paramObj: {
             match,select, populate
         }});
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });
 
 exports.list = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
-    let position = "User-DS list";
     try{
         // 根据 payload 过滤 match select
 
@@ -160,6 +152,6 @@ exports.list = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
         return resolve(res_list);
         
     } catch(err) {
-        return reject({status: 500, position, err});
+        return reject({status: 500, err});
     }
 });

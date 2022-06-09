@@ -1,20 +1,20 @@
 /**
  * 
- * @param {*} docModel 文档模型
+ * @param {*} doc 文档模型
  * @param {*} docNew 需要创建或更新的文档
  * @param {*} query 指针类型的数据： 重要 要操作的数据
  * @param {*} type 判断是创建还是更新内容
  * @returns 如果错误就返回错误信息
  */
- const filterParam = (docModel, docNew, query, type) => {
-	for(key in docModel) {		// 循环文档中的每个field
+ const filterParam = (doc, docNew, query, type) => {
+	for(key in doc) {		// 循环文档中的每个field
 		if(type === 'upd' && !docNew[key]) continue;			// 如果是更新文档 对于不更改的值 则可以忽略不判断;
 
 		let param = {};
-		if(docModel[key].unique) {								// 判断field是否为unique 如果是unique 则不需要判断其他的
+		if(doc[key].unique) {								// 判断field是否为unique 如果是unique 则不需要判断其他的
 			param[key] = docNew[key];
 		} else {
-			let uniq = docModel[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = firm
+			let uniq = doc[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = firm
 			if(!uniq) continue;					// 如果没有 则不用查看
 			if(!(uniq instanceof Array)) return `${type} 数据库 doc 的uniq值错误`;
 			param[key] = docNew[key];			// 相当于 {code: '员工编号'}
@@ -33,13 +33,13 @@
 
 /**
  * 
- * @param {*} Model: 数据库模型
+ * @param {*} DBcollection: 数据库模型
  * @param {*} doc: 模型 模型field
  * @param {*} docNew: 要创建或修改的 文档数据
  * @returns 如果数据库中有相同的数据 则返回相应文档
  */
 
-module.exports = (Model, doc, docNew) => new Promise(async(resolve, reject) => {
+module.exports = (DBcollection, doc, docNew) => new Promise(async(resolve, reject) => {
 	try {
 		let query = {"$or": []};			// 初始化field唯一的参数
 
@@ -52,7 +52,7 @@ module.exports = (Model, doc, docNew) => new Promise(async(resolve, reject) => {
 		let message = filterParam(doc, docNew, query, 'crt');
 
 		if(message) return reject(message);
-		let objSame = await Model.findOne(query);
+		let objSame = await DBcollection.findOne(query);
         if(objSame) return resolve({status: 200, message: "数据库中已有相同数据", paramObj: {match: query}, data: {objSame}});
 		return resolve({status: 400, message: "没有相同信息"});
 	} catch(err) {

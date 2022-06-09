@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 
 exports.encrypt_prom = (str_bcrypt) => new Promise((resolve, reject) => {
-	let position = "middle bcrypt encrypt_prom"
 	str_bcrypt=String(str_bcrypt);
 	bcrypt.genSalt(parseInt(process.env.SALT_WORK_FACTOR), function(err, salt) {
 		if(err) return reject({status: 500, message: 'bcrypt.genSalt error!'});

@@ -1,56 +1,46 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 const DB = require("./db");
-const doc = DB.doc;
-exports.doc = doc;
-exports.Model = DB.Model;
-const docPreCT = require(path.resolve(process.cwd(), "middle/docPreCT"));
 
-exports.create = async(ctx, next) => {
-    let position = "/create";
+exports.doc = DB.doc;
+exports.Model = DB.Model;
+
+exports.createPG = async(ctx, next) => {
     try{
         let payload = null;
         let crtObj = ctx.request.body;
-        let message = docPreCT.createFilter(doc, crtObj);
-        if(message) return resJson.failure(ctx, {position, message});
 
-        let res = await DB.create(payload, crtObj);
+        let res = await DB.createCT(payload, crtObj);
         return resJson.all(ctx, res);
     } catch(err) {
         console.log(err);
-        return resJson.errs(ctx, {position, err});
+        return resJson.errs(ctx, {err});
     }
 };
 
-exports.remove = async(ctx, next) => {
-    let position = "/remove";
+exports.removePG = async(ctx, next) => {
     try{
         let payload = null;
         let id = ctx.request.params.id;
         // let body = ctx.request.body;
-        let message = docPreCT.removeFilter(doc, id);
-        if(message) return resJson.failure(ctx, {position, message});
 
-        let res = await DB.remove(payload , id);
+        let res = await DB.removeCT(payload , id);
         return resJson.all(ctx, res);
     } catch(err) {
-        return resJson.errs(ctx, {position, err});
+        return resJson.errs(ctx, {err});
     }
 }
 // User_modify
-exports.modify = async(ctx, next) => {
-    let position = "/modify";
+exports.modifyPG = async(ctx, next) => {
     try{
         let payload = null;
         let id = ctx.request.params.id;
         let updObj = ctx.request.body;
-        let message = docPreCT.modifyFilter(doc, updObj, id);
-        if(message) return resJson.failure(ctx, {position, message});
 
-        let res = await DB.modify(payload, id, updObj);
+        let res = await DB.modifyCT(payload, id, updObj);
         return resJson.all(ctx, res);
     } catch(err) {
-        return resJson.errs(ctx, {position, err});
+        return resJson.errs(ctx, {err});
     }
 }
 
@@ -61,36 +51,29 @@ exports.modify = async(ctx, next) => {
 
 
 
-// User_detail
-exports.detail = async(ctx, next) => {
-    let position = "/detail";
+exports.detailPG = async(ctx, next) => {
     try{
         let payload = null;
         let id = ctx.request.params.id;
-        let paramDetail = ctx.request.body;
-        let {message, paramObj} = docPreCT.detailFilter(doc, paramDetail, id);
-        if(!paramObj) return resJson.failure(ctx, {position, message});
+        let paramObj = ctx.request.body;
 
-        let res = await DB.detail(payload, paramObj);
+        let res = await DB.detailCT(payload, paramObj, id);
         return resJson.all(ctx, res);
     } catch(err) {
-        return resJson.errs(ctx, {position, err});
+        console.log('User detail Error: ', err);
+        return resJson.errs(ctx, {err});
     }
 }
 
 // User_list
-exports.list = async(ctx, next) => {
-    let position = "/list";
+exports.listPG = async(ctx, next) => {
     try{
         let payload = null;
-        let paramList = ctx.request.body;
-        let {message, paramObj} = docPreCT.listFilter(doc, paramList);
-        if(!paramObj) return resJson.failure(ctx, {position, message});
+        let paramObj = ctx.request.body;
 
-        let res = await DB.list(payload, paramObj);
-        console.log(3, res)
+        let res = await DB.listCT(payload, paramObj);
         return resJson.all(ctx, res);
     } catch(err) {
-        return resJson.errs(ctx, {position, err});
+        return resJson.errs(ctx, {err});
     }
 }

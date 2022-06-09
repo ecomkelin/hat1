@@ -15,8 +15,11 @@ db_master = mongoose.createConnection(process.env.DB_MASTER, { useNewUrlParser: 
  * 数据库方法打包文件
  */
 const Schema = mongoose.Schema;
+const readPre = require("./readPre");
+const writePre = require("./writePre");
 const docSame = require("./docSame");
 const path = require('path');
+const { match } = require('assert');
 const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/server/_sysConf"));
 
 // 暴露mongodb的方法 以及model的doc即所有field
@@ -48,8 +51,59 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const list = require("./method/list")(DBread0);
-	const findOne = ({query, projection, populate}) => new Promise(async(resolve, reject) => {
+	const list = (paramList={}) => new Promise(async(resolve, reject) => {
+		try {
+			let {message, paramObj} = readPre.listFilter(doc, paramList);
+			if(!paramObj)  return resolve({status: 400, message});
+
+			// to do 查找数据库
+			let {query={}, projection, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
+			if(!sort) sort = {sortNum: -1, at_crt: -1};
+	
+			let count = await DBread0.countDocuments(query);
+	
+			let objects = await DBread0.find(query, projection)
+				.skip(skip).limit(limit)
+				.sort(sort)
+				.populate(populate);
+	
+			let object = null;
+			let {fields, keywords} = search;
+			if(objects.length > 0 && fields && keywords) {
+				query["$or"] = [];
+				fields.forEach(field => {
+					query["$or"].push({[field]: { $regex: keywords, $options: '$i' }})
+				});
+				object = await DBread0.findOne(query, projection).populate(populate);
+			}
+
+			return resolve({
+				status: 200, message: "获取用户列表成功", 
+				data: {count, objects, object, skip, limit},
+				paramObj: {
+					match: query,select: projection, skip, limit, sort, populate
+				}
+			});
+		} catch(err) {
+			console.error(err);
+			reject(err);
+		}
+	});
+
+	const detail = (paramDetail, id) => new Promise(async(resolve, reject) => {
+		try {
+			let {message, paramObj} = readPre.detailFilter(doc, paramDetail, id);
+			if(!paramObj)  return resolve({status: 400, message});
+			let {query={}, projection, populate} = paramObj;
+
+			let object = await DBread0.findOne(query, projection)
+				.populate(populate);
+			return resolve(object);
+		} catch(err) {
+			reject(err);
+		}
+	});
+	const findOne = ({query={}, projection, populate}) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await DBread0.findOne(query, projection)
 				.populate(populate);
@@ -71,8 +125,11 @@ module.exports = (docName, doc) => {
 
 	/* write 写入数据 一定要在主数据库中写 */
 	const DBwrite = DBmaster;
-	const insertOne = (document, options) => new Promise(async(resolve, reject) => {
+	const create = (document) => new Promise(async(resolve, reject) => {
 		try {
+			let message = writePre.createFilter(doc, document);
+			if(message) return resolve({status: 400, message});
+
 			// 写入 auto 数据
 			document.at_crt = document.at_upd = document.at_edit = new Date();
 	
@@ -95,16 +152,19 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const updateOne = (filter={}, update, options) => new Promise(async(resolve, reject) => {
+	const modify = (filter={}, updObj) => new Promise(async(resolve, reject) => {
 		try {
+			let message = docPreCT.modifyFilter(doc, updObj, id);
+			if(message) return resolve({status: 400, message});
+
 			// 写入 auto 数据
-			update.at_edit = new Date();
+			updObj.at_edit = new Date();
 	
 			// 判断数据
-			let res_docSame = await docSame(DBread0, doc, update);
+			let res_docSame = await docSame(DBread0, doc, updObj);
 			if(res_docSame.status === 200) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
 
-			let object = await DBwrite.updateOne(filter, update, options);
+			let object = await DBwrite.updateOne(filter, updObj);
 			return resolve(object);
 		} catch(err) {
 			reject(err);
@@ -119,8 +179,11 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const deleteOne = (filter, options) => new Promise(async(resolve, reject) => {
+	const remove = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
+			let message = writePre.removeFilter(doc, filter._id);
+			if(message) return resolve({status: 400, message});
+
 			let del = await DBwrite.deleteOne(filter);
 			return resolve(del);
 		} catch(err) {
@@ -137,5 +200,5 @@ module.exports = (docName, doc) => {
 	});
 
 	// 暴露出所有数据库方法
-	return {doc, aggregate, countDocuments, list, findOne, distinct, insertMany, insertOne, updateMany, updateOne, deleteOne, deleteMany};
+	return {doc, aggregate, countDocuments, list, detail, findOne, distinct, insertMany, create, updateMany, modify, remove, deleteMany};
 }

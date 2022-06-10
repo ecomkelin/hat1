@@ -24,8 +24,8 @@ exports.tokenVerify_Prom = (headersToken)=> new Promise(async(resolve, reject) =
 			if(expired) return resolve({status: 401, message: "token错误或过期", expired});
 			return resolve({status: 200, data: {token, is_refresh, payload}});
 		})
-	} catch(error) {
-		return reject({status: 400, message: '[resolve tokenVerify_Prom]'});
+	} catch(e) {
+		return reject(e);
 	}
 })
 

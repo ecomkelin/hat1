@@ -1,7 +1,7 @@
 const path = require('path');
 const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
 const bcryptMD = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
-const Model = require(path.resolve(process.cwd(), "src/models/1_auth/User"));
+const Model = require("./UserDB");
 
 exports.doc = Model.doc;
 exports.Model = Model;
@@ -27,8 +27,8 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
 
         /* 返回 */
         return resolve({status: 200, data: {object}});
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });
 
@@ -41,8 +41,8 @@ exports.createMany = (payload, docObjs) =>  Promise(async(resolve, reject) => {
         /* 返回 */
         if(!objects) return resolve({status: 400, message: "创建objects失败"});
         return resolve({status: 200, data: {objects}});
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });
 
@@ -63,8 +63,8 @@ exports.modifyCT = (payload, id, updObj={}) => new Promise(async(resolve, reject
         if(!object) return resolve({status: 400, message: "更新失败"});
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "更新成功"});
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });
 
@@ -75,8 +75,8 @@ exports.modifyMany = (payload, match, setObj) => new Promise(async(resolve, reje
         if(!updMany) return resolve({status: 400, message: "批量更新失败"});
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "批量更新成功"});
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });
 
@@ -97,8 +97,8 @@ exports.removeCT = (payload, id) => new Promise(async(resolve, reject) => {
 
         /* 返回 */
         return resolve({status: 200, message: "删除成功"});
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });
 
@@ -109,8 +109,8 @@ exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
 
         /* 返回 */
         return resolve({status: 200, message: "删除成功"});
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });
 
@@ -139,8 +139,8 @@ exports.detailCT = (payload, paramObj={}, id) => new Promise(async(resolve, reje
         return resolve({status: 200, message: "查看用户详情成功", data: {object}, paramObj: {
             match,select, populate
         }});
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });
 
@@ -151,7 +151,7 @@ exports.listCT = (payload, paramObj={}) => new Promise(async(resolve, reject) =>
         let res_list = await Model.list(paramObj);
         return resolve(res_list);
         
-    } catch(err) {
-        return reject({status: 500, err});
+    } catch(e) {
+        return reject(e);
     }
 });

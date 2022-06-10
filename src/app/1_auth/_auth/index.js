@@ -1,5 +1,5 @@
 const path = require('path');
-const { Model } = require('../User/db');
+const { Model } = require('../User/UserCT');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 const jwtMD = require(path.resolve(process.cwd(), "bin/middle/jwt"));
 const bcryptMD = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
@@ -27,8 +27,8 @@ exports.refresh = Model => async(ctx, next) => {
 			data: {accessToken, refreshToken, payload},
 			message: "refresh 刷新token成功",
 		});
-	} catch(err) {
-		return resJson.errs(ctx, {message: "refresh", err});
+	} catch(e) {
+		return resJson.errs(ctx, {e});
 	}
 }
 
@@ -46,8 +46,8 @@ exports.login = Model => async(ctx, next) => {
 			data: {payload, accessToken, refreshToken},
 			message: "登录成功"
 		})
-    } catch(err) {
-        return resJson.errs(ctx, {err});
+    } catch(e) {
+        return resJson.errs(ctx, {e});
     }
 };
 const getToken = (payload, Model) => {
@@ -87,7 +87,7 @@ const objectObt_Prom = (body, Model) => new Promise(async(resolve, reject) => {
 		} else {
 			return resolve({status: 400, message: "请输入正确的 [type_login] 类型为String ['hat', 'google', 'facebook', 'weixin'] "});
 		}
-	} catch(err) {
-		return reject({status: 500, err});
+	} catch(e) {
+		return reject(e);
 	}
 });

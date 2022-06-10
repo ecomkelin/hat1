@@ -30,7 +30,6 @@
 		query["$or"].push(param);
 	}
 }
-
 /**
  * 
  * @param {*} DBcollection: 数据库模型
@@ -51,12 +50,12 @@ module.exports = (DBcollection, doc, docNew) => new Promise(async(resolve, rejec
 		// 如果是创建
 		let message = filterParam(doc, docNew, query, 'crt');
 
-		if(message) return reject(message);
+		if(message) return resolve({status: 400, message});
 		let objSame = await DBcollection.findOne(query);
-        if(objSame) return resolve({status: 200, message: "数据库中已有相同数据", paramObj: {match: query}, data: {objSame}});
-		return resolve({status: 400, message: "没有相同信息"});
-	} catch(err) {
-		return reject(err);
+        if(objSame) return resolve({status: 200, exist: true, message: "数据库中已有相同数据", paramObj: {match: query}, data: {objSame}});
+		return resolve({status: 200, exist: false, message: "没有相同信息"});
+	} catch(e) {
+		return reject(e);
 	}
 })
 

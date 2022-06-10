@@ -1,6 +1,6 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-const DB = require("./db");
+const DB = require("./UserCT");
 
 exports.doc = DB.doc;
 exports.Model = DB.Model;
@@ -12,9 +12,8 @@ exports.createPG = async(ctx, next) => {
 
         let res = await DB.createCT(payload, crtObj);
         return resJson.all(ctx, res);
-    } catch(err) {
-        console.log(err);
-        return resJson.errs(ctx, {err});
+    } catch(e) {
+        return resJson.errs(ctx, {e});
     }
 };
 
@@ -26,8 +25,8 @@ exports.removePG = async(ctx, next) => {
 
         let res = await DB.removeCT(payload , id);
         return resJson.all(ctx, res);
-    } catch(err) {
-        return resJson.errs(ctx, {err});
+    } catch(e) {
+        return resJson.errs(ctx, {e});
     }
 }
 // User_modify
@@ -39,8 +38,8 @@ exports.modifyPG = async(ctx, next) => {
 
         let res = await DB.modifyCT(payload, id, updObj);
         return resJson.all(ctx, res);
-    } catch(err) {
-        return resJson.errs(ctx, {err});
+    } catch(e) {
+        return resJson.errs(ctx, {e});
     }
 }
 
@@ -59,13 +58,11 @@ exports.detailPG = async(ctx, next) => {
 
         let res = await DB.detailCT(payload, paramObj, id);
         return resJson.all(ctx, res);
-    } catch(err) {
-        console.log('User detail Error: ', err);
-        return resJson.errs(ctx, {err});
+    } catch(e) {
+        return resJson.errs(ctx, {e});
     }
 }
 
-// User_list
 exports.listPG = async(ctx, next) => {
     try{
         let payload = null;
@@ -73,7 +70,7 @@ exports.listPG = async(ctx, next) => {
 
         let res = await DB.listCT(payload, paramObj);
         return resJson.all(ctx, res);
-    } catch(err) {
-        return resJson.errs(ctx, {err});
+    } catch(e) {
+        return resJson.errs(ctx, {e});
     }
 }

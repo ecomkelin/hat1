@@ -1,6 +1,6 @@
 // 引入全局及组的 collection field
-const doc_global = require("../_doc/docGlobal");
-const doc_group = require("./doc_group");
+const doc_global = require("../../0_collection/docGlobal");
+const doc_group = require("../doc_group");
 
 // 本身特殊的 field
 const code = {...doc_group.code};
@@ -18,7 +18,7 @@ const doc = {
 };
 
 // 集合名称
-const docName = require("../_doc/collections").User;
+const docName = require("../../0_collection/collections").User;
 
 
 // 暴露 方法 及 doc

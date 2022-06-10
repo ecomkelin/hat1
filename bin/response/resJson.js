@@ -33,12 +33,13 @@ exports.failure = async(ctx, ctxBody) => {
 exports.errs = async(ctx, ctxBody) => {
     console.log("-------------------- resJson errs --------------------");
     console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
-    let {err} = ctxBody
-    if(err) err = err.message;
-    console.error("[@/resJson errs] err: ", err);
+    let {e} = ctxBody
+    // console.log("[@/resJson errs] e.name: ", e.name);
+    // console.log("[@/resJson errs] e.message: ", e.message);
+    console.log("[@/resJson errs] e.stack: ", e.stack);
+    let error = e.stack
     console.log();
-    err = String(err);
     ctx.status = 500;
-    ctx.body = {status: 500, ...ctxBody};
+    ctx.body = {status: 500, error};
     return;
 }

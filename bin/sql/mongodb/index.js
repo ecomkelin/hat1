@@ -38,16 +38,16 @@ module.exports = (docName, doc) => {
 	const aggregate = (pipelines, options) => new Promise(async(resolve, reject) => {
 		try {
 			return resolve("功能未开放")
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 	const countDocuments = (query, options) => new Promise(async(resolve, reject) => {
 		try {
 			let count = await DBread0.countDocuments(query);
 			return resolve(count);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 
@@ -84,9 +84,8 @@ module.exports = (docName, doc) => {
 					match: query,select: projection, skip, limit, sort, populate
 				}
 			});
-		} catch(err) {
-			console.error(err);
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 
@@ -99,8 +98,8 @@ module.exports = (docName, doc) => {
 			let object = await DBread0.findOne(query, projection)
 				.populate(populate);
 			return resolve(object);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 	const findOne = ({query={}, projection, populate}) => new Promise(async(resolve, reject) => {
@@ -108,8 +107,8 @@ module.exports = (docName, doc) => {
 			let object = await DBread0.findOne(query, projection)
 				.populate(populate);
 			return resolve(object);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 
@@ -118,8 +117,8 @@ module.exports = (docName, doc) => {
 			field = String(field);
 			let dist = await DBread0.distinct(field, query);
 			return resolve(dist);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 
@@ -135,20 +134,21 @@ module.exports = (docName, doc) => {
 	
 			// 判断数据
 			let res_docSame = await docSame(DBread0, doc, document);
-			if(res_docSame.status === 200) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
+			if(res_docSame.status !== 200) return resolve({...res_docSame});   // 错误信息
+			if(res_docSame.exist === true) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
 
 			let object = await DBwrite.create(document);
 			return resolve(object);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 	const insertMany = (documents, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await DBwrite.insertMany(documents);
 			return resolve(object);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 
@@ -162,20 +162,21 @@ module.exports = (docName, doc) => {
 	
 			// 判断数据
 			let res_docSame = await docSame(DBread0, doc, updObj);
-			if(res_docSame.status === 200) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
+			if(res_docSame.status !== 200) return resolve({...res_docSame});   // 错误信息
+			if(res_docSame.exist === true) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
 
 			let object = await DBwrite.updateOne(filter, updObj);
 			return resolve(object);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 	const updateMany = (filter={}, update, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await DBwrite.updateMany(filter, update, options);
 			return resolve(object);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 
@@ -186,16 +187,16 @@ module.exports = (docName, doc) => {
 
 			let del = await DBwrite.deleteOne(filter);
 			return resolve(del);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 	const deleteMany = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
 			let dels = await DBwrite.deleteMany(filter);
 			return resolve(dels);
-		} catch(err) {
-			reject(err);
+		} catch(e) {
+			reject(e);
 		}
 	});
 

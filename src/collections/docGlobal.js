@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
 // 数据库名称集合
-const docName = require("./collections");
+const docName = require("./config");
 
 module.exports = {
 	code: {

@@ -1,6 +1,9 @@
 // 引入全局及组的 collection field
-const doc_global = require("../../0_collection/docGlobal");
+const doc_global = require("../../../collections/docGlobal");
 const doc_group = require("../doc_group");
+// #################################################################
+// global 最上面 group中间 本身最下
+
 
 // 本身特殊的 field
 const code = {...doc_group.code};
@@ -18,9 +21,11 @@ const doc = {
 };
 
 // 集合名称
-const docName = require("../../0_collection/collections").User;
+const docName = require("../../../collections/config").User;
 
 
+
+// #################################################################
 // 暴露 方法 及 doc
 const path = require('path');
 const Model = require(path.join(process.cwd(), "bin/sql/mongodb"))(docName, doc);

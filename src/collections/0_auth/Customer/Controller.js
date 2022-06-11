@@ -1,10 +1,7 @@
 const path = require('path');
 const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
-const bcryptMD = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
-const Model = require("./UserDB");
-
-exports.doc = Model.doc;
-exports.Model = Model;
+const Bcrypt = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
+const Model = require("./Model");
 
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
@@ -16,7 +13,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         docObj.phone = phoneNum ? docObj.phonePre+phoneNum : undefined;
 
         if(docObj.pwd) {
-            let hash_bcrypt = await bcryptMD.encrypt_prom(docObj.pwd);
+            let hash_bcrypt = await Bcrypt.encrypt_prom(docObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
             docObj.pwd = hash_bcrypt;
         }
@@ -53,7 +50,7 @@ exports.modifyCT = (payload, id, updObj={}) => new Promise(async(resolve, reject
 
         // 操作数据
         if(updObj.pwd) {
-            let hash_bcrypt = await bcryptMD.encrypt_prom(updObj.pwd);
+            let hash_bcrypt = await Bcrypt.encrypt_prom(updObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
             updObj.pwd = hash_bcrypt;
         }
@@ -147,8 +144,9 @@ exports.detailCT = (payload, paramObj={}, id) => new Promise(async(resolve, reje
 exports.listCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         // 根据 payload 过滤 match select
-
+        // 缓存
         let res_list = await Model.list(paramObj);
+        console.log(111, res_list)
         return resolve(res_list);
         
     } catch(e) {

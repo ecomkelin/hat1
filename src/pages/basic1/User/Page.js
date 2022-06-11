@@ -1,16 +1,13 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-const DB = require("./UserCT");
-
-exports.doc = DB.doc;
-exports.Model = DB.Model;
+const Controller = require("../../../collections/0_auth/User/Controller");
 
 exports.createPG = async(ctx, next) => {
     try{
         let payload = null;
         let crtObj = ctx.request.body;
 
-        let res = await DB.createCT(payload, crtObj);
+        let res = await Controller.createCT(payload, crtObj);
         return resJson.all(ctx, res);
     } catch(e) {
         return resJson.errs(ctx, {e});
@@ -23,7 +20,7 @@ exports.removePG = async(ctx, next) => {
         let id = ctx.request.params.id;
         // let body = ctx.request.body;
 
-        let res = await DB.removeCT(payload , id);
+        let res = await Controller.removeCT(payload , id);
         return resJson.all(ctx, res);
     } catch(e) {
         return resJson.errs(ctx, {e});
@@ -36,7 +33,7 @@ exports.modifyPG = async(ctx, next) => {
         let id = ctx.request.params.id;
         let updObj = ctx.request.body;
 
-        let res = await DB.modifyCT(payload, id, updObj);
+        let res = await Controller.modifyCT(payload, id, updObj);
         return resJson.all(ctx, res);
     } catch(e) {
         return resJson.errs(ctx, {e});
@@ -56,7 +53,7 @@ exports.detailPG = async(ctx, next) => {
         let id = ctx.request.params.id;
         let paramObj = ctx.request.body;
 
-        let res = await DB.detailCT(payload, paramObj, id);
+        let res = await Controller.detailCT(payload, paramObj, id);
         return resJson.all(ctx, res);
     } catch(e) {
         return resJson.errs(ctx, {e});
@@ -68,7 +65,7 @@ exports.listPG = async(ctx, next) => {
         let payload = null;
         let paramObj = ctx.request.body;
 
-        let res = await DB.listCT(payload, paramObj);
+        let res = await Controller.listCT(payload, paramObj.userlistParam);
         return resJson.all(ctx, res);
     } catch(e) {
         return resJson.errs(ctx, {e});

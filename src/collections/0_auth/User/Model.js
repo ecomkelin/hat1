@@ -21,7 +21,7 @@ const doc = {
 };
 
 // 集合名称
-const docName = require("../../../collections/config").User;
+const docName = require("../../../collections").User;
 
 
 

@@ -19,7 +19,7 @@ const doc = {
 };
 
 // 集合名称
-const docName = require("../../../collections/config").Customer;
+const docName = require("../../../collections").Customer;
 
 
 // #################################################################

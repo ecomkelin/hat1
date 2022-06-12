@@ -9,8 +9,8 @@ exports.listFilter = (doc, paramList) => {
     let paramObj = paramTemp;
     return {paramObj};
 }
-exports.detailFilter = (doc, paramDetail, id) => {
-    if(!isObjectId(id)) return {message: "请传递正确的id信息"};
+exports.detailFilter = (doc, paramDetail={}) => {
+    if(!isObjectId(paramDetail._id)) return {message: "请传递正确的id信息"};
     delete paramDetail.skip;
     delete paramDetail.limit;
     delete paramDetail.sort;
@@ -18,7 +18,7 @@ exports.detailFilter = (doc, paramDetail, id) => {
     let message = format_get(doc, paramDetail, paramTemp);
     if(message) return {message};
     if(!paramTemp.match) paramTemp.match = {};
-    paramTemp.match._id = id;
+    paramTemp.match._id = paramDetail._id;
     paramObj = paramTemp;
     return {paramObj}
 }

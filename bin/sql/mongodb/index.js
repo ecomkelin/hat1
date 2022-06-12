@@ -88,9 +88,9 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const detail = (paramDetail, id) => new Promise(async(resolve, reject) => {
+	const detail = (paramDetail) => new Promise(async(resolve, reject) => {
 		try {
-			let {message, paramObj} = readPre.detailFilter(doc, paramDetail, id);
+			let {message, paramObj} = readPre.detailFilter(doc, paramDetail);
 			if(!paramObj)  return resolve({status: 400, message});
 			let {query={}, projection, populate} = paramObj;
 

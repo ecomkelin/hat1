@@ -39,35 +39,3 @@ exports.modifyPG = async(ctx, next) => {
         return resJson.errs(ctx, {e});
     }
 }
-
-
-
-
-
-
-
-
-exports.detailPG = async(ctx, next) => {
-    try{
-        let payload = null;
-        let id = ctx.request.params.id;
-        let paramObj = ctx.request.body;
-
-        let res = await Controller.detailCT(payload, paramObj, id);
-        return resJson.all(ctx, res);
-    } catch(e) {
-        return resJson.errs(ctx, {e});
-    }
-}
-
-exports.listPG = async(ctx, next) => {
-    try{
-        let payload = null;
-        let paramObj = ctx.request.body;
-
-        let res = await Controller.listCT(payload, paramObj.userlistParam);
-        return resJson.all(ctx, res);
-    } catch(e) {
-        return resJson.errs(ctx, {e});
-    }
-}

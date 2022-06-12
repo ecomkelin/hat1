@@ -15,30 +15,28 @@ fs.readdirSync(collectionPath).forEach(dirName => {
     }
 })
 
-const rtRecu = (dirPath, routerName, n) => {
+const rtRecu = (dirPath, paths, n) => {
     fs.readdirSync(dirPath).forEach(dirName => {
         if(dirName.split('.').length === 1) {       // 如果是文件夹 则进一步读取内容
-            if(n===0) routerName = '';
-            let rs = routerName.split('/')
-            for(let i=1; i<n-1; i++) {
-                routerName = '/'+rs[i];
-            }
-            routerName += '/'+dirName;
-            console.log(111, n, routerName)
-            rtRecu(path.join(dirPath+dirName+'/'), routerName, n+1);
+            paths[n] = dirName;
+            rtRecu(path.join(dirPath+dirName+'/'), paths, n+1);
         } else {                                    // 如果是文件则 则加载
             let file = dirPath+dirName;
             if(fs.existsSync(file)) {
                 let requ = require(file);
+                let routerName = '';
+                for(let j=1; j<n;j++) {
+                    routerName += '/'+paths[j];
+                }
                 routerName += '/'+dirName.split('.')[0];
-                console.log(222, routerName);
+                console.log('111', routerName)
                 router.post("/b1"+routerName, requ );
             }
         }
-    })
+    });
 }
 const viewPath = path.join(process.cwd(), "src/view/");
-rtRecu(viewPath, '', 0);
+rtRecu(viewPath, ['view'], 0);
 
 const writePath = path.join(process.cwd(), "src/write/");
 fs.readdirSync(writePath).forEach(dirName => {

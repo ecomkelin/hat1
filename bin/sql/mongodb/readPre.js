@@ -17,8 +17,8 @@ exports.detailFilter = (doc, paramDetail={}) => {
     let paramTemp = {};
     let message = format_get(doc, paramDetail, paramTemp);
     if(message) return {message};
-    if(!paramTemp.match) paramTemp.match = {};
-    paramTemp.match._id = paramDetail._id;
+    if(!paramTemp.query) paramTemp.query = {};
+    paramTemp.query._id = paramDetail._id;
     paramObj = paramTemp;
     return {paramObj}
 }

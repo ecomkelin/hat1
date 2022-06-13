@@ -6,6 +6,7 @@ const path = require('path');
 const {isObjectId} = require(path.resolve(process.cwd(), "bin/extra/judge/is_ObjectId"));
 
 const regFieldFilter = (doc, obj, key) => {
+
     if(!doc[key]) {
         return `没有[${key}] 此字段`;
     }

@@ -1,54 +1,55 @@
 const path = require('path');
-const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 const jwtMD = require(path.resolve(process.cwd(), "bin/middle/jwt"));
 const bcryptMD = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
 const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
 
 
 /* 用refreshToken刷新 accessToken */
-exports.refresh = Model => async(ctx, next) => {
+exports.refresh = (ctx, Model) => new Promise(async(resolve, reject) => {
 	try {
-
 		let res_payload = await jwtMD.tokenVerify_Prom(ctx.request.headers['authorization']);
-		if(res_payload.status !== 200) return resJson.failure(ctx, {...res_payload});
+		if(res_payload.status !== 200) return resolve(res_payload);
 		let {token, is_refresh, payload} = res_payload.data;
 
-		if(!is_refresh) return resJson.failure(ctx, {message: "refresh header 后面需要加 re"});
+		if(!is_refresh) return resolve({status: 400, message: "refresh header 后面需要加 re"});
 
 		let object = await Model.findOne({query: {_id: payload._id}});
-		if(!object) return resJson.failure(ctx, {message: "授权错误, 请重新登录"});
+		if(!object) return resolve({status: 400, message: "授权错误, 请重新登录"});
 
-		// if(token !== object.refreshToken) return resJson.failure(ctx, {message: "refreshToken 不匹配"});
+		// if(token !== object.refreshToken) return resolve({status: 400, message: "refreshToken 不匹配"});
 
 		let {accessToken, refreshToken} = getToken(payload, Model);
 
-		return resJson.success(ctx, {
+		return resolve({
+			status: 200,
 			data: {accessToken, refreshToken, payload},
 			message: "refresh 刷新token成功",
 		});
 	} catch(e) {
-		return resJson.errs(ctx, {e});
+		return reject(e);
 	}
-}
+});
 
 
-exports.login = Model => async(ctx, next) => {
+exports.login = (ctx, Model) => new Promise(async(resolve, reject) => {
     try{
 		let res_object = await objectObt_Prom(ctx.request.body, Model);
-		if(res_object.status !== 200) return resJson.failure(ctx, res_object);
+		if(res_object.status !== 200) return resolve(res_object);
 		let object = res_object.data.object;
 		let payload = jwtMD.generatePayload(object);
 
 		let {accessToken, refreshToken} = getToken(payload, Model);
 
-		return resJson.success(ctx, {
+		return resolve({
+			status: 400,
 			data: {payload, accessToken, refreshToken},
 			message: "登录成功"
-		})
+		});
     } catch(e) {
-        return resJson.errs(ctx, {e});
+        return reject(e);
     }
-};
+});
+
 const getToken = (payload, Model) => {
 	let accessToken = jwtMD.generateToken(payload);
 	let refreshToken = jwtMD.generateToken(payload, true);

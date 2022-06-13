@@ -1,10 +1,16 @@
 const path = require('path');
 const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
 const Bcrypt = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
+
 const Model = require("./Model");
+const writePre = require(path.resolve(process.cwd(), "src/middle/savePre/writePre"));
+
 
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
+        let message = writePre.createFilter(Model.doc, docObj);
+        if(message) return resolve({status: 400, message});
+
         // 读取数据
         let {phoneNum} = docObj;
 
@@ -43,10 +49,10 @@ exports.createMany = (payload, docObjs) =>  Promise(async(resolve, reject) => {
     }
 });
 
-exports.modifyCT = (payload, id, updObj={}) => new Promise(async(resolve, reject) => {
+exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) => {
     try{
+        let match = {_id: updObj._id};
         // 还要加入 payload
-        let match = {_id: id};
 
         // 操作数据
         if(updObj.pwd) {
@@ -78,10 +84,13 @@ exports.modifyMany = (payload, match, setObj) => new Promise(async(resolve, reje
 });
 
 
-exports.removeCT = (payload, id) => new Promise(async(resolve, reject) => {
+exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
     try{
+        let message = writePre.removeFilter(Model.doc, body._id);
+        if(message) return resolve({status: 400, message});
+
         /* 读取数据 */
-        let match = {_id: id};
+        let match = {_id: body._id};
         // match 还要加入 payload
 
         /* 判断数据 */
@@ -144,9 +153,7 @@ exports.detailCT = (payload, paramObj={}, id) => new Promise(async(resolve, reje
 exports.listCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         // 根据 payload 过滤 match select
-        // 缓存
         let res_list = await Model.list(paramObj);
-        console.log(111, res_list)
         return resolve(res_list);
         
     } catch(e) {

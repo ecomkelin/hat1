@@ -16,7 +16,8 @@ module.exports = {
         required: true,
         minLen: 6,
         maxLen: 12,
-        as: 0
+        saveChange: true, // 存储数据库之前会变化
+        as: 0, //   不可读
     },
     refreshToken: {
         type: String,
@@ -29,6 +30,7 @@ module.exports = {
         type: String,
         trimLen: 4,
         regexp: '^[0-9]*$',
+        saveChange: true,
     },
     phoneNum: {
         type: String,

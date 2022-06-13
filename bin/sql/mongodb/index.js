@@ -16,7 +16,6 @@ db_master = mongoose.createConnection(process.env.DB_MASTER, { useNewUrlParser: 
  */
 const Schema = mongoose.Schema;
 const readPre = require("./readPre");
-const writePre = require("./writePre");
 const docSame = require("./docSame");
 const path = require('path');
 const { match } = require('assert');
@@ -125,9 +124,6 @@ module.exports = (docName, doc) => {
 	const COLwrite = COLmaster;
 	const create = (document) => new Promise(async(resolve, reject) => {
 		try {
-			let message = writePre.createFilter(doc, document);
-			if(message) return resolve({status: 400, message});
-
 			// 写入 auto 数据
 			document.at_crt = document.at_upd = document.at_edit = new Date();
 	
@@ -181,9 +177,6 @@ module.exports = (docName, doc) => {
 
 	const remove = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
-			let message = writePre.removeFilter(doc, filter._id);
-			if(message) return resolve({status: 400, message});
-
 			let del = await COLwrite.deleteOne(filter);
 			return resolve(del);
 		} catch(e) {

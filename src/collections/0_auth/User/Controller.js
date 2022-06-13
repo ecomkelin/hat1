@@ -35,11 +35,11 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     }
 });
 
-exports.createMany = (payload, docObjs) =>  Promise(async(resolve, reject) => {
+exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => {
     try{
         let orgObjs = await Model.find({query: {}, projection: {code: 1}});
         // 写入
-        let objects = await Model.insertMany(docObjs);
+        let objects = await Model.createMany(docObjs);
 
         /* 返回 */
         if(!objects) return resolve({status: 400, message: "创建objects失败"});
@@ -72,9 +72,9 @@ exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) =>
 });
 
 
-exports.modifyMany = (payload, match, setObj) => new Promise(async(resolve, reject) => {
+exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, reject) => {
     try{
-        let updMany = await Model.updateMany(match, setObj);
+        let updMany = await Model.modifyMany(match, setObj);
         if(!updMany) return resolve({status: 400, message: "批量更新失败"});
         /* 返回 */
         return resolve({status: 200, data: {object}, message: "批量更新成功"});
@@ -108,10 +108,10 @@ exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
     }
 });
 
-exports.removeMany = (payload, match) => new Promise(async(resolve, reject) => {
+exports.removeManyCT = (payload, match) => new Promise(async(resolve, reject) => {
     try{
         /* 删除数据 */
-        let dels = await Model.deleteMany(match)
+        let dels = await Model.removeMany(match)
 
         /* 返回 */
         return resolve({status: 200, message: "删除成功"});

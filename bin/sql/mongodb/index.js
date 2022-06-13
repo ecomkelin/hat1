@@ -138,7 +138,7 @@ module.exports = (docName, doc) => {
 			reject(e);
 		}
 	});
-	const insertMany = (documents, options) => new Promise(async(resolve, reject) => {
+	const createMany = (documents, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await COLwrite.insertMany(documents);
 			return resolve(object);
@@ -166,7 +166,7 @@ module.exports = (docName, doc) => {
 			reject(e);
 		}
 	});
-	const updateMany = (filter={}, update, options) => new Promise(async(resolve, reject) => {
+	const modifyMany = (filter={}, update, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await COLwrite.updateMany(filter, update, options);
 			return resolve(object);
@@ -183,7 +183,7 @@ module.exports = (docName, doc) => {
 			reject(e);
 		}
 	});
-	const deleteMany = (filter, options) => new Promise(async(resolve, reject) => {
+	const removeMany = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
 			let dels = await COLwrite.deleteMany(filter);
 			return resolve(dels);
@@ -193,5 +193,5 @@ module.exports = (docName, doc) => {
 	});
 
 	// 暴露出所有数据库方法
-	return {doc, aggregate, countDocuments, list, detail, findOne, distinct, insertMany, create, updateMany, modify, remove, deleteMany};
+	return {doc, aggregate, countDocuments, list, detail, findOne, distinct, createMany, create, modifyMany, modify, remove, removeMany};
 }

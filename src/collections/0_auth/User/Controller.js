@@ -5,7 +5,12 @@ const Bcrypt = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
 const Model = require("./Model");
 const writePre = require(path.resolve(process.cwd(), "src/middle/savePre/writePre"));
 
-
+/**
+ * 
+ * @param {*} payload 权限
+ * @param {*} docObj 创建对象
+ * @returns 
+ */
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
         let message = writePre.createFilter(Model.doc, docObj);

@@ -2,7 +2,7 @@ const router = require('@koa/router')();
 // const router = require('@koa/router')({prefix: "/v1"});
 
 /** ============================== 包含的其他路由 ============================== */
-const routers = [];
+const routerObjs = [];
 const version = '/v1';
 
 const fs = require('fs');
@@ -28,13 +28,12 @@ const rtRecuModel = (dirPath, paths, n, maskFiles) => {
                     let requ = require(file);
                     let routerName = version+'/'+prefixModel+'/'+paths[n-1];
                     router.get(routerName, ctx => ctx.body= { status: 200, doc: requ.doc }  );
-                    routers.push(routerName)
+                    routerObjs.push(routerName)
                 }
             }
         }
     });
 }
-
 
 const collectionPath = path.join(process.cwd(), "src/collections/");
 rtRecuModel(collectionPath, ['collections'], 0, ['Model.js']);
@@ -61,24 +60,24 @@ const rtRecu = (dirPath, paths, n) => {
                 }
                 routerName += '/'+dirName.split('.')[0];
                 router.post(routerName, requ);
-                routers.push(routerName);
+                routerObjs.push(routerName);
             }
         }
     });
 }
-const viewPath = path.join(process.cwd(), "src/view/");
-rtRecu(viewPath, ['view'], 0);
+const PagePath = path.join(process.cwd(), "src/Page/");
+rtRecu(PagePath, ['Page'], 0);
 
-const writePath = path.join(process.cwd(), "src/write/");
-rtRecu(writePath, ['view'], 0);
+const PostPath = path.join(process.cwd(), "src/Post/");
+rtRecu(PostPath, ['Post'], 0);
 /** ============================== 包含的其他路由 ============================== */
 
 
 const COL_conf = require("./collections");
 const colsRouter = version+"/allDBs"
 router.get(colsRouter, ctx => ctx.body= { status: 200, collections: Object.keys(COL_conf) } );
-routers.push(colsRouter);
+routerObjs.push(colsRouter);
 
-router.get(version+'/routers', ctx => ctx.body = {status: 200, routers});
+router.get(version+'/routers', ctx => ctx.body = {status: 200, routerObjs});
 
 module.exports = router;

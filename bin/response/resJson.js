@@ -9,6 +9,14 @@ exports.all = async(ctx, ctxBody) => {
     ctx.body = {...ctxBody};
     return;
 }
+exports.api = async(ctx, api) => {
+    console.log("--------------------- resJson api ---------------------");
+    console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
+    console.log();
+    ctx.status = 200;
+    ctx.body = api;
+    return;
+}
 exports.success = async(ctx, ctxBody) => {
     console.log("----------------- resJson success -----------------");
     console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));

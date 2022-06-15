@@ -30,11 +30,8 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         }
 
         // 写入
-        let object = await Model.create(docObj);
-        if(!object) return resolve({status: 400, message: "创建object失败"});
-
-        /* 返回 */
-        return resolve({status: 200, data: {object}});
+        let res = await Model.create(docObj);
+        return resolve(res);
     } catch(e) {
         return reject(e);
     }
@@ -44,11 +41,8 @@ exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => 
     try{
         let orgObjs = await Model.find({query: {}, projection: {code: 1}});
         // 写入
-        let objects = await Model.createMany(docObjs);
-
-        /* 返回 */
-        if(!objects) return resolve({status: 400, message: "创建objects失败"});
-        return resolve({status: 200, data: {objects}});
+        let res = await Model.createMany(docObjs);
+        return resolve(res);
     } catch(e) {
         return reject(e);
     }
@@ -67,10 +61,8 @@ exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) =>
         }
 
         // 修改数据
-        let object = await Model.modify(match, updObj);
-        if(!object) return resolve({status: 400, message: "更新失败"});
-        /* 返回 */
-        return resolve({status: 200, data: {object}, message: "更新成功"});
+        let res = await Model.modify(match, updObj);
+        return resolve(res);
     } catch(e) {
         return reject(e);
     }
@@ -79,10 +71,8 @@ exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) =>
 
 exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, reject) => {
     try{
-        let updMany = await Model.modifyMany(match, setObj);
-        if(!updMany) return resolve({status: 400, message: "批量更新失败"});
-        /* 返回 */
-        return resolve({status: 200, data: {object}, message: "批量更新成功"});
+        let res = await Model.modifyMany(match, setObj);
+        return resolve(res);
     } catch(e) {
         return reject(e);
     }
@@ -104,10 +94,7 @@ exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
 
         /* 删除数据 */
         let del = await Model.remove(match)
-        if(del.deletedCount === 0) return resolve({status: 400, message: "删除失败"});
-
-        /* 返回 */
-        return resolve({status: 200, message: "删除成功"});
+        return resolve(res);
     } catch(e) {
         return reject(e);
     }
@@ -139,17 +126,12 @@ exports.removeManyCT = (payload, match) => new Promise(async(resolve, reject) =>
 
 
 
-exports.detailCT = (payload, paramObj={}, id) => new Promise(async(resolve, reject) => {
+exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         let {match={}, select, populate} = paramObj;
         // 根据 payload 过滤 match select
-
-        let object = await Model.detail(paramObj, id);
-
-        if(!object) return resolve({status: 400, message: "数据库中无此数据"});
-        return resolve({status: 200, message: "查看用户详情成功", data: {object}, paramObj: {
-            match,select, populate
-        }});
+        let res = await Model.detail(paramObj);
+       return resolve(res);
     } catch(e) {
         return reject(e);
     }
@@ -158,9 +140,8 @@ exports.detailCT = (payload, paramObj={}, id) => new Promise(async(resolve, reje
 exports.listCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         // 根据 payload 过滤 match select
-        let res_list = await Model.list(paramObj);
-        return resolve(res_list);
-        
+        let res = await Model.list(paramObj);
+        return resolve(res);
     } catch(e) {
         return reject(e);
     }

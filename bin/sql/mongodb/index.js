@@ -52,8 +52,9 @@ module.exports = (docName, doc) => {
 
 	const list = (paramList={}) => new Promise(async(resolve, reject) => {
 		try {
-			let {message, paramObj} = readPre.listFilter(doc, paramList);
-			if(!paramObj)  return resolve({status: 400, message});
+			let res = await readPre.listFilter(doc, paramList);
+			if(res.status !== 200) return resolve(res);
+			let paramObj = res.data.paramObj;
 
 			let {query={}, projection, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
 			if(!sort) sort = {sortNum: -1, at_upd: -1};
@@ -78,24 +79,25 @@ module.exports = (docName, doc) => {
 			return resolve({
 				status: 200, message: "获取用户列表成功", 
 				data: {count, objects, object, skip, limit},
-				paramObj: {
-					match: query,select: projection, skip, limit, sort, populate
-				}
+				paramObj
 			});
 		} catch(e) {
-			reject(e);
+			return reject(e);
 		}
 	});
 
 	const detail = (paramDetail) => new Promise(async(resolve, reject) => {
 		try {
-			let {message, paramObj} = readPre.detailFilter(doc, paramDetail);
-			if(!paramObj)  return resolve({status: 400, message});
+			let res = await readPre.detailFilter(doc, paramDetail);
+			if(res.status !== 200) return resolve(res);
+			let paramObj = res.data.paramObj;
+
 			let {query={}, projection, populate} = paramObj;
 
 			let object = await COLread0.findOne(query, projection)
 				.populate(populate);
-			return resolve(object);
+			if(!object) return resolve({status: 400, message: "数据库中无此数据"});
+			return resolve({status: 200, message: "查看用户详情成功", data: {object}, paramObj});
 		} catch(e) {
 			reject(e);
 		}
@@ -129,11 +131,11 @@ module.exports = (docName, doc) => {
 	
 			// 判断数据
 			let res_docSame = await docSame(COLread0, doc, document);
-			if(res_docSame.status !== 200) return resolve({...res_docSame});   // 错误信息
+			if(res_docSame.status !== 200) return resolve(res_docSame);   // 错误信息
 			if(res_docSame.exist === true) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
 
 			let object = await COLwrite.create(document);
-			return resolve(object);
+			return resolve({status: 200, data: {object}});
 		} catch(e) {
 			reject(e);
 		}
@@ -141,7 +143,7 @@ module.exports = (docName, doc) => {
 	const createMany = (documents, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await COLwrite.insertMany(documents);
-			return resolve(object);
+			return resolve({status: 200, data: {object}});
 		} catch(e) {
 			reject(e);
 		}
@@ -149,19 +151,16 @@ module.exports = (docName, doc) => {
 
 	const modify = (filter={}, updObj) => new Promise(async(resolve, reject) => {
 		try {
-			let message = docPreCT.modifyFilter(doc, updObj, id);
-			if(message) return resolve({status: 400, message});
-
 			// 写入 auto 数据
 			updObj.at_edit = new Date();
 	
 			// 判断数据
 			let res_docSame = await docSame(COLread0, doc, updObj);
-			if(res_docSame.status !== 200) return resolve({...res_docSame});   // 错误信息
+			if(res_docSame.status !== 200) return resolve(res_docSame);   // 错误信息
 			if(res_docSame.exist === true) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
 
 			let object = await COLwrite.updateOne(filter, updObj);
-			return resolve(object);
+			return resolve({status: 200, data: {object}});
 		} catch(e) {
 			reject(e);
 		}
@@ -169,7 +168,7 @@ module.exports = (docName, doc) => {
 	const modifyMany = (filter={}, update, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await COLwrite.updateMany(filter, update, options);
-			return resolve(object);
+			return resolve({status: 200, data: {object}});
 		} catch(e) {
 			reject(e);
 		}
@@ -178,7 +177,8 @@ module.exports = (docName, doc) => {
 	const remove = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
 			let del = await COLwrite.deleteOne(filter);
-			return resolve(del);
+			if(del.deletedCount === 0) return resolve({status: 400, message: "数据删除失败"});
+			return resolve({status: 200, message: "数据删除成功", data: {del}});
 		} catch(e) {
 			reject(e);
 		}

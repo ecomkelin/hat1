@@ -6,7 +6,7 @@
  * @param {*} type 判断是创建还是更新内容
  * @returns 如果错误就返回错误信息
  */
- const filterParam = (doc, docNew) => new Promise((resolve, reject) => {
+ const filterParam_Pobj = (doc, docNew) => new Promise((resolve, reject) => {
 	try {
 		let query = {"$or": []};			// 初始化field唯一的参数
 		let type = docNew._id ? 'upd' : 'crt';
@@ -19,11 +19,11 @@
 			} else {
 				let uniq = doc[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = firm
 				if(!uniq) continue;					// 如果没有 则不用查看
-				if(!(uniq instanceof Array)) return resolve({status: 400, message: `${type} 数据库 doc 的uniq值错误`});
+				if(!(uniq instanceof Array)) return reject({status: 400, message: `${type} 数据库 doc 的uniq值错误`});
 				param[key] = docNew[key];			// 相当于 {code: '员工编号'}
 				for(let i=0; i<uniq.length; i++) {
 					let sKey = uniq[i];
-					if(docNew[sKey] === undefined) return resolve({status: 400, message: `${type} 请传递 在新的 doc中传递 [${key}] 的值`});
+					if(docNew[sKey] === undefined) return reject({status: 400, message: `${type} 请传递 在新的 doc中传递 [${key}] 的值`});
 					param[sKey] = docNew[sKey];		// 相当于 {firm: 'firmId'}
 				}
 				// 循环下来 
@@ -31,7 +31,7 @@
 				// 折扣编号 {nome: '002', Brand: 'brandId', Supplier: 'supplierId'} // 这个供应商的这个品牌下 产品的名称不能相同
 			}
 			query["$or"].push(param);
-			return resolve({status: 200, data: {query}});
+			return resolve(query);
 		}
 	} catch(e) {
 		return reject(e);
@@ -45,18 +45,28 @@
  * @returns 如果数据库中有相同的数据 则返回相应文档
  */
 
-module.exports = (DBcollection, doc, docNew) => new Promise(async(resolve, reject) => {
+ exports.passExist_Pobj = (DBcollection, doc, docNew) => new Promise(async(resolve, reject) => {
 	try {
 				
-		let res = await filterParam(doc, docNew);
-		if(res.status !== 200) return resolve(res);
-		
-		let query = res.data.query;
+		let query = await filterParam_Pobj(doc, docNew);
 		if(docNew._id) query._id = {"$ne": docNew._id};			// 如果是更新 需要加入 $ne _id
 
 		let objSame = await DBcollection.findOne(query);
-        if(objSame) return resolve({status: 200, exist: true, message: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
-		return resolve({status: 200, exist: false, message: "没有相同信息的数据"});
+        if(objSame) return resolve(objSame);
+		return reject({status: 400, exist: false, message: "没有相同信息的数据", paramObj: {match: query}});
+	} catch(e) {
+		return reject(e);
+	}
+})
+exports.passNotExist_Pnull = (DBcollection, doc, docNew) => new Promise(async(resolve, reject) => {
+	try {
+				
+		let query = await filterParam_Pobj(doc, docNew);
+		if(docNew._id) query._id = {"$ne": docNew._id};			// 如果是更新 需要加入 $ne _id
+
+		let objSame = await DBcollection.findOne(query);
+        if(objSame) return reject({status: 400, exist: true, message: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
+		return resolve(null);
 	} catch(e) {
 		return reject(e);
 	}

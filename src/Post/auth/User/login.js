@@ -6,8 +6,8 @@ const Model = require(path.resolve(process.cwd(), "src/collections/0_auth/User/M
 
 module.exports = async(ctx, next) => {
     try{
-      let res = await Auth.login(ctx, Model)
-      return resJson.all(res);
+      let res = await Auth.login_Pres(ctx, Model)
+      return resJson.success(ctx, res);
     } catch(e) {
         return resJson.errs(ctx, {e});
     }

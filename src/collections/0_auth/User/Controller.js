@@ -24,13 +24,13 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         docObj.phone = phoneNum ? docObj.phonePre+phoneNum : undefined;
 
         if(docObj.pwd) {
-            let hash_bcrypt = await Bcrypt.encrypt_prom(docObj.pwd);
+            let hash_bcrypt = await Bcrypt.encryptHash_Pstr(docObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
             docObj.pwd = hash_bcrypt;
         }
 
         // 写入
-        let res = await Model.create(docObj);
+        let res = await Model.create_Pres(docObj);
         return resolve(res);
     } catch(e) {
         return reject(e);
@@ -39,9 +39,9 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
 
 exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => {
     try{
-        let orgObjs = await Model.find({query: {}, projection: {code: 1}});
+        let orgObjs = await Model.list_Pres({query: {}, projection: {code: 1}});
         // 写入
-        let res = await Model.createMany(docObjs);
+        let res = await Model.createMany_Pres(docObjs);
         return resolve(res);
     } catch(e) {
         return reject(e);
@@ -55,13 +55,13 @@ exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) =>
 
         // 操作数据
         if(updObj.pwd) {
-            let hash_bcrypt = await Bcrypt.encrypt_prom(updObj.pwd);
+            let hash_bcrypt = await Bcrypt.encryptHash_Pstr(updObj.pwd);
             if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
             updObj.pwd = hash_bcrypt;
         }
 
         // 修改数据
-        let res = await Model.modify(match, updObj);
+        let res = await Model.modify_Pres(match, updObj);
         return resolve(res);
     } catch(e) {
         return reject(e);
@@ -71,7 +71,7 @@ exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) =>
 
 exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, reject) => {
     try{
-        let res = await Model.modifyMany(match, setObj);
+        let res = await Model.modifyMany_Pres(match, setObj);
         return resolve(res);
     } catch(e) {
         return reject(e);
@@ -89,11 +89,11 @@ exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
         // match 还要加入 payload
 
         /* 判断数据 */
-        let objOrg = await Model.findOne({query: match, projection: {_id: 1}});
+        let objOrg = await Model.findOne_Pobj({query: match, projection: {_id: 1}});
         if(!objOrg) return resolve({status: 400, message: "数据库中无此数据"});
 
         /* 删除数据 */
-        let del = await Model.remove(match)
+        let del = await Model.remove_Pres(match)
         return resolve(res);
     } catch(e) {
         return reject(e);
@@ -103,10 +103,10 @@ exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
 exports.removeManyCT = (payload, match) => new Promise(async(resolve, reject) => {
     try{
         /* 删除数据 */
-        let dels = await Model.removeMany(match)
+        let dels = await Model.removeMany_Pres(match)
 
         /* 返回 */
-        return resolve({status: 200, message: "删除成功"});
+        return resolve({message: "删除成功"});
     } catch(e) {
         return reject(e);
     }
@@ -130,7 +130,7 @@ exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
     try{
         let {match={}, select, populate} = paramObj;
         // 根据 payload 过滤 match select
-        let res = await Model.detail(paramObj);
+        let res = await Model.detail_Pres(paramObj);
        return resolve(res);
     } catch(e) {
         return reject(e);
@@ -140,7 +140,7 @@ exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
 exports.listCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         // 根据 payload 过滤 match select
-        let res = await Model.list(paramObj);
+        let res = await Model.list_Pres(paramObj);
         return resolve(res);
     } catch(e) {
         return reject(e);

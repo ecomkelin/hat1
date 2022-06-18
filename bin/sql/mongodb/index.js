@@ -34,27 +34,17 @@ module.exports = (docName, doc) => {
 
 	/* read 一般在从数据库读数据 简单的暂时先用一个数据 如果读写分离就要用从数据库  COLread* = db_slave* */
 	const COLread0 = COLmaster;
-	const aggregate = (pipelines, options) => new Promise(async(resolve, reject) => {
+	const aggregate_Prom = (pipelines, options) => new Promise(async(resolve, reject) => {
 		try {
-			return resolve("功能未开放")
+			return reject("功能未开放")
 		} catch(e) {
-			reject(e);
-		}
-	});
-	const countDocuments = (query, options) => new Promise(async(resolve, reject) => {
-		try {
-			let count = await COLread0.countDocuments(query);
-			return resolve(count);
-		} catch(e) {
-			reject(e);
+			return reject(e);
 		}
 	});
 
-	const list = (paramList={}) => new Promise(async(resolve, reject) => {
+	const list_Pres = (paramList={}) => new Promise(async(resolve, reject) => {
 		try {
-			let res = await readPre.listFilter(doc, paramList);
-			if(res.status !== 200) return resolve(res);
-			let paramObj = res.data.paramObj;
+			let paramObj = await readPre.listFilter_Pobj(doc, paramList);
 
 			let {query={}, projection, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
 			if(!sort) sort = {sortNum: -1, at_upd: -1};
@@ -77,7 +67,7 @@ module.exports = (docName, doc) => {
 			}
 
 			return resolve({
-				status: 200, message: "获取用户列表成功", 
+				message: "获取数据列表成功", 
 				data: {count, objects, object, skip, limit},
 				paramObj
 			});
@@ -86,23 +76,21 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const detail = (paramDetail) => new Promise(async(resolve, reject) => {
+	const detail_Pres = (paramDetail) => new Promise(async(resolve, reject) => {
 		try {
-			let res = await readPre.detailFilter(doc, paramDetail);
-			if(res.status !== 200) return resolve(res);
-			let paramObj = res.data.paramObj;
+			let paramObj = await readPre.detailFilter_Pobj(doc, paramDetail);
 
 			let {query={}, projection, populate} = paramObj;
 
 			let object = await COLread0.findOne(query, projection)
 				.populate(populate);
 			if(!object) return resolve({status: 400, message: "数据库中无此数据"});
-			return resolve({status: 200, message: "查看用户详情成功", data: {object}, paramObj});
+			return resolve({message: "查看数据详情成功", data: {object}, paramObj});
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const findOne = ({query={}, projection, populate}) => new Promise(async(resolve, reject) => {
+	const findOne_Pobj = ({query={}, projection, populate}) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await COLread0.findOne(query, projection)
 				.populate(populate);
@@ -112,78 +100,64 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const distinct = (field, query, options) => new Promise(async(resolve, reject) => {
-		try {
-			field = String(field);
-			let dist = await COLread0.distinct(field, query);
-			return resolve(dist);
-		} catch(e) {
-			reject(e);
-		}
-	});
-
 	/* write 写入数据 一定要在主数据库中写 */
 	const COLwrite = COLmaster;
-	const create = (document) => new Promise(async(resolve, reject) => {
+	const create_Pres = (document) => new Promise(async(resolve, reject) => {
 		try {
 			// 写入 auto 数据
 			document.at_crt = document.at_upd = document.at_edit = new Date();
 	
 			// 判断数据
-			let res_docSame = await docSame(COLread0, doc, document);
-			if(res_docSame.status !== 200) return resolve(res_docSame);   // 错误信息
-			if(res_docSame.exist === true) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
+			await docSame.passNotExist_Pnull(COLread0, doc, document);	// 如果不存在就通过 存在就报错
 
 			let object = await COLwrite.create(document);
-			return resolve({status: 200, data: {object}});
+			return resolve({data: {object}, message: "数据创建成功"});
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const createMany = (documents, options) => new Promise(async(resolve, reject) => {
+	const createMany_Pres = (documents, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await COLwrite.insertMany(documents);
-			return resolve({status: 200, data: {object}});
+			return resolve({data: {object}});
 		} catch(e) {
 			reject(e);
 		}
 	});
 
-	const modify = (filter={}, updObj) => new Promise(async(resolve, reject) => {
+	const modify_Pres = (filter={}, updObj) => new Promise(async(resolve, reject) => {
 		try {
 			// 写入 auto 数据
 			updObj.at_edit = new Date();
 	
 			// 判断数据
-			let res_docSame = await docSame(COLread0, doc, updObj);
-			if(res_docSame.status !== 200) return resolve(res_docSame);   // 错误信息
-			if(res_docSame.exist === true) return resolve({...res_docSame, status: 400});   // 如果数据库中已有相同数据
+			await docSame.passNotExist_Pnull(COLread0, doc, updObj);	// 如果不存在就通过 存在就报错
 
 			let object = await COLwrite.updateOne(filter, updObj);
-			return resolve({status: 200, data: {object}});
+			return resolve({data: {object}});
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const modifyMany = (filter={}, update, options) => new Promise(async(resolve, reject) => {
+	const modifyMany_Pres = (filter={}, update, options) => new Promise(async(resolve, reject) => {
 		try {
 			let object = await COLwrite.updateMany(filter, update, options);
-			return resolve({status: 200, data: {object}});
+			return resolve({data: {object}});
 		} catch(e) {
 			reject(e);
 		}
 	});
 
-	const remove = (filter, options) => new Promise(async(resolve, reject) => {
+	const remove_Pres = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
 			let del = await COLwrite.deleteOne(filter);
 			if(del.deletedCount === 0) return resolve({status: 400, message: "数据删除失败"});
-			return resolve({status: 200, message: "数据删除成功", data: {del}});
+			return resolve({message: "数据删除成功", data: {del}});
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const removeMany = (filter, options) => new Promise(async(resolve, reject) => {
+	const removeMany_Pres = (filter, options) => new Promise(async(resolve, reject) => {
 		try {
 			let dels = await COLwrite.deleteMany(filter);
 			return resolve(dels);
@@ -193,5 +167,13 @@ module.exports = (docName, doc) => {
 	});
 
 	// 暴露出所有数据库方法
-	return {doc, aggregate, countDocuments, list, detail, findOne, distinct, createMany, create, modifyMany, modify, remove, removeMany};
+	return {
+		doc, 
+		aggregate_Prom, 
+		list_Pres, 
+		detail_Pres, findOne_Pobj, 
+		createMany_Pres, create_Pres,
+		modifyMany_Pres, modify_Pres,
+		remove_Pres, removeMany_Pres
+	};
 }

@@ -7,12 +7,13 @@ module.exports = async(ctx, next) => {
     try{
         let payload = null;
         let paramObj = ctx.request.body;
+
         if(ctx.request.query.api == 1) return resJson.api(ctx, api)
         // 通过身份， 判定前端要什么数据
         let res = await Controller.listCT(payload, paramObj);
-        return resJson.all(ctx, res);
+        return resJson.success(ctx, res);
     } catch(e) {
-        return resJson.errs(ctx, {e});
+        return resJson.errs(ctx, e);
     }
 }
 

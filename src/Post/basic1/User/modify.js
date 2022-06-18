@@ -8,7 +8,7 @@ module.exports = async(ctx, next) => {
         let updObj = ctx.request.body;
 
         let res = await Controller.modifyCT(payload, updObj);
-        return resJson.all(ctx, res);
+        return resJson.success(ctx, res);
     } catch(e) {
         return resJson.errs(ctx, {e});
     }

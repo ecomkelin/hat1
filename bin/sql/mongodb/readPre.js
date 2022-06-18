@@ -1,7 +1,7 @@
 const path = require('path');
 const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "bin/extra/judge/is_ObjectId"));
 
-exports.listFilter = (doc, paramList) => new Promise(async(resolve, reject) => {
+exports.listFilter_Pobj = (doc, paramList) => new Promise(async(resolve, reject) => {
     try {
         let readPreApi = {
             "paramObj": {
@@ -52,18 +52,15 @@ exports.listFilter = (doc, paramList) => new Promise(async(resolve, reject) => {
                 }
             }
         };
-
-        let res = await format_get(doc, paramList, readPreApi);
-        if(res.status !== 200) return resolve(res);
     
-        let paramObj = res.data.paramObj;
-        return resolve({status: 200, data: {paramObj}});
+        let paramObj = await obtainFormat_Pobj(doc, paramList, readPreApi);
+        return resolve(paramObj);
     } catch(e) {
         return reject(e);
     }
 });
 
-exports.detailFilter = (doc, paramDetail={}) => new Promise(async(resolve, reject) => {
+exports.detailFilter_Pobj = (doc, paramDetail={}) => new Promise(async(resolve, reject) => {
     try {
 
         let readPreApi = {
@@ -96,14 +93,11 @@ exports.detailFilter = (doc, paramDetail={}) => new Promise(async(resolve, rejec
         delete paramDetail.limit;
         delete paramDetail.sort;
 
-        let res = await format_get(doc, paramDetail, readPreApi);
-        if(res.status !== 200) return resolve(res);
-
-        let paramObj = res.data.paramObj;
+        let paramObj = await obtainFormat_Pobj(doc, paramDetail, readPreApi);
         if(!paramObj.query) paramObj.query = {};
         paramObj.query._id = paramDetail._id;
 
-        return resolve({status: 200, data: {paramObj}});
+        return resolve(paramObj);
     } catch(e) {
         return reject(e);
     }
@@ -131,7 +125,7 @@ const obt_docField = (doc, field) => {
     return null;
 }
 
-const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) => {
+const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, reject) => {
     try {
         let paramTemp = {};
         let {filter, select={}, skip, limit, sort, populate} = paramObj;
@@ -141,7 +135,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             let {search, match, includes={}, excludes={}, lte={}, gte={}, at_before={}, at_after={}} = filter;
     
             if(search) {
-                if(!search.fields) return resolve({
+                if(!search.fields) return reject({
                     status: 400,
                     message: "数据层 paramObj.filter.search 参数错误 需要传递 [search.fields] 参数",
                     readPreApi
@@ -156,12 +150,12 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
                     for(i in search.fields) {
                         let field = search.fields[i];
                         let docField = obt_docField(doc, field);
-                        if(!docField) return resolve({
+                        if(!docField) return reject({
                             status: 400,
                             message: `[paramObj.filter.search.fields]: 数据库中无 此字段： [${field}] `,
                             readPreApi
                         });
-                        if(docField.type !== String) return resolve({
+                        if(docField.type !== String) return reject({
                             status: 400,
                             message: `数据层readPre [paramObj.filter.search.fields 的值 ${field}] 错误, 应该传递类型为<String>的<field>`,
                             readPreApi
@@ -175,7 +169,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             for(key in match) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type === ObjectId && !isObjectId(match[key]) ) return resolve({
+                if(docField.type === ObjectId && !isObjectId(match[key]) ) return reject({
                     status: 400,
                     message: `数据层readPre [paramObj.filter.match.${key}] 类型为 ObjectId, 请您检查`,
                     readPreApi
@@ -185,7 +179,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             for(key in includes) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type === ObjectId && !isObjectId(includes[key]) ) return resolve({
+                if(docField.type === ObjectId && !isObjectId(includes[key]) ) return reject({
                     status: 400,
                     message: `[paramObj.filter.includes.${key}] 类型为 ObjectId`,
                     readPreApi
@@ -195,7 +189,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             for(key in excludes) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type === ObjectId && !isObjectId(excludes[key]) ) return resolve({
+                if(docField.type === ObjectId && !isObjectId(excludes[key]) ) return reject({
                     status: 400,
                     message: `[paramObj.filter.excludes.${key}] 类型为 ObjectId`,
                     readPreApi
@@ -205,7 +199,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             for(key in lte) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type !==  Number) return resolve({
+                if(docField.type !==  Number) return reject({
                     status: 400,
                     message: `[paramObj.filter.lte 的 key ${key}] 必须为Number类型`,
                     readPreApi
@@ -216,7 +210,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             for(key in gte) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type !==  Number) return resolve({
+                if(docField.type !==  Number) return reject({
                     status: 400,
                     message: `[paramObj.filter.gte 的 key ${key}] 必须为Number类型`,
                     readPreApi
@@ -227,7 +221,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             for(key in at_before) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type !==  Date) return resolve({
+                if(docField.type !==  Date) return reject({
                     status: 400,
                     message: `[paramObj.filter.at_before 的 key ${key}] 必须为 Date 类型`,
                     readPreApi
@@ -238,7 +232,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             for(key in at_after) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type !==  Date) return resolve({
+                if(docField.type !==  Date) return reject({
                     status: 400,
                     message: `[paramObj.filter.at_after 的 key ${key}] 必须为 Date 类型`,
                     readPreApi
@@ -251,7 +245,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
     
         if(skip) {
             if(isNaN(skip) || skip < 0) {
-                if(docField.type !==  Date) return resolve({
+                if(docField.type !==  Date) return reject({
                     status: 400,
                     message: `[paramObj.skip] 必须为大于0的 Number 类型`,
                     readPreApi
@@ -263,7 +257,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
         paramTemp.limit = 0; // 在此只判断数值
         if(limit) {
             if(isNaN(limit) || limit < 0) {
-                return resolve({
+                return reject({
                     status: 400,
                     message: `[paramObj.limit] 必须为大于0的 Number 类型`,
                     readPreApi
@@ -274,7 +268,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
     
         for(key in select) {
             let docField = obt_docField(doc, key);
-            if(!docField) return resolve({
+            if(!docField) return reject({
                 status: 400,
                 message: `[paramObj.select 的 ${key}] 不是该数据的字段`,
                 readPreApi
@@ -293,7 +287,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
     
         if(sort) {
             for(key in sort) {
-                if(!obt_docField(doc, key)) return resolve({
+                if(!obt_docField(doc, key)) return reject({
                     status: 400,
                     message: `[paramObj.sort 的 ${key}] 不是该数据的字段`,
                     readPreApi
@@ -313,7 +307,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             } else if(populate instanceof Object) {
     
             } else {
-                return resolve({
+                return reject({
                     status: 400,
                     message: `[paramObj.populate] 参数错误`,
                     readPreApi
@@ -321,7 +315,7 @@ const format_get = (doc, paramObj, readPreApi) => new Promise((resolve, reject) 
             }
             paramTemp.populate = populate;
         }
-        return resolve({status: 200, data: {paramObj: paramTemp}});
+        return resolve(paramTemp);
     } catch(e) {
         return reject(e);
     }

@@ -3,7 +3,7 @@ const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/ph
 const Bcrypt = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
 
 const Model = require("./Model");
-const writePre = require(path.resolve(process.cwd(), "src/middle/savePre/writePre"));
+const writePre = require(path.resolve(process.cwd(), "src/bin/permission/writePre"));
 
 /**
  * 
@@ -13,8 +13,7 @@ const writePre = require(path.resolve(process.cwd(), "src/middle/savePre/writePr
  */
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
-        let message = writePre.createFilter(Model.doc, docObj);
-        if(message) return resolve({status: 400, message});
+        await writePre.createPass_Pnull(Model.doc, docObj);
 
         // 读取数据
         let {phoneNum} = docObj;
@@ -81,8 +80,7 @@ exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, re
 
 exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
     try{
-        let message = writePre.removeFilter(Model.doc, body._id);
-        if(message) return resolve({status: 400, message});
+        await writePre.removePass_Pnull(Model.doc, body._id);
 
         /* 读取数据 */
         let match = {_id: body._id};

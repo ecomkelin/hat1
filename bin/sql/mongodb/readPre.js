@@ -283,6 +283,9 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 }
             }
         }
+        for(key in doc) {
+            if(doc[key].as === 0) select[key] = 0;
+        }
         paramTemp.projection = select;
     
         if(sort) {

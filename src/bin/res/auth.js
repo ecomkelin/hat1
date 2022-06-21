@@ -7,11 +7,8 @@ const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/ph
 /* 用refreshToken刷新 accessToken */
 exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 	try {
-		let res_payload = await jwtMD.tokenVerify_Pdata(ctx.request.headers['authorization']);
-		let {token, is_refresh, payload} = res_payload;
-
-		if(!is_refresh) return reject({status: 400, message: "refresh header 后面需要加 re"});
-
+		let payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization'], "refresh");
+		if(!payload) return reject({status: 400, message: "refresh payload 为空 错误"});
 		let object = await Model.findOne_Pobj({query: {_id: payload._id}});
 		if(!object) return reject({status: 400, message: "授权错误, 请重新登录"});
 

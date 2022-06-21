@@ -5,7 +5,8 @@ const Controller = require("../../../collections/0_auth/User/Controller");
 
 module.exports = async(ctx, next) => {
     try{
-        let payload = null;
+        let payload = ctx.request.payload;
+
         let paramObj = ctx.request.body;
 
         if(ctx.request.query.api == 1) return resJson.api(ctx, api)

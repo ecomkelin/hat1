@@ -1,3 +1,4 @@
+V 5.0.0	Config User role, paylod
 V 4.6.0	统一错误处理
 V 4.5.0	后台调出 Api
 V 4.4.2 调整

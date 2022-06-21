@@ -7,7 +7,7 @@ const version = '/v1';
 
 const fs = require('fs');
 const path = require('path');
-
+const payloadMD = require("./bin/payload");
 /**
  * 
  * @param {*} dirPath 当前绝对路径
@@ -35,7 +35,8 @@ const rtRecuModel = (dirPath, paths, n, maskFiles) => {
     });
 }
 
-const collectionPath = path.join(process.cwd(), "src/collections/");
+// 读取所有Model
+const collectionPath = path.join(process.cwd(), "src/app/collections/");
 rtRecuModel(collectionPath, ['collections'], 0, ['Model.js']);
 
 
@@ -59,24 +60,33 @@ const rtRecu = (dirPath, paths, n) => {
                     routerName += '/'+paths[j];
                 }
                 routerName += '/'+dirName.split('.')[0];
-                router.post(routerName, requ);
+                router.post(routerName, payloadMD, requ);
                 routerObjs.push(routerName);
             }
         }
     });
 }
-const PagePath = path.join(process.cwd(), "src/Page/");
+const PagePath = path.join(process.cwd(), "src/app/Page/");
 rtRecu(PagePath, ['Page'], 0);
 
-const PostPath = path.join(process.cwd(), "src/Post/");
+const PostPath = path.join(process.cwd(), "src/app/Post/");
 rtRecu(PostPath, ['Post'], 0);
 /** ============================== 包含的其他路由 ============================== */
 
 
-const COL_conf = require("./collections");
+
+
+
+
+const COL_conf = require("./app/collections");
 const colsRouter = version+"/allDBs"
 router.get(colsRouter, ctx => ctx.body= { status: 200, collections: Object.keys(COL_conf) } );
 routerObjs.push(colsRouter);
+
+const Config = require("./app/config");
+const confRouter = version+"/config";
+router.get(confRouter, ctx => ctx.body = {status: 200, Config});
+routerObjs.push(confRouter);
 
 router.get(version+'/routers', ctx => ctx.body = {status: 200, routerObjs});
 

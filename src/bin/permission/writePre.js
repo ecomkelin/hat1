@@ -13,7 +13,7 @@ const regFieldPath_Pnull = (doc, obj, key) => new Promise((resolve, reject) => {
         if(doc[key].is_auto) {
             return reject({status: 400, message: `writePre [${key}]为自动生成数据, 不可操作`});
         }
-    
+
         if(doc[key].trimLen && doc[key].trimLen !== obj[key].length) {
             return reject({status: 400, message: `writePre [${key}] 字段的字符串长度必须为 [${doc[key].trimLen}]`});
         }
@@ -64,7 +64,7 @@ exports.modifyPass_Pnull = (doc, updObj, id) => new Promise(async(resolve, rejec
         for(key in updObj) {
             await regFieldPath_Pnull(doc, updObj, key);
 
-            if(doc[key].is_is_fixed) {
+            if(doc[key].is_fixed) {
                 return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
             }
         }

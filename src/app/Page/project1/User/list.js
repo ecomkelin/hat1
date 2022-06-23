@@ -5,11 +5,13 @@ const Controller = require("../../../collections/0_auth/User/Controller");
 
 module.exports = async(ctx, next) => {
     try{
+        if(ctx.request.query.api == 1) return resJson.api(ctx, api);
+
         let payload = ctx.request.payload;
 
         let paramObj = ctx.request.body;
 
-        if(ctx.request.query.api == 1) return resJson.api(ctx, api)
+        
         // 通过身份， 判定前端要什么数据
         let res = await Controller.listCT(payload, paramObj);
         return resJson.success(ctx, res);

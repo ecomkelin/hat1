@@ -13,6 +13,8 @@ const writePre = require(path.resolve(process.cwd(), "src/bin/permission/writePr
  */
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
+        // 整体权限
+        // 部分权限
         await writePre.createPass_Pnull(Model.doc, docObj);
 
         // 读取数据

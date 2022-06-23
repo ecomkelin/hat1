@@ -4,6 +4,8 @@ const Controller = require(path.resolve(process.cwd(), "src/app/collections/0_au
 
 module.exports = async(ctx, next) => {
     try{
+        if(ctx.request.query.api == 1) return resJson.api(ctx, api);
+
         let payload = ctx.request.payload;
         let body = ctx.request.body;
 
@@ -12,4 +14,9 @@ module.exports = async(ctx, next) => {
     } catch(e) {
         return resJson.errs(ctx, {e});
     }
+}
+
+
+const api = {
+    description: "您的身份必须为管理者 以上 才能创建新用户"
 }

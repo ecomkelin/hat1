@@ -1,3 +1,5 @@
+V 5.0.2	小优化
+V 5.0.1	小填充
 V 5.0.0	Config User role, paylod
 V 4.6.0	统一错误处理
 V 4.5.0	后台调出 Api

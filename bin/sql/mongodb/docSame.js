@@ -53,7 +53,7 @@
 
 		let objSame = await DBcollection.findOne(query);
         if(objSame) return resolve(objSame);
-		return reject({status: 400, exist: false, message: "没有相同信息的数据", paramObj: {match: query}});
+		return reject({status: 400, message: "没有相同信息的数据", paramObj: {match: query}});
 	} catch(e) {
 		return reject(e);
 	}
@@ -65,7 +65,7 @@ exports.passNotExist_Pnull = (DBcollection, doc, docNew) => new Promise(async(re
 		if(docNew._id) query._id = {"$ne": docNew._id};			// 如果是更新 需要加入 $ne _id
 
 		let objSame = await DBcollection.findOne(query);
-        if(objSame) return reject({status: 400, exist: true, message: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
+        if(objSame) return reject({status: 400, message: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
 		return resolve(null);
 	} catch(e) {
 		return reject(e);

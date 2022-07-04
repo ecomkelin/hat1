@@ -1,6 +1,6 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-const Controller = require("../../../collections/0_auth/User/Controller");
+const Controller = require("../../../models/0_auth/User/Controller");
 
 
 module.exports = async(ctx, next) => {

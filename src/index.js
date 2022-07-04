@@ -36,8 +36,8 @@ const rtRecuModel = (dirPath, paths, n, maskFiles) => {
 }
 
 // 读取所有Model
-const collectionPath = path.join(process.cwd(), "src/app/collections/");
-rtRecuModel(collectionPath, ['collections'], 0, ['Model.js']);
+const collectionPath = path.join(process.cwd(), "src/app/models/");
+rtRecuModel(collectionPath, ['models'], 0, ['Model.js']);
 
 
 /**
@@ -78,9 +78,9 @@ rtRecu(PostPath, ['Post'], 0);
 
 
 
-const COL_conf = require("./app/collections");
+const COL_conf = require("./app/models");
 const colsRouter = version+"/allDBs"
-router.get(colsRouter, ctx => ctx.body= { status: 200, collections: Object.keys(COL_conf) } );
+router.get(colsRouter, ctx => ctx.body= { status: 200, models: Object.keys(COL_conf) } );
 routerObjs.push(colsRouter);
 
 const Config = require("./app/config");

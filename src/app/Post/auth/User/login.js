@@ -6,12 +6,12 @@ const Model = require(path.resolve(process.cwd(), "src/app/models/0_auth/User/Mo
 
 module.exports = async(ctx, next) => {
     try{
-      if(ctx.request.query.api == 1) return resJson.api(ctx, api);
+      if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
 
       let res = await Auth.login_Pres(ctx, Model)
-      return resJson.success(ctx, res);
+      return resJson.success(ctx, res, next);
     } catch(e) {
-        return resJson.errs(ctx, {e});
+        return resJson.errs(ctx, e, next);
     }
 };
 

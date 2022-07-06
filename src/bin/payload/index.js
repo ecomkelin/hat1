@@ -1,6 +1,6 @@
 
 const path = require('path');
-const jwtMD = require(path.resolve(process.cwd(), "bin/middle/jwt"));
+const jwtMD = require(path.resolve(process.cwd(), "src/bin/payload/jwt"));
 
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 module.exports = async(ctx, next) => {

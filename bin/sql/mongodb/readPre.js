@@ -1,59 +1,10 @@
 const path = require('path');
-const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "bin/extra/judge/is_ObjectId"));
-
+const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "bin/js/mongoObjectId"));
+const readList = require("../../config/readList");
+const readDetail = require("../../config/readDetail");
 exports.listFilter_Pobj = (doc, paramList) => new Promise(async(resolve, reject) => {
-    try {
-        let readPreApi = {
-            "paramObj": {
-                "filter": {
-                    "search": {
-                        "fields": "要查询的字段数组 或 字段字符串",
-                        "keywords": "要查询的字符串内容"
-                    },
-                    "match": {
-                        "$key": "需要匹配数据的字段",
-                        "$value": "完全匹配的值不区分大小写",
-                    },
-                    "includes": {
-                        "$key": "需要匹配数据的ObjectId字段 比如 Shop Categ Skus",
-                        "$value": "完全匹配的ObjectIds 为数组",
-                    },
-                    "excludes": {
-                        "$key": "排除匹配数据的ObjectId字段 比如 Shop Categ Skus",
-                        "$value": "完全匹配的ObjectIds 为数组",
-                    },
-                    "lte": {
-
-                    },
-                    "gte": {
-
-                    },
-                    "at_before": {
-
-                    },
-                    "at_after": {
-
-                    }
-                },
-                "select": {
-
-                },
-                "skip": {
-
-                },
-                "limit": {
-
-                },
-                "sort": {
-
-                },
-                "populate": {
-
-                }
-            }
-        };
-    
-        let paramObj = await obtainFormat_Pobj(doc, paramList, readPreApi);
+    try {    
+        let paramObj = await obtainFormat_Pobj(doc, paramList, readList);
         return resolve(paramObj);
     } catch(e) {
         return reject(e);
@@ -62,38 +13,12 @@ exports.listFilter_Pobj = (doc, paramList) => new Promise(async(resolve, reject)
 
 exports.detailFilter_Pobj = (doc, paramDetail={}) => new Promise(async(resolve, reject) => {
     try {
-
-        let readPreApi = {
-            "_id": "要查找的 ObjectId",
-            "paramObj": {
-                "filter": {
-                    "match": {
-                        "$key": "需要匹配数据的字段",
-                        "$value": "完全匹配的值不区分大小写",
-                    },
-                    "includes": {
-                        "$key": "需要匹配数据的ObjectId字段 比如 Shop Categ Skus",
-                        "$value": "完全匹配的ObjectIds 为数组",
-                    },
-                    "excludes": {
-                        "$key": "排除匹配数据的ObjectId字段 比如 Shop Categ Skus",
-                        "$value": "完全匹配的ObjectIds 为数组",
-                    }
-                },
-                "select": {
-
-                },
-                "populate": {
-                    
-                }
-            }
-        };
         if(!isObjectId(paramDetail._id)) return resolve({status: 400, message: "请传递正确的id信息"});
         delete paramDetail.skip;
         delete paramDetail.limit;
         delete paramDetail.sort;
 
-        let paramObj = await obtainFormat_Pobj(doc, paramDetail, readPreApi);
+        let paramObj = await obtainFormat_Pobj(doc, paramDetail, readDetail);
         if(!paramObj.query) paramObj.query = {};
         paramObj.query._id = paramDetail._id;
 
@@ -284,7 +209,7 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
             }
         }
         for(key in doc) {
-            if(doc[key].as === 0) select[key] = 0;
+            if(doc[key].as === 0) delete select[key];
         }
         paramTemp.projection = select;
     

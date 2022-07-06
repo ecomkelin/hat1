@@ -1,27 +1,17 @@
-const moment = require('moment');
-
-exports.api = async(ctx, api) => {
-    console.log("--------------------- resJson api ---------------------");
-    console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
-    console.log();
+exports.api = async(ctx, api, next) => {
     ctx.status = 200;
-    ctx.body = api;
-    return;
+    ctx.body = {status: 200, api};
+    await next();
 }
 
-exports.success = async(ctx, ctxBody) => {
-    console.log("----------------- resJson success -----------------");
-    console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
+exports.success = async(ctx, ctxBody, next) => {
     if(ctxBody.message) console.log("[@/resJson success] message: ", ctxBody.message);
-    console.log();
     ctx.status = 200;
     ctx.body = {status: 200, ...ctxBody};
-    return;
+    await next();
 }
 
-exports.errs = async(ctx, e) => {
-    console.log("-------------------- resJson errs --------------------");
-    console.log(moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"));
+exports.errs = async(ctx, e, next) => {
     let error = e.stack
     let status = e.status || 500;
     ctx.status = status;
@@ -33,7 +23,5 @@ exports.errs = async(ctx, e) => {
         ctx.body = {status, ...e};
         console.log("[@/resJson errs] e: ", e);
     }
-
-    console.log();
-    return;
+    await next();
 }

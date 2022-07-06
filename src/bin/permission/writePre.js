@@ -3,7 +3,7 @@
     也会跳过一些不合理的要求 比如 post时 给了多出的数据库的字段
 */
 const path = require('path');
-const {isObjectId} = require(path.resolve(process.cwd(), "bin/extra/judge/is_ObjectId"));
+const {isObjectId} = require(path.resolve(process.cwd(), "bin/js/mongoObjectId"));
 
 const regFieldPath_Pnull = (doc, obj, key) => new Promise((resolve, reject) => {
     try {

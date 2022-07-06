@@ -1,7 +1,7 @@
 const path = require('path');
-const jwtMD = require(path.resolve(process.cwd(), "bin/middle/jwt"));
-const bcryptMD = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
-const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
+const jwtMD = require(path.resolve(process.cwd(), "src/bin/payload/jwt"));
+const bcryptMD = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
+const format_phonePre = require(path.resolve(process.cwd(), "src/bin/js/format/phonePre"));
 
 
 /* 用refreshToken刷新 accessToken */

@@ -1,18 +1,18 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-const Controller = require(path.resolve(process.cwd(), "src/app/models/0_auth/User/Controller"));
+const Controller = require("../../../models/0_auth/User/Controller");
 
 module.exports = async(ctx, next) => {
     try{
-        if(ctx.request.query.api == 1) return resJson.api(ctx, api);
+        if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
 
         let payload = ctx.request.payload;
         let crtObj = ctx.request.body;
 
         let res = await Controller.createCT(payload, crtObj);
-        return resJson.success(ctx, res);
+        return resJson.success(ctx, res, next);
     } catch(e) {
-        return resJson.errs(ctx, {e});
+        return resJson.errs(ctx, e, next);
     }
 };
 

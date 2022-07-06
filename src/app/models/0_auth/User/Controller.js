@@ -1,6 +1,6 @@
 const path = require('path');
-const format_phonePre = require(path.resolve(process.cwd(), "bin/extra/format/phonePre"));
-const Bcrypt = require(path.resolve(process.cwd(), "bin/middle/bcrypt"));
+const format_phonePre = require(path.resolve(process.cwd(), "src/bin/js/format/phonePre"));
+const Bcrypt = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
 
 const Model = require("./Model");
 const writePre = require(path.resolve(process.cwd(), "src/bin/permission/writePre"));

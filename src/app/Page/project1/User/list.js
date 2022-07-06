@@ -11,8 +11,6 @@ module.exports = async(ctx, next) => {
         let payload = ctx.request.payload;
 
         let paramObj = ctx.request.body;
-
-        
         // 通过身份， 判定前端要什么数据
         let res = await Controller.listCT(payload, paramObj);
         return resJson.success(ctx, res, next);

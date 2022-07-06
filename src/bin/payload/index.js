@@ -1,6 +1,3 @@
-
-const path = require('path');
-const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 const jwtMD = require("./jwt");
 
 module.exports = async(ctx, next) => {
@@ -10,6 +7,7 @@ module.exports = async(ctx, next) => {
 		ctx.request.payload = payload;
 		return next();
 	} catch(e) {
-		return resJson.errs(ctx, e, next);
+		ctx.request.payload = null;
+		return next();
 	}
 }

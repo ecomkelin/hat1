@@ -48,19 +48,20 @@ const floor = {
  * 
  * @param {*} dirPath 当前绝对路径
  * @param {*} paths 经过的所有 路径的 文件夹名称
+ * @param {*} floorLevel 从第几层开始输入路由路径
  * @param {*} n 路径的层级
  */
-const rtRecu = (dirPath, paths, n) => {
+const rtRecu = (dirPath, paths, floorLevel, n) => {
     fs.readdirSync(dirPath).forEach(dirName => {
         if(dirName.split('.').length === 1) {       // 如果是文件夹 则进一步读取内容
             paths[n] = dirName;
-            rtRecu(path.join(dirPath+dirName+'/'), paths, n+1);
+            rtRecu(path.join(dirPath+dirName+'/'), paths, floorLevel, n+1);
         } else {                                    // 如果是文件则 则加载
             let file = dirPath+ dirName;
             if(fs.existsSync(file)) {
                 let requ = require(file);
                 let routerName = version;
-                for(let j=floor.second; j<n;j++) {
+                for(let j=floorLevel; j<n;j++) {
                     routerName += '/'+paths[j];
                 }
                 routerName += '/'+dirName.split('.')[0];
@@ -71,34 +72,13 @@ const rtRecu = (dirPath, paths, n) => {
     });
 }
 const PagePath = path.join(process.cwd(), "src/app/Page/");
-rtRecu(PagePath, ['Page'], 0);
+rtRecu(PagePath, ['Page'], floor.second, 0);
 
 const PostPath = path.join(process.cwd(), "src/app/Post/");
-rtRecu(PostPath, ['Post'], 0);
+rtRecu(PostPath, ['Post'], floor.second, 0);
 
-
-const rtAuthRecu = (dirPath, paths, n) => {
-    fs.readdirSync(dirPath).forEach(dirName => {
-        if(dirName.split('.').length === 1) {       // 如果是文件夹 则进一步读取内容
-            paths[n] = dirName;
-            rtAuthRecu(path.join(dirPath+dirName+'/'), paths, n+1);
-        } else {                                    // 如果是文件则 则加载
-            let file = dirPath+ dirName;
-            if(fs.existsSync(file)) {
-                let requ = require(file);
-                let routerName = version;
-                for(let j=floor.first; j<n;j++) {
-                    routerName += '/'+paths[j];
-                }
-                routerName += '/'+dirName.split('.')[0];
-                router.post(routerName, requ);
-                routerObjs.push(routerName);
-            }
-        }
-    });
-}
 const AuthPath = path.join(process.cwd(), "src/app/Auth/");
-rtAuthRecu(AuthPath, ['Auth'], 0);
+rtRecu(AuthPath, ['Auth'], floor.first, 0);
 /** ============================== 包含的其他路由 ============================== */
 
 

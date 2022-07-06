@@ -2,7 +2,7 @@ const jsonwebtoken = require('jsonwebtoken');
 
 
 /* ============================== 获取token ============================== */
-const obtain_headersInfo = (headersToken) => {
+exports.obtain_headersInfo = (headersToken) => {
 	if(!headersToken) return null;
 	let hts = String(headersToken).split(" ");
 	if(hts.length === 1) return null;
@@ -12,11 +12,9 @@ const obtain_headersInfo = (headersToken) => {
 /* ================================ 验证 ================================ */
 exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
 	try {
-		let token = obtain_headersInfo(headersToken);
+		let token = this.obtain_headersInfo(headersToken);
 		if(!token) return resolve(null);
-
 		let token_secret = is_refresh ? process.env.REFRESH_TOKEN_SECRET:process.env.ACCESS_TOKEN_SECRET;
-
 		jsonwebtoken.verify(token, token_secret, (expired, payload) => {
 			if(expired) return reject({status: 401, message: "token错误或过期", expired});
 			return resolve(payload);

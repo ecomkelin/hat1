@@ -23,7 +23,7 @@ server.use(async(ctx, next) => {
     let start = Date.now();
     console.log(moment(start).format("YYYY-MM-DD HH:mm:ss"), ` ---------- ${ctx.method} ${ctx.url}`);
     // if(ctx && ctx.request) console.log("req body: ", ctx.request.body);
-    if(ctx.request.headers) console.log(ctx.request.headers.authorization)
+    // if(ctx.request.headers) console.log(ctx.request.headers.authorization)
     await next();
 
     // if(ctx) console.log("res body", ctx.body);

@@ -7,8 +7,7 @@ const Model = require(path.resolve(process.cwd(), "src/app/models/0_auth/User/Mo
 module.exports = async(ctx, next) => {
     try{
       if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
-
-      let res = await Auth.refresh_Pres(ctx, Model)
+      let res = await Auth.refresh_Pres(ctx, Model);
       return resJson.success(ctx, res, next);
     } catch(e) {
         return resJson.errs(ctx, e, next);
@@ -17,15 +16,5 @@ module.exports = async(ctx, next) => {
 
 
 const api = {
-  description: "您的身份必须为管理者 以上 才能创建新用户",
-  code: {
-      desp: "账号, 不能有相同的账号",
-      required: true,
-      regular: "",
-      maxLen: 12,
-      minLen: 4,
-  },
-  pwd: {
-      desp: "密码"
-  }
+  
 }

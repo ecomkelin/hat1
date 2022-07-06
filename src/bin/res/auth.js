@@ -1,5 +1,5 @@
 const path = require('path');
-const jwtMD = require(path.resolve(process.cwd(), "src/bin/payload/jwt"));
+const jwtMD = require("../payload/jwt");
 const bcryptMD = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
 const format_phonePre = require(path.resolve(process.cwd(), "src/bin/js/format/phonePre"));
 
@@ -7,12 +7,14 @@ const format_phonePre = require(path.resolve(process.cwd(), "src/bin/js/format/p
 /* 用refreshToken刷新 accessToken */
 exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 	try {
-		let payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization'], "refresh");
+		let headersToken = ctx.request.headers['authorization'];
+		let payload = await jwtMD.obtainPayload_Pobj(headersToken, true);
 		if(!payload) return reject({status: 400, message: "refresh payload 为空 错误"});
 		let object = await Model.findOne_Pobj({query: {_id: payload._id}});
 		if(!object) return reject({status: 400, message: "授权错误, 请重新登录"});
-
-		// if(token !== object.refreshToken) return reject({status: 400, message: "refreshToken 不匹配"});
+		
+		let token = await jwtMD.obtain_headersInfo(headersToken);
+		if(token !== object.refreshToken) return reject({status: 400, message: "refreshToken 不匹配, 请重新登陆"});
 
 		let {accessToken, refreshToken} = getToken(payload, Model);
 
@@ -28,13 +30,10 @@ exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 
 exports.login_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
     try{
-		let res_object = await obtainObj_Pobj(ctx.request.body, Model);
-		if(res_object.status !== 200) return resolve(res_object);
-		let object = res_object.data.object;
+		let object = await obtainObj_Pobj(ctx.request.body, Model);
 		let payload = jwtMD.generatePayload(object);
 
 		let {accessToken, refreshToken} = getToken(payload, Model);
-
 		return resolve({
 			status: 400,
 			data: {payload, accessToken, refreshToken},
@@ -74,10 +73,9 @@ const obtainObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
 
 			let object = await Model.findOne_Pobj({query: match, project: {}});
 			if(!object) return reject({status: 400, message: "账号错误"});
-
 			await bcryptMD.matchBcrypt_Pnull(hat.pwd, object.pwd);
 
-			return resolve({data: {object}});
+			return resolve(object);
 		} else {
 			return reject({status: 400, message: "请输入正确的 [type_login] 类型为String ['hat', 'google', 'facebook', 'weixin'] "});
 		}

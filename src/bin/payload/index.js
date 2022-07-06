@@ -1,8 +1,8 @@
 
 const path = require('path');
-const jwtMD = require(path.resolve(process.cwd(), "src/bin/payload/jwt"));
-
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
+const jwtMD = require("./jwt");
+
 module.exports = async(ctx, next) => {
 	try {
 		let payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization']);
@@ -10,6 +10,6 @@ module.exports = async(ctx, next) => {
 		ctx.request.payload = payload;
 		return next();
 	} catch(e) {
-		return resJson.errs(ctx, {e});
+		return resJson.errs(ctx, e, next);
 	}
 }

@@ -1,3 +1,5 @@
+V 5.5.0	eslint 规则 && inspect debugger chrome://inspect
+        jest 单元测试 运行环境 配置文件env.js
 V 5.4.0	cross-env dev prd
 V 5.3.0	动态刷新refreshToken, 唯一登陆
 V 5.2.0	文件结构调整

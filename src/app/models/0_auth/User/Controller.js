@@ -94,7 +94,7 @@ exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
 
         /* 删除数据 */
         let del = await Model.remove_Pres(match)
-        return resolve(res);
+        return resolve(del);
     } catch(e) {
         return reject(e);
     }

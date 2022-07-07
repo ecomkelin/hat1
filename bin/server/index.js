@@ -1,9 +1,9 @@
-require('dotenv').config();
-const port = process.env.SERVER_PORT;
+const path = require('path');
+const {SERVER_PORT, IS_PRD} = require(path.resolve(process.cwd(), "bin/config/env"));
 const koaServer = require("./koaServer");
 
-if(process.env.NODE_ENV === 'production') console.log = () => {}
+if(IS_PRD) console.log = () => {}
 
-koaServer.listen(port, () => {
-    console.info(`server is running on http://localhost:${port}`);
+koaServer.listen(SERVER_PORT, () => {
+    console.info(`server is running on http://localhost:${SERVER_PORT}`);
 });

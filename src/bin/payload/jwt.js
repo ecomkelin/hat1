@@ -1,4 +1,9 @@
 const jsonwebtoken = require('jsonwebtoken');
+const path = require('path');
+const {
+	ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EX, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EX
+} = require(path.resolve(process.cwd(), "bin/config/env"));
+
 
 
 /* ============================== 获取token ============================== */
@@ -14,7 +19,7 @@ exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(reso
 	try {
 		let token = this.obtain_headersInfo(headersToken);
 		if(!token) return resolve(null);
-		let token_secret = is_refresh ? process.env.REFRESH_TOKEN_SECRET:process.env.ACCESS_TOKEN_SECRET;
+		let token_secret = is_refresh ? REFRESH_TOKEN_SECRET:ACCESS_TOKEN_SECRET;
 		jsonwebtoken.verify(token, token_secret, (expired, payload) => {
 			if(expired) return reject({status: 401, message: "token错误或过期", expired});
 			return resolve(payload);
@@ -28,8 +33,8 @@ exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(reso
 /* ================================ 签名 ================================ */
 exports.generateToken = (obj, is_refresh=null)=> {
 	let payload = this.generatePayload(obj);
-	let token_secret = is_refresh ? process.env.REFRESH_TOKEN_SECRET : process.env.ACCESS_TOKEN_SECRET;
-	let token_ex = is_refresh ? process.env.REFRESH_TOKEN_EX : process.env.ACCESS_TOKEN_EX;
+	let token_secret = is_refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET;
+	let token_ex = is_refresh ? REFRESH_TOKEN_EX : ACCESS_TOKEN_EX;
 	return jsonwebtoken.sign(payload, token_secret, {expiresIn: token_ex});
 }
 

@@ -35,7 +35,6 @@ exports.login_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 
 		let {accessToken, refreshToken} = getToken(payload, Model);
 		return resolve({
-			status: 400,
 			data: {payload, accessToken, refreshToken},
 			message: "登录成功"
 		});

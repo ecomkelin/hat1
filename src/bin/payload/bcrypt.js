@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs');
+const path = require('path');
+const {SALT_WORK_FACTOR} = require(path.resolve(process.cwd(), "bin/config/env"));
 
 exports.encryptHash_Pstr = (str_bcrypt) => new Promise((resolve, reject) => {
 	str_bcrypt=String(str_bcrypt);
-	bcrypt.genSalt(parseInt(process.env.SALT_WORK_FACTOR), function(err, salt) {
+	bcrypt.genSalt(parseInt(SALT_WORK_FACTOR), function(err, salt) {
 		if(err) return reject(err);
 		bcrypt.hash(str_bcrypt, salt, function(err, hash_bcrypt) {
 			if(err) return reject(err);

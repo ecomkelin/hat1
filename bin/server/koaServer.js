@@ -1,3 +1,5 @@
+const path = require('path');
+const {IS_DEV} = require(path.resolve(process.cwd(), "bin/config/env"));
 const {DIR_PUBLIC, DIR_UPLOAD} = require("./_sysConf");
 
 const koa = require('koa');
@@ -21,7 +23,7 @@ server.use(koaBody({// 配置可以上传文件的 koa-body
 const moment = require('moment');
 server.use(async(ctx, next) => {
     let start = Date.now();
-    console.log(moment(start).format("YYYY-MM-DD HH:mm:ss"), ` ---------- ${ctx.method} ${ctx.url}`);
+    if(IS_DEV) console.log(moment(start).format("YYYY-MM-DD HH:mm:ss"), ` ---------- ${ctx.method} ${ctx.url}`);
     // if(ctx && ctx.request) console.debug("req body: ", ctx.request.body);
     // if(ctx.request.headers) console.debug(ctx.request.headers.authorization)
     await next();
@@ -29,8 +31,8 @@ server.use(async(ctx, next) => {
     // if(ctx) console.debug("res body", ctx.body);
     let end = Date.now();
     let ms = end - start;
-    console.log('用时:', `${ms}ms`);
-    console.log();
+    if(IS_DEV) console.log('用时:', `${ms}ms`);
+    if(IS_DEV) console.log();
     return;
 })
 

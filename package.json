@@ -4,9 +4,10 @@
   "description": "basic System",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=dev nodemon ./bin/server/index.js",
+    "dev": "cross-env NODE_ENV=dev nodemon --inspect=9229 ./bin/server/index.js",
     "prd": "cross-env NODE_ENV=production nodemon ./bin/server/index.js",
-    "test": "cross-env NODE_ENV=test echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint --ext .js ./src",
+    "test": "cross-env NODE_ENV=test DB_MASTER=mongodb://localhost/hat1 jest --runInBand --forceExit --colors"
   },
   "keywords": [],
   "author": "",
@@ -24,7 +25,11 @@
     "npm": "^8.7.0"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.3",
-    "nodemon": "^2.0.15"
+    "eslint": "^8.19.0",
+    "jest": "^28.1.2",
+    "nodemon": "^2.0.15",
+    "supertest": "^6.2.4"
   }
 }

@@ -1,11 +1,17 @@
+/**
+ * @description: 链接数据库, 打包mongoose语法
+ * @author: kelin
+ */
+ const path = require('path');
+ const {DB_MASTER} = require(path.resolve(process.cwd(), "bin/config/env"));
 /* 数据库连接文件 */
 const mongoose = require('mongoose');
 /**
  * 主从数据库
  * 数据库的读写分离
  */
-db_master = mongoose.createConnection(process.env.DB_MASTER, { useNewUrlParser: true, useUnifiedTopology: true});
-//db_slave1 = mongoose.createConnection(process.env.DB_SLAVE1, { useNewUrlParser: true, useUnifiedTopology: true});
+const db_master = mongoose.createConnection(DB_MASTER, { useNewUrlParser: true, useUnifiedTopology: true});
+//const db_slave1 = mongoose.createConnection(DB_SLAVE1, { useNewUrlParser: true, useUnifiedTopology: true});
 
 
 
@@ -17,7 +23,7 @@ db_master = mongoose.createConnection(process.env.DB_MASTER, { useNewUrlParser: 
 const Schema = mongoose.Schema;
 const readPre = require("./readPre");
 const docSame = require("./docSame");
-const path = require('path');
+
 const { match } = require('assert');
 const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/server/_sysConf"));
 
@@ -165,7 +171,6 @@ module.exports = (docName, doc) => {
 			reject(e);
 		}
 	});
-
 	// 暴露出所有数据库方法
 	return {
 		doc, 
@@ -174,6 +179,8 @@ module.exports = (docName, doc) => {
 		detail_Pres, findOne_Pobj, 
 		createMany_Pres, create_Pres,
 		modifyMany_Pres, modify_Pres,
-		remove_Pres, removeMany_Pres
+		remove_Pres, removeMany_Pres,
+
+		create:COLwrite.create,
 	};
 }

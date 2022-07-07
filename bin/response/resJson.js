@@ -1,3 +1,6 @@
+const path = require('path');
+const {IS_DEV} = require(path.resolve(process.cwd(), "bin/config/env"));
+
 exports.api = async(ctx, api, next) => {
     ctx.status = 200;
     ctx.body = {status: 200, api};
@@ -15,9 +18,9 @@ exports.errs = async(ctx, e, next) => {
 
     if(error) {
         ctx.body = {status, error};
-        console.error("[errs] e.stack: ", error);
+        if(IS_DEV) console.error("[errs] e.stack: ", error);
     } else {
         ctx.body = {status, ...e};
-        console.error("[errs] e: ", e);
+        if(IS_DEV) console.error("[errs] e: ", e);
     }
 }

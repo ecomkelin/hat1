@@ -6,6 +6,7 @@ require('dotenv').config();
 IS_PRD = (process.env.NODE_ENV === "production") ? true : false;
 IS_DEV = (process.env.NODE_ENV === "dev") ? true : false;
 
+SERVER_NAME="HAT";
 SERVER_PORT=8000
 DB_MASTER="mongodb://localhost/hat1";
 DB_SLAVE1="mongodb://localhost/hat2";
@@ -15,9 +16,10 @@ REFRESH_TOKEN_SECRET="52e0be8a2ab783e1df725a778105388d2674ead419461d0f8fe13d2118
 REFRESH_TOKEN_EX="90d"
 SALT_WORK_FACTOR=10
 
-if(IS_PRD) {
-    SERVER_PORT=process.env.SERVER_PORT;
+if(process.env.SERVER_NAME) SERVER_NAME =process.env.SERVER_NAME;
+if(process.env.SERVER_PORT) SERVER_PORT =process.env.SERVER_PORT;
 
+if(IS_PRD) {
     DB_MASTER=process.env.DB_MASTER_PRD;
     DB_SLAVE1=process.env.DB_SLAVE1_PRD;
 
@@ -29,20 +31,14 @@ if(IS_PRD) {
 } else if(IS_DEV) {
     DB_MASTER=process.env.DB_MASTER_DEV;
     DB_SLAVE1=process.env.DB_SLAVE1_DEV;
-
-    ACCESS_TOKEN_SECRET=process.env.ACCESS_TOKEN_SECRET
-    ACCESS_TOKEN_EX=process.env.ACCESS_TOKEN_EX
-    REFRESH_TOKEN_SECRET=process.env.REFRESH_TOKEN_SECRET
-    REFRESH_TOKEN_EX=process.env.REFRESH_TOKEN_EX
-    SALT_WORK_FACTOR=process.env.SALT_WORK_FACTOR
 }
 
 
 
 module.exports = {
-    SERVER_PORT,
+    SERVER_NAME, SERVER_PORT,
 
-    IS_PRD,
+    IS_PRD, IS_DEV,
 
     DB_MASTER, DB_SLAVE1,
 

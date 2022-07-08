@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=dev nodemon --inspect=9229 ./bin/server/index.js",
-    "prd": "cross-env NODE_ENV=production nodemon ./bin/server/index.js",
-    "lint": "eslint --ext .js ./src",
-    "test": "cross-env NODE_ENV=test DB_MASTER=mongodb://localhost/hat1 jest --runInBand --forceExit --colors"
+    "start": "pm2 start pm2.conf.json",
+    "stop": "pm2 stop pm2.conf.json",
+    "delete": "pm2 delete pm2.conf.json",
+    "test": "cross-env NODE_ENV=test DB_MASTER=mongodb://localhost/hat1 jest --runInBand --forceExit --colors",
+    "lint": "eslint --ext .js ./src"
   },
   "keywords": [],
   "author": "",

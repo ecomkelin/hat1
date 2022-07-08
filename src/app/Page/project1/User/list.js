@@ -7,7 +7,7 @@ const api = readList.paramObj;
 module.exports = async(ctx, next) => {
     try{
         if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
-
+        a = b;  
         let payload = ctx.request.payload;
 
         let paramObj = ctx.request.body;

@@ -1,6 +1,5 @@
 const path = require('path');
-const {IS_DEV} = require(path.resolve(process.cwd(), "bin/config/env"));
-const {DIR_PUBLIC, DIR_UPLOAD} = require("./_sysConf");
+const {IS_DEV, DIR_PUBLIC, DIR_UPLOAD} = require(path.resolve(process.cwd(), "bin/config/env"));
 
 const koa = require('koa');
 const server = new koa();

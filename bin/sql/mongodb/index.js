@@ -1,9 +1,9 @@
 /**
- * @description: 链接数据库, 打包mongoose语法
+ * @description: 链接数据库, 打包mongoose语法, 每个Model引入
  * @author: kelin
  */
  const path = require('path');
- const {DB_MASTER} = require(path.resolve(process.cwd(), "bin/config/env"));
+ const {DB_MASTER, LIMIT_FIND} = require(path.resolve(process.cwd(), "bin/config/env"));
 /* 数据库连接文件 */
 const mongoose = require('mongoose');
 /**
@@ -23,9 +23,6 @@ const db_master = mongoose.createConnection(DB_MASTER, { useNewUrlParser: true, 
 const Schema = mongoose.Schema;
 const readPre = require("./readPre");
 const docSame = require("./docSame");
-
-const { match } = require('assert');
-const {LIMIT_FIND} = require(path.join(process.cwd(), "bin/server/_sysConf"));
 
 // 暴露mongodb的方法 以及model的doc即所有field
 /**

@@ -1,4 +1,6 @@
 const path = require('path');
+require('dotenv').config();
+
 const {SERVER_NAME, SERVER_PORT, IS_PRD} = require(path.resolve(process.cwd(), "bin/config/env"));
 const koaServer = require("./koaServer");
 

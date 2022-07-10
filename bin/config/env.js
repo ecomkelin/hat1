@@ -1,7 +1,7 @@
 /**
  * 环境变量
  */
-require('dotenv').config();
+const path = require('path');
 
 IS_PRD = (process.env.NODE_ENV === "production") ? true : false;
 IS_DEV = (process.env.NODE_ENV === "dev") ? true : false;
@@ -15,6 +15,7 @@ ACCESS_TOKEN_EX="5m";
 REFRESH_TOKEN_SECRET="52e0be8a2ab783e1df725a778105388d2674ead419461d0f8fe13d211814e7658015bb4617824a380f01b5a7c118f8b8082e36e5035670c62541f0ea24bdd996"
 REFRESH_TOKEN_EX="90d"
 SALT_WORK_FACTOR=10
+
 
 if(process.env.SERVER_NAME) SERVER_NAME =process.env.SERVER_NAME;
 if(process.env.SERVER_PORT) SERVER_PORT =process.env.SERVER_PORT;
@@ -34,6 +35,11 @@ if(IS_PRD) {
 }
 
 
+DIR_PUBLIC = path.resolve(process.cwd(), "public/");
+DIR_UPLOAD = path.resolve(process.cwd(), "public/upload/");
+
+LIMIT_FIND = 50;
+
 
 module.exports = {
     SERVER_NAME, SERVER_PORT,
@@ -44,5 +50,7 @@ module.exports = {
 
     ACCESS_TOKEN_SECRET,ACCESS_TOKEN_EX,
     REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EX,
-    SALT_WORK_FACTOR
+    SALT_WORK_FACTOR,
+
+    DIR_PUBLIC, DIR_UPLOAD, LIMIT_FIND
 }

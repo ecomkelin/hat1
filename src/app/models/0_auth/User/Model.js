@@ -1,5 +1,4 @@
 // 引入全局及组的 collection field
-const doc_global = require("../../docGlobal");
 const doc_group = require("../doc_group");
 // #################################################################
 // global 最上面 group中间 本身最下
@@ -10,8 +9,6 @@ const code = {...doc_group.code};
 code.unique = true;
 // 打包成为集合
 const doc = {
-    ...doc_global,
-
     ...doc_group,
 
     code,

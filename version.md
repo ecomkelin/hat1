@@ -1,3 +1,4 @@
+V 5.5.2	微调
 V 5.5.1	日志环境 package pm2
 V 5.5.0	eslint 规则 && inspect debugger chrome://inspect
         jest 单元测试 运行环境 配置文件env.js

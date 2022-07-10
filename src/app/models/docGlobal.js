@@ -1,3 +1,7 @@
+/**
+ * @description  全局集合的数据特征集合
+ * 
+ */
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;

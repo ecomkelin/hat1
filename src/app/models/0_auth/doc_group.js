@@ -1,14 +1,13 @@
+/**
+ * @description: 
+ */
+
+ const doc_global = require("../docGlobal");
 module.exports = {
 	// 登录信息
-    code: {
-        type: String,
-        required: true,
-        minLen: 4,
-        maxLen: 20,
-        regexp: '^[a-zA-Z0-9]*$',
-        is_fixed: true,
-    },                                       // <手动/自动> 管理员可添加修改，注册自动生成
-    phone: {type: String, is_auto: true},                                      // <半自动> phonePre+phoneNum
+    ...doc_global,
+
+    phone: {type: String, is_auto: true},     // <半自动> phonePre+phoneNum
     email: {type: String},
 
     pwd: {

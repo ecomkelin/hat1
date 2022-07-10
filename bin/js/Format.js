@@ -1,7 +1,7 @@
 const path = require('path');
 const {PHONE_PRE} = require(path.join(process.cwd(), "bin/config/const_var"));
 
-module.exports = (phonePre) => {
+format_phonePre = (phonePre) => {
 	if(!phonePre) return PHONE_PRE;
 
     phonePre = String(phonePre);
@@ -24,4 +24,8 @@ module.exports = (phonePre) => {
 		return "+"+phonePre[2]+phonePre[3];
 	}
 	return PHONE_PRE;
+}
+
+module.exports = {
+    format_phonePre
 }

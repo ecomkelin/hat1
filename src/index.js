@@ -1,45 +1,30 @@
 /**
- * 路由控制文件
- */
+ * @description: 总路由文件
+ * @author: kelin
+*/
 
-const router = require('@koa/router')();
 // const prefix = "/v1";
 // const router = require('@koa/router')({prefix});
-const routerObjs = [];
 
+const router = require('@koa/router')();
+const routerObjs = [];  // 为了展示所有路由
 /** ============================== 包含的其他路由 ============================== */
 const JSrouter = require("./bin/js/router");
 
-// ---- 读取所有Model
-/**
- * 'Models' 是读取的文件夹
- * ['Model.js'] 子文件夹下的文件 如果没有 则全读
- */
-JSrouter.rtModels(router, routerObjs, 'Models', ['Model.js']);
+// @description: 分别展示所有数据库 document的字段
+JSrouter.rtModels(router, routerObjs, 'dbModels', ['Model.js']);
 
-// ---- 页面路由
-/**
- * 'Api' 是读取的文件夹
- */
-JSrouter.rtRouters(router, routerObjs, 'Api');
-// const PostPath = appPath+"Post/";
-// rtRouters(PostPath, ['Post'], floor.second);
+// 'Api' 是读取的文件夹
+JSrouter.rtApis(router, routerObjs, 'Api');
+
+// JSrouter.rtRouters(router, routerObjs, 'particular');
 /** ============================== 包含的其他路由 ============================== */
 
 
-// -- 读取所有models
-const COL_conf = require("./app/Models");
-const colsRouter = "/dbs"
-router.get(colsRouter, ctx => ctx.body= { status: 200, Models: Object.keys(COL_conf) } );
-routerObjs.push(colsRouter);
+JSrouter.allModelsRouter(router, routerObjs);   // /dbs 路由 展示所有数据库 document名称
 
-// -- 读取config文件
-const Config = require("./app/config");
-const confRouter = "/config";
-router.get(confRouter, ctx => ctx.body = {status: 200, Config});
-routerObjs.push(confRouter);
+JSrouter.allConfigRouter(router, routerObjs);   // /config 路由 展示后端配置文件
 
-// -- 设置routers api 方便查询所有路由
-router.get('/routers', ctx => ctx.body = {status: 200, routerObjs});
+router.get('/routers', ctx => ctx.body = {status: 200, routerObjs});    // /routers 路由 查看所有路由api
 
 module.exports = router;

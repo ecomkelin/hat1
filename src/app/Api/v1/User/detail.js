@@ -1,6 +1,6 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-const Controller = require("../../../Models/0_auth/User/Controller");
+const Controller = require("../../../dbModels/0_auth/User/Controller");
 const readDetail = require(path.resolve(process.cwd(), "bin/config/readDetail"));
 const api = readDetail.paramObj;
 

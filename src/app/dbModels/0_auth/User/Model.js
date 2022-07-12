@@ -13,7 +13,9 @@ const doc = {
 
     code,
     // 权限信息
-    roleNum: {type: Number},                                    // 所属部门，或者说我们可以根据这个 来决定用户的界面
+    roleNum: {
+        type: Number
+    },                                    // 所属部门，或者说我们可以根据这个 来决定用户的界面
     auths: [{type: String}],                                    // 用户权限
 };
 

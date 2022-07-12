@@ -10,6 +10,7 @@ const regFieldPath_Pnull = (doc, obj, key) => new Promise((resolve, reject) => {
         if(!doc[key]) {
             return reject({status: 400, message: `writePre 没有[${key}] 此字段`});
         }
+
         if(doc[key].is_auto) {
             return reject({status: 400, message: `writePre [${key}]为自动生成数据, 不可操作`});
         }

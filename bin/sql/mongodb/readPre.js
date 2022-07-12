@@ -1,5 +1,6 @@
 const path = require('path');
 const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "bin/js/mongoObjectId"));
+
 const readList = require("../../config/readList");
 const readDetail = require("../../config/readDetail");
 exports.listFilter_Pobj = (doc, paramList) => new Promise(async(resolve, reject) => {

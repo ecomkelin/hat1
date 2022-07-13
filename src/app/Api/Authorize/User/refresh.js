@@ -2,7 +2,7 @@ const path = require('path');
 const Auth = require(path.resolve(process.cwd(), "src/bin/js/resProm/authrize"));
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 
-const Model = require(path.resolve(process.cwd(), "src/app/dbModels/0_auth/User/Model"));
+const Model = require(path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Model"));
 
 module.exports = async(ctx, next) => {
     try{

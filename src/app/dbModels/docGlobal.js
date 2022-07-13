@@ -7,13 +7,13 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
 
 // 数据库名称集合
-const docName = require(".");
+const docNameObj = require(".");
 
 module.exports = {
 	code: {
 		type: String,
 		required: true,
-		minLen: 4,
+		minLen: 2,
 		maxLen: 20,
 		regexp: '^[a-zA-Z0-9]*$',
 		is_fixed: true,
@@ -29,18 +29,18 @@ module.exports = {
 	sortNum: {type: Number},
 
 	at_crt: {type: Date, is_auto: true, is_fixed: true},
-    User_crt_db: {type: ObjectId, ref: docName.User, is_auto: true, is_fixed: true},       // 创建人
+    User_crt_db: {type: ObjectId, ref: docNameObj.User, is_auto: true, is_fixed: true},       // 创建人
 
 	at_upd: {type: Date, is_auto: true},                                // [绝对] 最近一次更新时间 只要数文档更新
 	at_edit: {type: Date, is_auto: true}, 								// 最近的修改时间 本身的修改
-	// User_upd: {type: ObjectId, ref: docName.User, is_auto: true},    // 除了自己更新的人
+	// User_upd: {type: ObjectId, ref: docNameObj.User, is_auto: true},    // 除了自己更新的人
     // updObjs: [{
     //     at_upd: {type: Date, is_auto: true},
-    //     User_upd: {type: ObjectId, ref: docName.User, is_auto: true},    // 除了自己更新的人
+    //     User_upd: {type: ObjectId, ref: docNameObj.User, is_auto: true},    // 除了自己更新的人
     // }],
 
-	Firm_db: {type: ObjectId, ref: docName.Firm, is_fixed: true},              // 所属公司
-	Shop_db: {type: ObjectId, ref: docName.Shop, is_fixed: true},              // 所属分公司
+	Firm_db: {type: ObjectId, ref: docNameObj.Firm, is_fixed: true},              // 所属公司
+	Shop_db: {type: ObjectId, ref: docNameObj.Shop, is_fixed: true},              // 所属分公司
 
 
 	// 员工编号： {code: "001", Firm: "firmId"} xd公司中是否有 001这个员工编号

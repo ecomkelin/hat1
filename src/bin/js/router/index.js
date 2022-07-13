@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const appPath = path.join(process.cwd(), "src/app/");
 
+
 // -- 读取所有models
 const allModelsRouter = (router, routerObjs) => {
     const dbs_Config = require(path.join(process.cwd(), "src/app/dbModels"));
@@ -125,5 +126,8 @@ module.exports ={
     rtModels,
     rtRouters,
     allModelsRouter,
-    allConfigRouter
+    allConfigRouter,
+    data: {
+
+    }
 }

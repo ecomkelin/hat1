@@ -3,7 +3,8 @@
  * @author: kelin
  */
  const path = require('path');
- const {DB_MASTER, LIMIT_FIND} = require(path.resolve(process.cwd(), "bin/config/env"));
+ const {DB_MASTER} = require(path.resolve(process.cwd(), "bin/config/env"));
+ const {LIMIT_FIND} = require(path.resolve(process.cwd(), "src/app/config"));
 /* 数据库连接文件 */
 const mongoose = require('mongoose');
 /**

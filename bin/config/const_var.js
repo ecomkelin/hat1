@@ -1,3 +1,6 @@
+const LIMIT_FIND = 50;		// 系统中 默认调取的数据量
+if(process.env.LIMIT_FIND) LIMIT_FIND =process.env.LIMIT_FIND;
+
 const PHONE_PRE = '+39';
 if(process.env.PHONE_PRE) PHONE_PRE =process.env.PHONE_PRE;
 
@@ -7,6 +10,7 @@ const MONTH = {
 };
 
 module.exports = {
+    LIMIT_FIND,
     PHONE_PRE,
     MONTH
 }

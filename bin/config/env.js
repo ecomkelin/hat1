@@ -40,8 +40,6 @@ if(process.env.IS_STRICT === 'STRICT') IS_STRICT = true;
 DIR_PUBLIC = path.resolve(process.cwd(), "public/");
 DIR_UPLOAD = path.resolve(process.cwd(), "public/upload/");
 
-LIMIT_FIND = 50;
-
 
 module.exports = {
     SERVER_NAME, SERVER_PORT,
@@ -54,5 +52,5 @@ module.exports = {
     REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EX,
     SALT_WORK_FACTOR,
 
-    DIR_PUBLIC, DIR_UPLOAD, LIMIT_FIND
+    DIR_PUBLIC, DIR_UPLOAD
 }

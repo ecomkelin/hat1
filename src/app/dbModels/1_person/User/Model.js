@@ -1,16 +1,24 @@
-// 引入全局或组的 collection field
-const docGlobal = require("../../docGlobal");
+// 引入全局及组的 collection field
+const doc_group = require("../doc_group");
+// #################################################################
+// global 最上面 group中间 本身最下
 
+
+// 本身特殊的 field
+const code = {...doc_group.code};
+code.unique = true;
 // 打包成为集合
 const doc = {
-    ...docGlobal,
+    ...doc_group,
 
+    code,
     // 权限信息
+    roleNum: {type: Number},                                    // 所属部门，或者说我们可以根据这个 来决定用户的界面
     auths: [{type: String}],                                    // 用户权限
 };
 
 // 集合名称
-const docName = require("../..").Firm;
+const docName = require("../..").User;
 
 
 

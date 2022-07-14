@@ -200,7 +200,7 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 readPreApi
             });
 
-            if(docField.as === 0) {
+            if(docField.is_hideRead) {
                 delete select[key];
             } else {
                 if(select[key] != 1) {
@@ -210,7 +210,7 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
             }
         }
         for(key in doc) {
-            if(doc[key].as === 0) delete select[key];
+            if(doc[key].is_hideRead) delete select[key];
         }
         paramTemp.projection = select;
     

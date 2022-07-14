@@ -10,21 +10,24 @@ const regFieldPath_Pnull = (doc, obj, key) => new Promise((resolve, reject) => {
         if(!doc[key]) {
             return reject({status: 400, message: `writePre 没有[${key}] 此字段`});
         }
-
         if(doc[key].is_auto) {
             return reject({status: 400, message: `writePre [${key}]为自动生成数据, 不可操作`});
         }
 
         if(doc[key].trimLen && doc[key].trimLen !== obj[key].length) {
+            if(doc[key].type !== String) return reject({status: 400, message: `writePre [${key}] 加了 trimLen 限制, 必须为 String 类型`});
             return reject({status: 400, message: `writePre [${key}] 字段的字符串长度必须为 [${doc[key].trimLen}]`});
         }
         if(doc[key].minLen && doc[key].minLen > obj[key].length) {
+            if(doc[key].type !== String) return reject({status: 400, message: `writePre [${key}] 加了 minLen 限制, 必须为 String 类型`});
             return reject({status: 400, message: `writePre [${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
         }
         if(doc[key].maxLen &&  doc[key].maxLen < obj[key].length) {
+            if(doc[key].type !== String) return reject({status: 400, message: `writePre [${key}] 加了 maxLen 限制, 必须为 String 类型`});
             return reject({status: 400, message: `writePre [${key}] 字段的字符串长度为： [${doc[key].minLen} ~ ${doc[key].maxLen}]`});
         }
         if(doc[key].regexp) {
+            if(doc[key].type !== String) return reject({status: 400, message: `writePre [${key}] 加了 regexp 限制, 必须为 String 类型`});
             let regexp = new RegExp(doc[key].regexp);
             if(!regexp.test(obj[key])) {
                 return reject({status: 400, message: `writePre [${key}] 的规则： [${doc[key].regErrMsg}]`});

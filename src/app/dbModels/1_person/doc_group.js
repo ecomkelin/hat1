@@ -16,12 +16,12 @@ module.exports = {
         minLen: 6,
         maxLen: 12,
         saveChange: true, // 存储数据库之前会变化
-        as: 0, //   不可读
+        is_hideRead: true, //   不可读
     },
     refreshToken: {
         type: String,
         is_auto: true,
-        as: 0
+        is_hideRead: true
     },
 
 	img_url: {type: String},
@@ -50,9 +50,9 @@ module.exports = {
     is_codeUpd: {type: Boolean, default: false, is_auto: true}, 	// 只读 如果账号被修改过 则为 true 否则为 false
     at_codeUpd: {type: Date, default: null, is_auto: true},		// 只读 上次账户修改时间
     at_login: {type: Date, is_auto: true},                                     // 最近一次登录
-    site_login: {type: String, is_auto: true},                                 // 最近一次登录的地方
-    loginObjs: {
-        at_login: {type: Date, is_auto: true},                                     
-        site_login: {type: String, is_auto: true},                            
-    }
+    // site_login: {type: String, is_auto: true},                                 // 最近一次登录的地方
+    // loginObjs: {
+    //     at_login: {type: Date, is_auto: true},                                     
+    //     site_login: {type: String, is_auto: true},                            
+    // }
 }

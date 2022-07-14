@@ -31,7 +31,7 @@ server.use(async(ctx, next) => {
     // if(ctx) console.debug("res body", ctx.body);
     let end = Date.now();
     let ms = end - start;
-    if(IS_DEV) console.log('用时:', `${ms}ms`);
+    if(IS_DEV) console.log(ctx.status, `用时: ${ms}ms`);
     if(IS_DEV) console.log();
     return;
 })

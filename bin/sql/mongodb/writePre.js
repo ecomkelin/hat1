@@ -10,9 +10,12 @@ const regFieldPath_Pnull = (doc, obj, key) => new Promise((resolve, reject) => {
         if(!doc[key]) {
             return reject({status: 400, message: `writePre 没有[${key}] 此字段`});
         }
-        if(doc[key].is_auto) {
-            return reject({status: 400, message: `writePre [${key}]为自动生成数据, 不可操作`});
-        }
+
+        if(doc[key].is_change) return resolve(null); // 一些变化的数据 不在此判断
+
+        // if(doc[key].is_auto) {
+        //     return reject({status: 400, message: `writePre [${key}]为自动生成数据, 不可操作`});
+        // }
 
         if(doc[key].trimLen && doc[key].trimLen !== obj[key].length) {
             if(doc[key].type !== String) return reject({status: 400, message: `writePre [${key}] 加了 trimLen 限制, 必须为 String 类型`});
@@ -52,9 +55,8 @@ exports.createPass_Pnull = (doc, crtObj) => new Promise(async(resolve, reject) =
                     return reject({status: 400, message:`writePre 创建时 必须添加 [docObj${key}] 字段`});
                 }
             }
-            // else {
-            //     if(crtObj[key] === null || crtObj[key] === undefined) continue; // 如果前台没有给数据则可以跳过 不判断后续
-            // }
+
+            if(doc[key].is_autoDate) crtObj[key] = new Date();      // 自动计时
         }
         return resolve(null);
     } catch(e) {
@@ -68,8 +70,11 @@ exports.modifyPass_Pnull = (doc, updObj, id) => new Promise(async(resolve, rejec
         if(!isObjectId(id)) return reject({status: 400, message: 'id 必须为 ObjectId 类型'});
         for(key in updObj) {
             if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
-
             await regFieldPath_Pnull(doc, updObj, key);            
+        }
+        for(key in doc) {
+            if(doc[key].is_fixed) continue; // 如果不可更改 则跳过 比如创建时间
+            if(doc[key].is_autoDate) crtObj[key] = new Date();      // 自动计时
         }
         return resolve(null);
     } catch(e) {

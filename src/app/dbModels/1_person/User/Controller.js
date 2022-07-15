@@ -3,7 +3,6 @@ const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/Format"));
 const Bcrypt = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
 
 const Model = require("./Model");
-const writePre = require(path.resolve(process.cwd(), "src/bin/permission/writePre"));
 
 /**
  * 
@@ -13,22 +12,21 @@ const writePre = require(path.resolve(process.cwd(), "src/bin/permission/writePr
  */
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
-        // 整体权限
         // 部分权限
-        await writePre.createPass_Pnull(Model.doc, docObj);
 
         // 读取数据
         let {phoneNum} = docObj;
 
-        // 操作数据
+        // 自动生成的数据 is_auto
+        if(docObj.phone) return reject({status: 400, message: "User 的 phone 信息是根据 phonePre 和phoneNumber 自动生成的"});
         docObj.phonePre = phoneNum ? format_phonePre(docObj.phonePre) : undefined;
         docObj.phone = phoneNum ? docObj.phonePre+phoneNum : undefined;
 
-        if(docObj.pwd) {
-            let hash_bcrypt = await Bcrypt.encryptHash_Pstr(docObj.pwd);
-            if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
-            docObj.pwd = hash_bcrypt;
-        }
+        if(!docObj.pwd) return reject({status: 400, message: "请输入 User 密码 pwd"});
+        if(docObj.pwd.length < Model.doc.pwd.minLen) return reject({status: 400, message: `密码长度不能低于 ${Model.doc.pwd.minLen}`});
+        let hash_bcrypt = await Bcrypt.encryptHash_Pstr(docObj.pwd);
+        if(!hash_bcrypt) return reject({status: 400, message: "密码加密失败"});
+        docObj.pwd = hash_bcrypt;
 
         // 写入
         let res = await Model.create_Pres(docObj);
@@ -82,8 +80,6 @@ exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, re
 
 exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
     try{
-        await writePre.removePass_Pnull(Model.doc, body._id);
-
         /* 读取数据 */
         let match = {_id: body._id};
         // match 还要加入 payload

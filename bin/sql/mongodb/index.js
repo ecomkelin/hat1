@@ -22,6 +22,7 @@ const db_master = mongoose.createConnection(DB_MASTER, { useNewUrlParser: true, 
  * 数据库方法打包文件
  */
 const Schema = mongoose.Schema;
+const writePre = require("./writePre");
 const readPre = require("./readPre");
 const docSame = require("./docSame");
 
@@ -108,8 +109,8 @@ module.exports = (docName, doc) => {
 	const COLwrite = COLmaster;
 	const create_Pres = (document) => new Promise(async(resolve, reject) => {
 		try {
-			// 写入 auto 数据
-			document.at_crt = document.at_upd = document.at_edit = new Date();
+			await writePre.createPass_Pnull(doc, document);
+
 			// 判断数据
 			await docSame.passNotExist_Pnull(COLread0, doc, document);	// 如果不存在就通过 存在就报错
 			let object = await COLwrite.create(document);
@@ -120,6 +121,10 @@ module.exports = (docName, doc) => {
 	});
 	const createMany_Pres = (documents, options) => new Promise(async(resolve, reject) => {
 		try {
+			for(let i=0; i<documents.length; i++) {
+				let document = documents[i];
+				await writePre.createPass_Pnull(doc, document);
+			}
 			let object = await COLwrite.insertMany(documents);
 			return resolve({data: {object}});
 		} catch(e) {
@@ -130,7 +135,7 @@ module.exports = (docName, doc) => {
 	const modify_Pres = (filter={}, updObj) => new Promise(async(resolve, reject) => {
 		try {
 			// 写入 auto 数据
-			updObj.at_edit = new Date();
+			await writePre.createPass_Pnull(doc, document);
 	
 			// 判断数据
 			await docSame.passNotExist_Pnull(COLread0, doc, updObj);	// 如果不存在就通过 存在就报错

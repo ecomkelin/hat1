@@ -1,7 +1,6 @@
 const path = require('path');
 
 const Model = require("./Model");
-const writePre = require(path.resolve(process.cwd(), "src/bin/permission/writePre"));
 /**
  * 
  * @param {*} payload 权限
@@ -14,7 +13,6 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         if(!docObj) return reject({status: 400, message: "请传递 文档数据"});
         if(!(docObj.auths instanceof Array)) return reject({status: 400, message: "Role文档的 auths字段 必须是数组"});
         if(docObj.auths.length < 1) return reject({status: 400, message: "Role文档的 auths字段 不能为空"});
-        await writePre.createPass_Pnull(Model.doc, docObj);
 
         // 写入
         let res = await Model.create_Pres(docObj);
@@ -61,7 +59,6 @@ exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, re
 
 exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
     try{
-        await writePre.removePass_Pnull(Model.doc, body._id);
 
         /* 读取数据 */
         let match = {_id: body._id};

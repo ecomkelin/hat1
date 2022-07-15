@@ -10,6 +10,7 @@ module.exports = async(ctx, next) => {
         if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
 
         let payload = ctx.request.payload;
+
         let paramObj = ctx.request.body;
         // 通过身份， 判定前端要什么数据
         let res = await Controller.listCT(payload, paramObj);

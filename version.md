@@ -1,4 +1,4 @@
-V 6.2.0 payload 修复 Role的部分功能
+V 6.2.0 payload 修复 调整了writePre的判定时机
 V 6.1.3 v6.1.2中 userModel 错误 
 V 6.1.2	models对应数据库名称自动加载
 V 6.1.1	文件调整

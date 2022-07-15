@@ -15,7 +15,7 @@ module.exports = {
         required: true,
         minLen: 6,
         maxLen: 12,
-        saveChange: true, // 存储数据库之前会变化
+        is_change: true, // 存储数据库之前会变化
         is_hideRead: true, //   不可读
     },
     refreshToken: {
@@ -29,7 +29,7 @@ module.exports = {
         type: String,
         trimLen: 4,
         regexp: '^[0-9]*$',
-        saveChange: true,
+        is_change: true,
     },
     phoneNum: {
         type: String,
@@ -38,7 +38,7 @@ module.exports = {
     },
 
 	addrObjs: [{
-		City_dbs : {type: String},
+		City: {type: String},
 		name: {type: String},
 		addr: {type: String},
 		postcode: {type: String},

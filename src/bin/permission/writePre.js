@@ -51,9 +51,10 @@ exports.createPass_Pnull = (doc, crtObj) => new Promise(async(resolve, reject) =
                 if(crtObj[key] === null || crtObj[key] === undefined) {
                     return reject({status: 400, message:`writePre 创建时 必须添加 [docObj${key}] 字段`});
                 }
-            } else {
-                if(crtObj[key] === null || crtObj[key] === undefined) continue; // 如果前台没有给数据则可以跳过 不判断后续
             }
+            // else {
+            //     if(crtObj[key] === null || crtObj[key] === undefined) continue; // 如果前台没有给数据则可以跳过 不判断后续
+            // }
         }
         return resolve(null);
     } catch(e) {
@@ -66,11 +67,9 @@ exports.modifyPass_Pnull = (doc, updObj, id) => new Promise(async(resolve, rejec
     try {
         if(!isObjectId(id)) return reject({status: 400, message: 'id 必须为 ObjectId 类型'});
         for(key in updObj) {
-            await regFieldPath_Pnull(doc, updObj, key);
+            if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
 
-            if(doc[key].is_fixed) {
-                return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
-            }
+            await regFieldPath_Pnull(doc, updObj, key);            
         }
         return resolve(null);
     } catch(e) {

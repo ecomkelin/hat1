@@ -1,6 +1,6 @@
 const path = require('path');
 const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-const Controller = require(path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Controller"));
+const Controller = require(path.resolve(process.cwd(), "src/app/dbModels/0_role/Role/Controller"));
 
 module.exports = async(ctx, next) => {
     try{

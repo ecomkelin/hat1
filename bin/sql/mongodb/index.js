@@ -110,10 +110,8 @@ module.exports = (docName, doc) => {
 		try {
 			// 写入 auto 数据
 			document.at_crt = document.at_upd = document.at_edit = new Date();
-	
 			// 判断数据
 			await docSame.passNotExist_Pnull(COLread0, doc, document);	// 如果不存在就通过 存在就报错
-
 			let object = await COLwrite.create(document);
 			return resolve({data: {object}, message: "数据创建成功"});
 		} catch(e) {

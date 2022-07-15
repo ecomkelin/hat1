@@ -128,8 +128,10 @@ exports.removeManyCT = (payload, match) => new Promise(async(resolve, reject) =>
 
 exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
-        let {match={}, select, populate} = paramObj;
+        let {filter={}, select, populate} = paramObj;
+        let {match={}} = filter;
         // 根据 payload 过滤 match select
+        if(payload.Firm) match.Firm = payload.Firm;
         let res = await Model.detail_Pres(paramObj);
        return resolve(res);
     } catch(e) {

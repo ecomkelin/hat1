@@ -3,7 +3,7 @@ exports.api = async(ctx, api, next) => {
     ctx.body = {status: 200, api};
 }
 
-exports.success = async(ctx, ctxBody, next) => {
+exports.success = async(ctx, ctxBody, next) => {    
     ctx.status = 200;
     ctx.body = {status: 200, ...ctxBody};
 }

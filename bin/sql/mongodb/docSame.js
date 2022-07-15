@@ -8,11 +8,12 @@
  */
  const filterParam_Pobj = (doc, docNew) => new Promise((resolve, reject) => {
 	try {
-		let query = {"$or": []};			// 初始化field唯一的参数
+		let or_field = [];			// 初始化field唯一的参数
 		let type = docNew._id ? 'upd' : 'crt';
+
 		for(key in doc) {		// 循环文档中的每个field
 			if(type === 'upd' && !docNew[key]) continue;			// 如果是更新文档 对于不更改的值 则可以忽略不判断;
-	
+			
 			let param = {};
 			if(doc[key].unique) {								// 判断field是否为unique 如果是unique 则不需要判断其他的
 				param[key] = docNew[key];
@@ -30,9 +31,11 @@
 				// {code: "001", Firm: "firmId"} xd公司中是否有 001这个员工编号
 				// 折扣编号 {nome: '002', Brand: 'brandId', Supplier: 'supplierId'} // 这个供应商的这个品牌下 产品的名称不能相同
 			}
-			query["$or"].push(param);
-			return resolve(query);
+			if(Object.keys(param).length > 0) or_field.push(param);
 		}
+		let query = null;
+		if(or_field.length > 0) query={"$or": or_field};
+		return resolve(query);
 	} catch(e) {
 		return reject(e);
 	}
@@ -60,10 +63,9 @@
 })
 exports.passNotExist_Pnull = (DBcollection, doc, docNew) => new Promise(async(resolve, reject) => {
 	try {
-				
 		let query = await filterParam_Pobj(doc, docNew);
+		if(query === null) return resolve(null);
 		if(docNew._id) query._id = {"$ne": docNew._id};			// 如果是更新 需要加入 $ne _id
-
 		let objSame = await DBcollection.findOne(query);
         if(objSame) return reject({status: 400, message: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
 		return resolve(null);

@@ -39,14 +39,13 @@ module.exports = {
     //     User_upd: {type: ObjectId, ref: docNameObj.User, is_auto: true},    // 除了自己更新的人
     // }],
 
-	Firm_db: {type: ObjectId, ref: docNameObj.Firm, is_fixed: true},              // 所属公司
-	Shop_db: {type: ObjectId, ref: docNameObj.Shop, is_fixed: true},              // 所属分公司
-
+	Firm: {type: ObjectId, ref: docNameObj.Firm, is_fixed: true},              // 所属公司
+	Shop: {type: ObjectId, ref: docNameObj.Shop, is_fixed: true},              // 所属分公司
 };
 
 /**
- * type mongodb数据库类型 (此字段为 mongoose 自带类型 本系统没有做判定)
- * required [Boolean] 是否为必须填写的, 如果为 true 添加时必须要有此数据 (此字段为 mongoose 自带类型 本系统没有做判定)
+ * type mongodb数据库类型 
+ * required [Boolean] 是否为必须填写的, 如果为 true 添加时必须要有此数据 (此字段为 mongoose 自带类型, 写入时 本系统也做了判定 )
  * is_auto [Boolean] 是否为自动更新， 如果为 true 则前端不能给数据 给数据就报错
  * is_fixed [Boolean] 字段是否可以修改, 如果为 true 则前端不可给此字段修改数据
  * trimLen [Number] (所属字段必须为 String 类型) 字段的固定长度  的正整数

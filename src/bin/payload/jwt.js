@@ -18,7 +18,7 @@ exports.obtain_headersInfo = (headersToken) => {
 exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
 	try {
 		let token = this.obtain_headersInfo(headersToken);
-		if(!token) return resolve(null);
+		if(!token) return resolve({});
 		let token_secret = is_refresh ? REFRESH_TOKEN_SECRET:ACCESS_TOKEN_SECRET;
 		jsonwebtoken.verify(token, token_secret, (expired, payload) => {
 			if(expired) return reject({status: 401, message: "token错误或过期", expired});

@@ -1,3 +1,4 @@
+V 6.3.0 modify方法
 V 6.2.1 缺陷修复
 V 6.2.0 payload 修复 调整了writePre的判定时机
 V 6.1.3 v6.1.2中 userModel 错误 

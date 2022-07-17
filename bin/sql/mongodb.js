@@ -25,7 +25,7 @@ const Schema = mongoose.Schema;
 const writePre = require("../js/db/writePre");
 const readPre = require("../js/db/readPre");
 const docSame = require("../js/db/docSame");
-
+const {isObjectId} = require("../js/isType");
 // 暴露mongodb的方法 以及model的doc即所有field
 /**
  * @param {由models中各个数据库中Model文件提供 系统初始化的时候就被加载到各个Model文件中去 不会根据每次访问重新加载COLmaster及方法}
@@ -97,6 +97,8 @@ module.exports = (docName, doc) => {
 	});
 	const findOne_Pobj = ({query={}, projection, populate}) => new Promise(async(resolve, reject) => {
 		try {
+			if(query._id && !isObjectId(query._id)) return reject({status: 400, message: "_id为 ObjectId 类型"})
+
 			let object = await COLread0.findOne(query, projection)
 				.populate(populate);
 			return resolve(object);
@@ -135,7 +137,7 @@ module.exports = (docName, doc) => {
 	const modify_Pres = (filter={}, updObj) => new Promise(async(resolve, reject) => {
 		try {
 			// 写入 auto 数据
-			await writePre.createPass_Pnull(doc, document);
+			await writePre.modifyPass_Pnull(doc, updObj, updObj._id);
 	
 			// 判断数据
 			await docSame.passNotExist_Pnull(COLread0, doc, updObj);	// 如果不存在就通过 存在就报错
@@ -181,7 +183,5 @@ module.exports = (docName, doc) => {
 		createMany_Pres, create_Pres,
 		modifyMany_Pres, modify_Pres,
 		remove_Pres, removeMany_Pres,
-
-		create:COLwrite.create,
 	};
 }

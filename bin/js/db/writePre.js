@@ -30,6 +30,15 @@ const formatDocKey_Pnull = (key, fieldObj, val) => new Promise((resolve, reject)
                 return reject({status: 400, message: `writePre [${key}] 的规则： [${fieldObj.regErrMsg}]`});
             }
         }
+
+        if(fieldObj.minNum && fieldObj.minNum > val) {
+            if(fieldObj.type !== Number) return reject({status: 400, message: `writePre [${key}] 加了 minNum 限制, 必须为 Number 类型`});
+            return reject({status: 400, message: `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`});
+        }
+        if(fieldObj.maxNum &&  fieldObj.maxNum < val) {
+            if(fieldObj.type !== Number) return reject({status: 400, message: `writePre [${key}] 加了 maxNum 限制, 必须为 Number 类型`});
+            return reject({status: 400, message: `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`});
+        }
         return resolve(null);
     } catch(e) {
         return reject(e);
@@ -63,12 +72,13 @@ exports.modifyPass_Pnull = (doc, updObj, id) => new Promise(async(resolve, rejec
     try {
         if(!isObjectId(id)) return reject({status: 400, message: 'id 必须为 ObjectId 类型'});
         for(key in updObj) {
+            if(key === '_id') continue;
             if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
             await formatDocKey_Pnull(key, doc[key], updObj[key]);            
         }
         for(key in doc) {
             if(doc[key].is_fixed) continue; // 如果不可更改 则跳过 比如创建时间
-            if(doc[key].is_auto) crtObj[key] = new Date();      // 自动计时
+            if(doc[key].is_auto) updObj[key] = new Date();      // 自动计时
         }
         return resolve(null);
     } catch(e) {

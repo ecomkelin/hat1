@@ -1,5 +1,5 @@
 
-const formatDocKey_Pnull = (key, fieldObj, val) => new Promise((resolve, reject) => {
+exports.beforeDockey_Pnull = (key, fieldObj, val) => new Promise((resolve, reject) => {
     try {
         if(!fieldObj) return reject({status: 400, message: `writePre 没有[${key}] 此字段`});
 
@@ -35,7 +35,7 @@ const formatDocKey_Pnull = (key, fieldObj, val) => new Promise((resolve, reject)
 exports.controlPass_Pnull = (doc, docObj) => new Promise(async(resolve, reject) => {
     try {
         for(key in docObj) {
-            await formatDocKey_Pnull(key, doc[key], docObj[key]);
+            await this.beforeDockey_Pnull(key, doc[key], docObj[key]);
         }
         return resolve(null);
     } catch(e) {

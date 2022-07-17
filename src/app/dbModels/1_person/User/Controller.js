@@ -1,7 +1,6 @@
 const path = require('path');
-const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/Format"));
 const {controlPass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/filterControl"));
-const {pwd_Pstr} = require("../FN_group");
+const {pwd_Auto_Pstr, format_phoneInfo} = require("../FN_group");
 
 const Model = require("./Model");
 
@@ -16,7 +15,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
         // 部分权限
 
-        // is_change is_semiAuto 数据过滤控制
+        // is_change is_semiAuto 数据的处理
         let passObj = {pwd: docObj.pwd};
         if(docObj.phonePre) passObj.phonePre = docObj.phonePre;
         if(docObj.phone) passObj.phone = docObj.phone;
@@ -24,10 +23,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
 
         // is_change is_semiAuto 数据自动处理处;
         docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
-        if(docObj.phoneNum) {
-            docObj.phonePre = format_phonePre(docObj.phonePre);
-            docObj.phone = docObj.phonePre+docObj.phoneNum;
-        }
+        format_phoneInfo(docObj);
 
         // 写入
         let res = await Model.create_Pres(docObj);
@@ -54,10 +50,9 @@ exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) =>
         // 还要加入 payload
         if(payload.Firm && payload.Firm._id) match.Firm = payload.Firm._id;
         if(payload.Shop && payload.Shop._id) match.Shop = payload.Shop._id;
+        let Org = await Model.findOne_Pobj({query: match});
 
-
-
-        // is_change is_semiAuto 数据过滤控制
+        // is_change is_semiAuto 数据的处理
         let passObj = {};
         if(docObj.pwd) passObj.pwd = docObj.pwd;
         if(docObj.phonePre) passObj.phonePre = docObj.phonePre;
@@ -66,10 +61,7 @@ exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) =>
 
         // is_change is_semiAuto 数据自动处理处;
         if(docObj.pwd) docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
-        if(docObj.phoneNum) {
-            docObj.phonePre = format_phonePre(docObj.phonePre);
-            docObj.phone = docObj.phonePre+docObj.phoneNum;
-        }
+        format_phoneInfo(docObj, Org);
 
         // 修改数据
         let res = await Model.modify_Pres(match, docObj);

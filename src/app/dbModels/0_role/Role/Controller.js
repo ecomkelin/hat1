@@ -1,18 +1,15 @@
-const path = require('path');
-
 const Model = require("./Model");
+
 /**
  * 
  * @param {*} payload 权限
  * @param {*} docObj 创建对象
  * @returns 
  */
+
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
-        // 验证数据是否正确
-        if(!docObj) return reject({status: 400, message: "请传递 文档数据"});
-        if(!(docObj.auths instanceof Array)) return reject({status: 400, message: "Role文档的 auths字段 必须是数组"});
-        if(docObj.auths.length < 1) return reject({status: 400, message: "Role文档的 auths字段 不能为空"});
+        // 部分权限
 
         // 写入
         let res = await Model.create_Pres(docObj);
@@ -33,13 +30,16 @@ exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => 
     }
 });
 
-exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) => {
+exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) => {
     try{
-        let match = {_id: updObj._id};
+        let match = {_id: docObj._id};
         // 还要加入 payload
+        if(payload.Firm && payload.Firm._id) match.Firm = payload.Firm._id;
+        if(payload.Shop && payload.Shop._id) match.Shop = payload.Shop._id;
+        let Org = await Model.findOne_Pobj({query: match});
 
         // 修改数据
-        let res = await Model.modify_Pres(match, updObj);
+        let res = await Model.modify_Pres(match, docObj);
         return resolve(res);
     } catch(e) {
         return reject(e);
@@ -59,7 +59,6 @@ exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, re
 
 exports.removeCT = (payload, body) => new Promise(async(resolve, reject) => {
     try{
-
         /* 读取数据 */
         let match = {_id: body._id};
         // match 还要加入 payload
@@ -104,8 +103,10 @@ exports.removeManyCT = (payload, match) => new Promise(async(resolve, reject) =>
 
 exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
-        let {match={}, select, populate} = paramObj;
+        let {filter={}, select, populate} = paramObj;
+        let {match={}} = filter;
         // 根据 payload 过滤 match select
+        if(payload.Firm) match.Firm = payload.Firm;
         let res = await Model.detail_Pres(paramObj);
        return resolve(res);
     } catch(e) {

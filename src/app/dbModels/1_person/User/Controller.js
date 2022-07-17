@@ -1,6 +1,7 @@
 const path = require('path');
 const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/Format"));
-const Bcrypt = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
+const {controlPass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/filterControl"));
+const {pwd_Pstr} = require("../FN_group");
 
 const Model = require("./Model");
 
@@ -10,23 +11,23 @@ const Model = require("./Model");
  * @param {*} docObj 创建对象
  * @returns 
  */
+
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
         // 部分权限
 
-        // 读取数据
-        let {phoneNum} = docObj;
+        // is_change is_semiAuto 数据过滤控制
+        let passObj = {pwd: docObj.pwd};
+        if(docObj.phonePre) passObj.phonePre = docObj.phonePre;
+        if(docObj.phone) passObj.phone = docObj.phone;
+        await controlPass_Pnull(Model.doc, passObj);
 
-        // 自动生成的数据 is_auto
-        if(docObj.phone) return reject({status: 400, message: "User 的 phone 信息是根据 phonePre 和phoneNumber 自动生成的"});
-        docObj.phonePre = phoneNum ? format_phonePre(docObj.phonePre) : undefined;
-        docObj.phone = phoneNum ? docObj.phonePre+phoneNum : undefined;
-
-        if(!docObj.pwd) return reject({status: 400, message: "请输入 User 密码 pwd"});
-        if(docObj.pwd.length < Model.doc.pwd.minLen) return reject({status: 400, message: `密码长度不能低于 ${Model.doc.pwd.minLen}`});
-        let hash_bcrypt = await Bcrypt.encryptHash_Pstr(docObj.pwd);
-        if(!hash_bcrypt) return reject({status: 400, message: "密码加密失败"});
-        docObj.pwd = hash_bcrypt;
+        // is_change is_semiAuto 数据自动处理处;
+        docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
+        if(docObj.phoneNum) {
+            docObj.phonePre = format_phonePre(docObj.phonePre);
+            docObj.phone = docObj.phonePre+docObj.phoneNum;
+        }
 
         // 写入
         let res = await Model.create_Pres(docObj);
@@ -47,20 +48,31 @@ exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => 
     }
 });
 
-exports.modifyCT = (payload, updObj={}) => new Promise(async(resolve, reject) => {
+exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) => {
     try{
-        let match = {_id: updObj._id};
+        let match = {_id: docObj._id};
         // 还要加入 payload
+        if(payload.Firm && payload.Firm._id) match.Firm = payload.Firm._id;
+        if(payload.Shop && payload.Shop._id) match.Shop = payload.Shop._id;
 
-        // 操作数据
-        if(updObj.pwd) {
-            let hash_bcrypt = await Bcrypt.encryptHash_Pstr(updObj.pwd);
-            if(!hash_bcrypt) return resolve({status: 400, message: "密码加密失败"});
-            updObj.pwd = hash_bcrypt;
+
+
+        // is_change is_semiAuto 数据过滤控制
+        let passObj = {};
+        if(docObj.pwd) passObj.pwd = docObj.pwd;
+        if(docObj.phonePre) passObj.phonePre = docObj.phonePre;
+        if(docObj.phone) passObj.phone = docObj.phone;
+        await controlPass_Pnull(Model.doc, passObj);
+
+        // is_change is_semiAuto 数据自动处理处;
+        if(docObj.pwd) docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
+        if(docObj.phoneNum) {
+            docObj.phonePre = format_phonePre(docObj.phonePre);
+            docObj.phone = docObj.phonePre+docObj.phoneNum;
         }
 
         // 修改数据
-        let res = await Model.modify_Pres(match, updObj);
+        let res = await Model.modify_Pres(match, docObj);
         return resolve(res);
     } catch(e) {
         return reject(e);

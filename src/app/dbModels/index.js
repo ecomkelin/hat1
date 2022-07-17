@@ -7,8 +7,8 @@
 
 // 	"Role": "hat_Role_dbs",
 
-// 	"Firm": "hat_Firm_dbs",
-// 	"Shop": "hat_Shop_dbs",
+// 	"Firm_db": "hat_Firm_dbs",
+// 	"Shop_db": "hat_Shop_dbs",
 // 	"City": "hat_City_dbs",
 // }
 

@@ -22,9 +22,9 @@ const db_master = mongoose.createConnection(DB_MASTER, { useNewUrlParser: true, 
  * 数据库方法打包文件
  */
 const Schema = mongoose.Schema;
-const writePre = require("./writePre");
-const readPre = require("./readPre");
-const docSame = require("./docSame");
+const writePre = require("../js/db/writePre");
+const readPre = require("../js/db/readPre");
+const docSame = require("../js/db/docSame");
 
 // 暴露mongodb的方法 以及model的doc即所有field
 /**

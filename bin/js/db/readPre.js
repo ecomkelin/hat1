@@ -1,5 +1,5 @@
-const path = require('path');
-const {ObjectId, isObjectId} = require(path.resolve(process.cwd(), "bin/js/mongoObjectId"));
+const {ObjectId} = require("../../config/type");
+const {isObjectId} = require("../isType");
 
 const readList = require("../../config/readList");
 const readDetail = require("../../config/readDetail");

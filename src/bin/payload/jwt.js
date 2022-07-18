@@ -41,11 +41,25 @@ exports.generateToken = (obj, is_refresh=null)=> {
 exports.generatePayload = (obj)=> {
 	let payload = {};
 	if(obj._id) payload._id = obj._id;
-	if(obj.Firm) payload.Firm = obj.Firm;
-	if(obj.Shop) payload.Shop = obj.Shop;
 	if(obj.code) payload.code = obj.code;
 	if(obj.nome) payload.nome = obj.nome;
 	if(obj.phone) payload.phone = obj.phone;
 	if(obj.email) payload.email = obj.email;
+	
+	if(obj.is_admin) payload.is_admin = obj.is_admin;
+	if(obj.Firm) payload.Firm = obj.Firm;
+	if(obj.Shop) payload.Shop = obj.Shop;
+	if(obj.auths) {
+		payload.auths = obj.auths;
+	}
+	if(obj.Roles) {
+		for(let i=0; i<obj.Roles.length; i++) {
+			let Role = obj.Roles[i];
+			for(let j=0; j<Role.auths.length; j++) {
+				let auth = Role.auths[j];
+				if(!payload.auths.includes(auth)) payload.auths.push(auth);
+			}
+		}
+	}
 	return payload;
 }

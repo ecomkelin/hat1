@@ -20,9 +20,8 @@ module.exports = {
 	},
 	name: {
 		type: String,
-        minLen: 4,
-        maxLen: 20,
-        regexp: '^[a-zA-Z0-9]*$',
+        minLen: 1,
+        maxLen: 20
     },
 
 	is_usable: {type: Boolean, default: true},                  // 是否可用
@@ -59,7 +58,9 @@ module.exports = {
  * is_hideRead [Boolean] 不可读取此数据 比如 密码  (readPre中 判定此参数)
  * 
  * unique [Boolean] 是否是唯一的, 如果为 true 则本字段中有且只有一个此值 (此字段为 mongoose 自带类型 本系统 在 docSame 中 也做了判定)
+ * true_unique [Boolean] 是否是唯一的, 如果为 true 则本字段中有且只有一个为真
  * uniq [Array[其他字段]]   在docSame文件中做判定
+ * true_uniq [Array[其他字段]]   在docSame文件中做判定 比如 true_uniq: ["Firm"] 一个公司中只有一个
  * 	// 员工编号： {code: "001", Firm: "firmId"} xd公司中是否有 001这个员工编号
 	// 产品名称： {nome: '002', Brand: 'brandId', Supplier: 'supplierId'} // 这个供应商的这个品牌下 产品的名称不能相同
 	// 折扣映射： Brand.uniq = ["Supplier"]; 添加折扣文档时 同一个供应商不能有相同的品牌

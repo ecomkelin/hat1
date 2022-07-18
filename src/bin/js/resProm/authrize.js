@@ -32,7 +32,6 @@ exports.login_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
     try{
 		let object = await obtainObj_Pobj(ctx.request.body, Model);
 		let payload = jwtMD.generatePayload(object);
-
 		let {accessToken, refreshToken} = getToken(payload, Model);
 		return resolve({
 			data: {payload, accessToken, refreshToken},
@@ -73,7 +72,6 @@ const obtainObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
 			let object = await Model.findOne_Pobj({query: match, project: {}});
 			if(!object) return reject({status: 400, message: "账号错误"});
 			await bcryptMD.matchBcrypt_Pnull(hat.pwd, object.pwd);
-
 			return resolve(object);
 		} else {
 			return reject({status: 400, message: "请输入正确的 [type_login] 类型为String ['hat', 'google', 'facebook', 'weixin'] "});

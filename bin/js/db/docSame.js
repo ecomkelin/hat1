@@ -17,19 +17,34 @@
 			let param = {};
 			if(doc[key].unique) {								// 判断field是否为unique 如果是unique 则不需要判断其他的
 				param[key] = docNew[key];
-			} else {
-				let uniq = doc[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = firm
-				if(!uniq) continue;					// 如果没有 则不用查看
+			} else if(doc[key].uniq) {
+				let uniq = doc[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = ["Firm"]
 				if(!(uniq instanceof Array)) return reject({status: 400, message: `${type} 数据库 doc 的uniq值错误`});
 				param[key] = docNew[key];			// 相当于 {code: '员工编号'}
 				for(let i=0; i<uniq.length; i++) {
 					let sKey = uniq[i];
 					if(docNew[sKey] === undefined) return reject({status: 400, message: `${type} 请传递 在新的 doc中传递 [${key}] 的值`});
-					param[sKey] = docNew[sKey];		// 相当于 {firm: 'firmId'}
+					param[sKey] = docNew[sKey];		// 相当于 {Firm: 'FirmId'}
 				}
 				// 循环下来 
-				// {code: "001", Firm: "firmId"} xd公司中是否有 001这个员工编号
+				// {code: "001", Firm: "FirmId"} xd公司中是否有 001这个员工编号
 				// 折扣编号 {nome: '002', Brand: 'brandId', Supplier: 'supplierId'} // 这个供应商的这个品牌下 产品的名称不能相同
+			} else if(doc[key].true_unique && docNew[key] === true) {
+				// 查看数据库模型中 field 的 true_unique 标识 本文档中 只能有一个为真的数据
+				param[key] = docNew[key];			// 相当于 {is_admin: '是否为超级用户'}
+			} else if(doc[key].true_uniq && docNew[key] === true) {
+				// 查看数据库模型中 field 的 true_uniq标识	
+				//比如 公司中员工账号唯一 is_default.true_uniq = ["Firm"] 整个公司只能有一个用户 的 is_default 为true
+				let true_uniq = doc[key].true_uniq;	
+				if(!(true_uniq instanceof Array)) return reject({status: 400, message: `${type} 数据库 doc 的true_uniq值错误`});
+				param[key] = docNew[key];			// 相当于 {is_default: '是否为默认数据'}
+				for(let i=0; i<true_uniq.length; i++) {
+					let sKey = true_uniq[i];
+					if(docNew[sKey] === undefined) continue;
+					param[sKey] = docNew[sKey];		// 相当于 {Firm: 'FirmId'}
+				}
+				// 循环下来 
+				// {is_default: true, Firm: "FirmId"} xd公司中是否有 001这个员工编号
 			}
 			if(Object.keys(param).length > 0) or_field.push(param);
 		}

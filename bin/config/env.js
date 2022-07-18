@@ -5,6 +5,7 @@ const path = require('path');
 
 IS_PRD = (process.env.NODE_ENV === "production") ? true : false;
 IS_DEV = (process.env.NODE_ENV === "dev") ? true : false;
+IS_DEBUG = (process.env.NODE_ENV === "debug") ? true : false;
 
 SERVER_NAME="HAT";
 SERVER_PORT=8000;
@@ -28,7 +29,7 @@ if(IS_PRD) {
     REFRESH_TOKEN_SECRET=process.env.REFRESH_TOKEN_SECRET;
     REFRESH_TOKEN_EX=process.env.REFRESH_TOKEN_EX;
     SALT_WORK_FACTOR=process.env.SALT_WORK_FACTOR;
-} else if(IS_DEV) {
+} else if(IS_DEV || IS_DEBUG) {
     DB_MASTER=process.env.DB_MASTER_DEV;
     DB_SLAVE1=process.env.DB_SLAVE1_DEV;
 }

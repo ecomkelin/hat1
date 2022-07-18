@@ -1,3 +1,4 @@
+V 6.3.1 is_admin
 V 6.3.0 modify方法
 V 6.2.1 缺陷修复
 V 6.2.0 payload 修复 调整了writePre的判定时机

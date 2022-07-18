@@ -7,10 +7,14 @@ module.exports = async(ctx, next) => {
         if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
 
         let payload = ctx.request.payload;
-        let match = ctx.request.body;
+        let {filter={}} = ctx.request.body;
+        let {ids, match={}} = filter;
 
-
-        let res = await Controller.removeCT(payload , match);
+        let matchObj = {
+            ...match,
+            _id: {"$in": ids}
+        }
+        let res = await Controller.removeManyCT(payload , matchObj);
         return resJson.success(ctx, res, next);
     } catch(e) {
         return resJson.errs(ctx, e, next);

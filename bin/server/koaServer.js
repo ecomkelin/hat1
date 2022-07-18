@@ -1,5 +1,5 @@
 const path = require('path');
-const {IS_DEV, DIR_PUBLIC, DIR_UPLOAD} = require(path.resolve(process.cwd(), "bin/config/env"));
+const {DIR_PUBLIC, DIR_UPLOAD} = require(path.resolve(process.cwd(), "bin/config/env"));
 
 const koa = require('koa');
 const server = new koa();
@@ -21,31 +21,35 @@ server.use(koaBody({// 配置可以上传文件的 koa-body
 // 日志打印中间件
 const moment = require('moment');
 server.use(async(ctx, next) => {
-    let start = Date.now();
-    if(IS_DEV) console.log(moment(start).format("YYYY-MM-DD HH:mm:ss"));
-
-    console.info(`[ ${ctx.method} ] ${ctx.url}`)
-    // if(ctx && ctx.request) console.debug("req body: ", ctx.request.body);
-    // if(ctx.request.headers) console.debug(ctx.request.headers.authorization)
-    await next();
-
-    let person = '< ';
-    let payload = ctx.request.payload;
-    if(payload) {
-        let {Firm, Shop, code, name, type} = payload;
-        if(Firm) person += `[${Firm}]Firm `;
-        if(Shop) person += `[${Shop}]Shop `;
-        if(code) person += `[${code}]code `;
-        if(name) person += `[${name}]name `;
-        if(type) person += `[${type}]type `;
+    try {
+        let start = Date.now();
+        console.log(moment(start).format("YYYY-MM-DD HH:mm:ss"));
+    
+        console.info(`[ ${ctx.method} ] ${ctx.url}`)
+        // if(ctx && ctx.request) console.debug("req body: ", ctx.request.body);
+        // if(ctx.request.headers) console.debug(ctx.request.headers.authorization)
+        await next();
+    
+        let person = '< ';
+        let payload = ctx.request.payload;
+        if(payload) {
+            let {Firm, Shop, code, name, type} = payload;
+            if(Firm) person += `[${Firm}]Firm `;
+            if(Shop) person += `[${Shop}]Shop `;
+            if(code) person += `[${code}]code `;
+            if(name) person += `[${name}]name `;
+            if(type) person += `[${type}]type `;
+        }
+        person += '>';
+        // if(ctx) console.debug("res body", ctx.body);
+        let end = Date.now();
+        let ms = end - start;
+        console.info(ctx.status, person, `用时: ${ms}ms`);
+        console.info();
+        return;
+    } catch(e) {
+        console.error("[errs] e.stack: ", e.stack);
     }
-    person += '>';
-    // if(ctx) console.debug("res body", ctx.body);
-    let end = Date.now();
-    let ms = end - start;
-    if(IS_DEV) console.log(ctx.status, person, `用时: ${ms}ms`);
-    if(IS_DEV) console.log();
-    return;
 })
 
 // const routerUser = require('./router/User');

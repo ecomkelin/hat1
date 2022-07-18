@@ -101,6 +101,7 @@ module.exports = (docName, doc) => {
 
 			let object = await COLread0.findOne(query, projection)
 				.populate(populate);
+			if(!object) return reject({status: 400, message: "数据库中 没有找到道此数据"})
 			return resolve(object);
 		} catch(e) {
 			reject(e);
@@ -127,22 +128,22 @@ module.exports = (docName, doc) => {
 				let document = documents[i];
 				await writePre.createPass_Pnull(doc, document);
 			}
-			let object = await COLwrite.insertMany(documents);
-			return resolve({data: {object}});
+			let objects = await COLwrite.insertMany(documents);
+			return resolve({data: {objects}});
 		} catch(e) {
 			reject(e);
 		}
 	});
 
-	const modify_Pres = (filter={}, updObj) => new Promise(async(resolve, reject) => {
+	const modify_Pres = (filter={}, update) => new Promise(async(resolve, reject) => {
 		try {
 			// 写入 auto 数据
-			await writePre.modifyPass_Pnull(doc, updObj, updObj._id);
-	
+			await writePre.modifyPass_Pnull(doc, update, update._id);
 			// 判断数据
-			await docSame.passNotExist_Pnull(COLread0, doc, updObj);	// 如果不存在就通过 存在就报错
-
-			let object = await COLwrite.updateOne(filter, updObj);
+			await docSame.passNotExist_Pnull(COLread0, doc, update);	// 如果不存在就通过 存在就报错
+			
+			console.debug("[debug: mongodb.js modify_Pres] <filter,update>: ", filter, update);
+			let object = await COLwrite.updateOne(filter, update);
 			return resolve({data: {object}});
 		} catch(e) {
 			reject(e);

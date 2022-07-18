@@ -21,7 +21,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
 
 exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => {
     try{
-        let orgObjs = await Model.list_Pres({query: {}, projection: {code: 1}});
+        let Orgs = await Model.list_Pres({query: {}, projection: {code: 1}});
         // 写入
         let res = await Model.createMany_Pres(docObjs);
         return resolve(res);

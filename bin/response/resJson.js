@@ -1,14 +1,14 @@
-exports.api = async(ctx, api, next) => {
+exports.api = (ctx, api, next) => {
     ctx.status = 200;
     ctx.body = {status: 200, api};
 }
 
-exports.success = async(ctx, ctxBody, next) => {    
+exports.success = (ctx, ctxBody, next) => {
     ctx.status = 200;
     ctx.body = {status: 200, ...ctxBody};
 }
 
-exports.errs = async(ctx, e, next) => {
+exports.errs = (ctx, e, next) => {
     let error = e.stack
     let status = e.status || 500;
     ctx.status = status;

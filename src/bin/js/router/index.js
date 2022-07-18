@@ -31,10 +31,11 @@ const floorLevel = 0;   // 从第几层开始输入路由路径
 const payloadMD = require("../../payload");
 const postApis = (router, routerObjs, dirPath, paths, n) => {
     fs.readdirSync(dirPath).forEach(dirName => {
-        if(dirName.split('.').length === 1) {       // 如果是文件夹 则进一步读取内容
+        let len = dirName.split('.').length;
+        if(len === 1) {       // 如果是文件夹 则进一步读取内容
             paths[n+1] = dirName;   // 第number层
             postApis(router, routerObjs, path.join(dirPath+dirName+'/'), paths, n+1);
-        } else {                                    // 如果是文件则 则加载
+        } else if(len === 2){                                    // 如果是文件则 则加载
             let file = dirPath+ dirName;
             if(fs.existsSync(file)) {
                 let requ = require(file);
@@ -67,10 +68,11 @@ const rtApis = (router, routerObjs, dirName) => {
 
 const getModels = (router, routerObjs, dirPath, paths, n, maskFiles) => {
     fs.readdirSync(dirPath).forEach(dirName => {
-        if(dirName.split('.').length === 1) {       // 如果是文件夹 则进一步读取内容
+        let len = dirName.split('.').length;
+        if(len === 1) {       // 如果是文件夹 则进一步读取内容
             paths[n+1] = dirName;
             getModels(router, routerObjs, path.join(dirPath+dirName+'/'), paths, n+1, maskFiles);
-        } else {                                    // 如果是文件则 则加载
+        } else if(len === 2) {                                    // 如果是文件则 则加载
             if(maskFiles.includes(dirName)) {
                 let file = dirPath+ dirName;
                 if(fs.existsSync(file)) {
@@ -90,7 +92,7 @@ const rtModels = (router, routerObjs, dirName, maskFiles) => {
 
 
 
-/* ====================================== Model文件路由 ====================================== */
+/* ====================================== 自定义文件路由 ====================================== */
 /**
  * @param {router} router 路由中间件
  * @param {Array} routerObjs 通过api展示给使用者所有的路由
@@ -102,10 +104,11 @@ const rtModels = (router, routerObjs, dirName, maskFiles) => {
 
  const getRouters = (router, routerObjs, dirPath, paths, n) => {
     fs.readdirSync(dirPath).forEach(dirName => {
-        if(dirName.split('.').length === 1) {       // 如果是文件夹 则进一步读取内容
+        let len = dirName.split('.').length;
+        if(len === 1) {       // 如果是文件夹 则进一步读取内容
             paths[n+1] = dirName;
             getRouters(router, routerObjs, path.join(dirPath+dirName+'/'), paths, n+1);
-        } else {                                    // 如果是文件则 则加载
+        } else if(len === 2) {                                    // 如果是文件则 则加载
             if(dirName === 'router.js') {
                 let file = dirPath+ dirName;
                 if(fs.existsSync(file)) {

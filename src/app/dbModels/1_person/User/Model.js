@@ -15,17 +15,15 @@ const doc = {
 
     code,
     // 权限信息
-    Role: {type: ObjectId, ref: docNameObj.Role},
-    auths: [{type: String}],                                            // 用户权限 可选
+    Roles: [{type: ObjectId, ref: docNameObj.Role}],
+    auths: [{type: String}],                                                    // 用户权限 可选
     // 特殊的 为了身份验证
-    is_admin: {type: Boolean},                                          // 每个公司有且只有一个为true
-    rankNum: {type: Number, default: 0, minNum: 0, maxNum: 9},          // 等级制度 修改用户时 只能修改自己或比自己等级低的用户
+    is_admin: {type: Boolean, default: false, true_unique: true},              // 每个公司有且只有一个为true
+    rankNum: {type: Number, default: 1, minNum: 1, maxNum: 9, is_change: true},  // 等级制度 修改用户时 只能修改自己或比自己等级低的用户
 };
 
 // 集合名称
 const docName = require("../..").User;
-
-
 
 // #################################################################
 // 暴露 方法 及 doc

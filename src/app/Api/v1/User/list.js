@@ -7,8 +7,8 @@ const api = readList.paramObj;
 module.exports = async(ctx, next) => {
     try{
         if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
-
         let payload = ctx.request.payload;
+        if(!payload.is_admin) return resJson.noAccess(ctx);
         let paramObj = ctx.request.body;
         // 通过身份， 判定前端要什么数据
         let res = await Controller.listCT(payload, paramObj);

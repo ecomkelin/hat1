@@ -7,7 +7,7 @@ const Model = require("./Model");
  * @param {*} docObj 创建对象
  * @returns 
  */
-exports.removeAllCT = (payload, docObj) => new Promise(async(resolve, reject) => {
+exports.removeAllCT = () => new Promise(async(resolve, reject) => {
     try{
         if(!IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
         /* 删除数据 */

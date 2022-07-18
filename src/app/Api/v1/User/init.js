@@ -8,7 +8,6 @@ module.exports = async(ctx, next) => {
 
         let payload = ctx.request.payload;
         let crtObj = ctx.request.body;
-
         let res = await Controller.initCT(payload, crtObj);
         return resJson.success(ctx, res, next);
     } catch(e) {

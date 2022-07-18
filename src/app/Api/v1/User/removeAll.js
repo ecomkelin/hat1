@@ -6,7 +6,7 @@ module.exports = async(ctx, next) => {
     try{
         if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
 
-        let res = await Controller.removeManyCT({} , {});
+        let res = await Controller.removeManyCT();
         return resJson.success(ctx, res, next);
     } catch(e) {
         return resJson.errs(ctx, e, next);

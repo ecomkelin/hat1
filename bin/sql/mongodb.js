@@ -101,7 +101,6 @@ module.exports = (docName, doc) => {
 
 			let object = await COLread0.findOne(query, projection)
 				.populate(populate);
-			if(!object) return reject({status: 400, message: "数据库中 没有找到道此数据"})
 			return resolve(object);
 		} catch(e) {
 			reject(e);
@@ -112,8 +111,7 @@ module.exports = (docName, doc) => {
 	const COLwrite = COLmaster;
 	const create_Pres = (document) => new Promise(async(resolve, reject) => {
 		try {
-			await writePre.createPass_Pnull(doc, document);
-
+			await writePre.pass_Pnull(false, doc, document);
 			// 判断数据
 			await docSame.passNotExist_Pnull(COLread0, doc, document);	// 如果不存在就通过 存在就报错
 			let object = await COLwrite.create(document);
@@ -126,7 +124,7 @@ module.exports = (docName, doc) => {
 		try {
 			for(let i=0; i<documents.length; i++) {
 				let document = documents[i];
-				await writePre.createPass_Pnull(doc, document);
+				await writePre.pass_Pnull(false, doc, document);
 			}
 			let objects = await COLwrite.insertMany(documents);
 			return resolve({data: {objects}});
@@ -138,7 +136,7 @@ module.exports = (docName, doc) => {
 	const modify_Pres = (filter={}, update) => new Promise(async(resolve, reject) => {
 		try {
 			// 写入 auto 数据
-			await writePre.modifyPass_Pnull(doc, update, update._id);
+			await writePre.pass_Pnull(true, doc, update);
 			// 判断数据
 			await docSame.passNotExist_Pnull(COLread0, doc, update);	// 如果不存在就通过 存在就报错
 			

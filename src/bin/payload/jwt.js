@@ -31,8 +31,7 @@ exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(reso
 
 
 /* ================================ 签名 ================================ */
-exports.generateToken = (obj, is_refresh=null)=> {
-	let payload = this.generatePayload(obj);
+exports.generateToken = (payload, is_refresh=null)=> {
 	let token_secret = is_refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET;
 	let token_ex = is_refresh ? REFRESH_TOKEN_EX : ACCESS_TOKEN_EX;
 	return jsonwebtoken.sign(payload, token_secret, {expiresIn: token_ex});
@@ -47,6 +46,7 @@ exports.generatePayload = (obj)=> {
 	if(obj.email) payload.email = obj.email;
 	
 	if(obj.is_admin) payload.is_admin = obj.is_admin;
+	if(obj.rankNum) payload.rankNum = obj.rankNum;
 	if(obj.Firm) payload.Firm = obj.Firm;
 	if(obj.Shop) payload.Shop = obj.Shop;
 	if(obj.auths) {
@@ -61,5 +61,6 @@ exports.generatePayload = (obj)=> {
 			}
 		}
 	}
+
 	return payload;
 }

@@ -1,15 +1,29 @@
-const Model = require("./Model");
+const path = require('path');
+const {IS_DEV} = require(path.resolve(process.cwd(), "bin/config/env"));
 
+const Model = require("./Model");
 /**
- * 
  * @param {*} payload 权限
  * @param {*} docObj 创建对象
  * @returns 
  */
+exports.removeAllCT = (payload, docObj) => new Promise(async(resolve, reject) => {
+    try{
+        if(!IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
+        /* 删除数据 */
+        let dels = await Model.removeMany_Pres({})
+
+        /* 返回 */
+        return resolve(dels);
+    } catch(e) {
+        return reject(e);
+    }
+});
+
+
 
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
-        // 部分权限
 
         // 写入
         let res = await Model.create_Pres(docObj);
@@ -19,9 +33,9 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     }
 });
 
-exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => {
+exports.createManyCT = (payload, docObjs) => new Promise(async(resolve, reject) => {
     try{
-        let Orgs = await Model.list_Pres({query: {}, projection: {code: 1}});
+        // let Orgs = await Model.list_Pres({query: {}, projection: {code: 1}});
         // 写入
         let res = await Model.createMany_Pres(docObjs);
         return resolve(res);
@@ -33,10 +47,9 @@ exports.createManyCT = (payload, docObjs) =>  Promise(async(resolve, reject) => 
 exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) => {
     try{
         let match = {_id: docObj._id};
-        // 还要加入 payload
-        if(payload.Firm && payload.Firm._id) match.Firm = payload.Firm._id;
-        if(payload.Shop && payload.Shop._id) match.Shop = payload.Shop._id;
-        let Org = await Model.findOne_Pobj({query: match});
+        // match里面要加入 payload 限制信息
+        if(payload.Firm && payload.Firm._id) match.Firm = payload.Firm._id; // 如果是公司用户 则只可修改本公司的用户
+        if(payload.Shop && payload.Shop._id) match.Shop = payload.Shop._id; // 如果是分店用户 则只可修改本分店的用户
 
         // 修改数据
         let res = await Model.modify_Pres(match, docObj);
@@ -47,9 +60,9 @@ exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) =>
 });
 
 
-exports.modifyManyCT = (payload, match, setObj) => new Promise(async(resolve, reject) => {
+exports.modifyManyCT = (payload, match, update) => new Promise(async(resolve, reject) => {
     try{
-        let res = await Model.modifyMany_Pres(match, setObj);
+        let res = await Model.modifyMany_Pres(match, update);
         return resolve(res);
     } catch(e) {
         return reject(e);
@@ -81,7 +94,7 @@ exports.removeManyCT = (payload, match) => new Promise(async(resolve, reject) =>
         let dels = await Model.removeMany_Pres(match)
 
         /* 返回 */
-        return resolve({message: "删除成功"});
+        return resolve(dels);
     } catch(e) {
         return reject(e);
     }

@@ -1,3 +1,4 @@
+V 6.3.2 writePre 优化
 V 6.3.1 is_admin
 V 6.3.0 modify方法
 V 6.2.1 缺陷修复

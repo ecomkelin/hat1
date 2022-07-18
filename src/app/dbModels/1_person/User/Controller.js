@@ -1,6 +1,6 @@
 const path = require('path');
 const {IS_DEV} = require(path.resolve(process.cwd(), "bin/config/env"));
-const {controlPass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/filterControl"));
+const {pass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/writePre"));
 const {pwd_Auto_Pstr, format_phoneInfo} = require("../FN_group");
 
 const Model = require("./Model");
@@ -16,12 +16,10 @@ const Model = require("./Model");
         // 查看是否已经又了 is_admin
         let Org = await Model.findOne_Pobj({query: {is_admin: true}, projection: {code: 1}});
         if(Org) return reject({status: 400, message: `本系统已经有超级管理员 [${Org.code}], 如果您忘记密码, 请从数据库删除重新添加`});
-
         if(!docObj.pwd) return reject({status: 400, message: "User init: 请输入超级管理员的密码 "});
         docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
         docObj.is_admin = true;
         docObj.rankNum = 10;
-
         // 写入
         let res = await Model.create_Pres(docObj);
         return resolve(res);
@@ -29,7 +27,7 @@ const Model = require("./Model");
         return reject(e);
     }
 });
-exports.removeAllCT = (payload, docObj) => new Promise(async(resolve, reject) => {
+exports.removeAllCT = () => new Promise(async(resolve, reject) => {
     try{
         if(!IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
         /* 删除数据 */
@@ -51,6 +49,7 @@ exports.removeAllCT = (payload, docObj) => new Promise(async(resolve, reject) =>
 
 
 const noWriteAuth = (payload, docObj) => {
+    if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
     if(payload.is_admin !== true) {
         if(docObj.Roles) {
             for(let i=0; i<docObj.Roles.length; i++) {
@@ -75,7 +74,6 @@ const noWriteAuth = (payload, docObj) => {
 }
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
-        console.log(11111)
         // 查看 前台数据 docObj 正确性
         if(!docObj.Roles) return reject({status: 400, message: "请传递 用户角色"});
         if(!docObj.auths) docObj.auths = [];
@@ -84,17 +82,17 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         if(message) return reject({status: 400, message});
 
         // is_change is_semiAuto 数据的处理
-        if(!docObj.pwd) return reject({status: 400, message: "请输入密码"});
-        let passObj = {pwd: docObj.pwd};
-        if(docObj.rankNum) passObj.rankNum = docObj.rankNum;
-        if(docObj.phonePre) passObj.phonePre = docObj.phonePre;
-        if(docObj.phone) passObj.phone = docObj.phone;
-        await controlPass_Pnull(Model.doc, passObj);
+        delete docObj.is_admin;
+        // if(!docObj.pwd) return reject({status: 400, message: "请输入密码"});
+        // let passObj = {pwd: docObj.pwd};
+        // if(docObj.rankNum) passObj.rankNum = docObj.rankNum;
+        // if(docObj.phonePre) passObj.phonePre = docObj.phonePre;
+        // if(docObj.phone) passObj.phone = docObj.phone;
+        await pass_Pnull(false, Model.doc, docObj, payload);
 
         // is_change is_semiAuto 数据自动处理处;
         docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
         format_phoneInfo(docObj);
-        if(docObj.is_admin === true) docObj.rankNum = 10;
 
         // 写入
         let res = await Model.create_Pres(docObj);
@@ -135,7 +133,7 @@ exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) =>
         if(docObj.rankNum) passObj.rankNum = docObj.rankNum;
         if(docObj.phonePre) passObj.phonePre = docObj.phonePre;
         if(docObj.phone) passObj.phone = docObj.phone;
-        await controlPass_Pnull(Model.doc, passObj);
+        await pass_Pnull(true, Model.doc, passObj, payload);
         
         // is_change is_semiAuto 数据自动处理处;
         if(docObj.pwd) docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);

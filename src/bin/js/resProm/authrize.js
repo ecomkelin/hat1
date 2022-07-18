@@ -16,7 +16,7 @@ exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 		let token = await jwtMD.obtain_headersInfo(headersToken);
 		if(token !== object.refreshToken) return reject({status: 400, message: "refreshToken 不匹配, 请重新登陆"});
 
-		let {accessToken, refreshToken} = getToken(payload, Model);
+		let {accessToken, refreshToken} = await getToken_Pobj(payload, Model);
 
 		return resolve({
 			data: {accessToken, refreshToken, payload},
@@ -31,8 +31,11 @@ exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 exports.login_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
     try{
 		let object = await obtainObj_Pobj(ctx.request.body, Model);
+
 		let payload = jwtMD.generatePayload(object);
-		let {accessToken, refreshToken} = getToken(payload, Model);
+
+		let {accessToken, refreshToken} = await getToken_Pobj(payload, Model);
+
 		return resolve({
 			data: {payload, accessToken, refreshToken},
 			message: "登录成功"
@@ -42,15 +45,20 @@ exports.login_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
     }
 });
 
-const getToken = (payload, Model) => {
-	let accessToken = jwtMD.generateToken(payload);
-	let refreshToken = jwtMD.generateToken(payload, true);
+const getToken_Pobj = (payload, Model) => new Promise(async(resolve, reject) => {
+	try {
+		let accessToken = jwtMD.generateToken(payload);
+		let refreshToken = jwtMD.generateToken(payload, true);
 
-	Model.modify_Pres({_id: payload._id}, {refreshToken, at_login: new Date()});
-	return {
-		accessToken, refreshToken
+		await Model.modify_Pres({_id: payload._id}, {refreshToken, at_login: new Date()});
+		return resolve({
+			accessToken, refreshToken
+		})
+	} catch(e) {
+		return reject(e);
 	}
-}
+})
+
 
 const obtainObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
 	try {

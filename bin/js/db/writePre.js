@@ -5,11 +5,11 @@
 
 const {isObjectId} = require("../isType");
 
-const formatDocKey_Pnull = (key, fieldObj, val) => new Promise((resolve, reject) => {
+const formatDocKey_Pnull = (key, fieldObj, val, is_before) => new Promise((resolve, reject) => {
     try {
         if(!fieldObj) return reject({status: 400, message: `writePre 没有[${key}] 此字段`});
 
-        if(fieldObj.is_change) return resolve(null); // 一些变化的数据 不在此判断
+        if(!is_before && fieldObj.is_change) return resolve(null); // 一些变化的数据 不在变化后判断 直接返回空通过
 
         if(val && fieldObj.type === String) {
             if(fieldObj.trimLen && fieldObj.trimLen !== val.length) return reject({status: 400, message: `writePre [${key}] 字段的字符串长度必须为 [${fieldObj.trimLen}]`});
@@ -34,6 +34,39 @@ const formatDocKey_Pnull = (key, fieldObj, val) => new Promise((resolve, reject)
     }
 });
 
+exports.pass_Pnull = (is_upd, doc, docObj, payload) => new Promise(async(resolve, reject) => {
+    try {
+        let is_before = payload ? true : false;
+        for(key in docObj) {
+            if(is_upd) {
+                if(key === '_id') continue;
+                if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
+            }
+            await formatDocKey_Pnull(key, doc[key], docObj[key], is_before);
+        }
+        for(key in doc) {
+            if(!is_upd) {
+                // 先判断是否可以为空
+                if(doc[key].required === true) {
+                    if(docObj[key] === null || docObj[key] === undefined) {
+                        return reject({status: 400, message:`writePre 创建时 必须添加 [docObj${key}] 字段`});
+                    }
+                }
+            } else {
+                if(doc[key].is_fixed) continue; // 如果不可更改 则跳过 比如创建时间
+            }
+            if(is_before) {
+                if(doc[key].is_semiAuto && docObj[key]) return reject({status: 400, message:`writePre [docObj${key}] 不能前端传输数据`});
+                if(doc[key].is_autoPayload) docObj[key] = payload._id;
+            }
+
+            if(doc[key].is_autoDate) docObj[key] = new Date();      // 自动计时
+        }
+        return resolve(null);
+    } catch(e) {
+        return reject(e);
+    }
+})
 
 exports.createPass_Pnull = (doc, crtObj) => new Promise(async(resolve, reject) => {
     try {
@@ -48,7 +81,7 @@ exports.createPass_Pnull = (doc, crtObj) => new Promise(async(resolve, reject) =
                 }
             }
 
-            if(doc[key].is_auto) crtObj[key] = new Date();      // 自动计时
+            if(doc[key].is_autoDate) crtObj[key] = new Date();      // 自动计时
         }
         return resolve(null);
     } catch(e) {
@@ -57,9 +90,8 @@ exports.createPass_Pnull = (doc, crtObj) => new Promise(async(resolve, reject) =
     
 });
 
-exports.modifyPass_Pnull = (doc, updObj, id) => new Promise(async(resolve, reject) => {
+exports.modifyPass_Pnull = (doc, updObj) => new Promise(async(resolve, reject) => {
     try {
-        if(!isObjectId(id)) return reject({status: 400, message: 'id 必须为 ObjectId 类型'});
         for(key in updObj) {
             if(key === '_id') continue;
             if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
@@ -67,7 +99,7 @@ exports.modifyPass_Pnull = (doc, updObj, id) => new Promise(async(resolve, rejec
         }
         for(key in doc) {
             if(doc[key].is_fixed) continue; // 如果不可更改 则跳过 比如创建时间
-            if(doc[key].is_auto) updObj[key] = new Date();      // 自动计时
+            if(doc[key].is_autoDate) updObj[key] = new Date();      // 自动计时
         }
         return resolve(null);
     } catch(e) {

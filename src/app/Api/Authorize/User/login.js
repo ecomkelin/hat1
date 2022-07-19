@@ -1,17 +1,15 @@
 const path = require('path');
 const Auth = require(path.resolve(process.cwd(), "src/bin/js/resProm/authrize"));
-const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-
 const Model = require(path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Model"));
 
 module.exports = async(ctx, next) => {
     try{
-      if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
+      if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
       let res = await Auth.login_Pres(ctx, Model);
-      return resJson.success(ctx, res, next);
+      return global.success(ctx, res, next);
     } catch(e) {
-        return resJson.errs(ctx, e, next);
+        return global.errs(ctx, e, next);
     }
 };
 

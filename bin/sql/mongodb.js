@@ -2,10 +2,8 @@
  * @description: 链接数据库, 打包mongoose语法, 每个Model引入
  * @author: kelin
  */
- const path = require('path');
- const {DB_MASTER} = global;
- const {LIMIT_FIND} = require(path.resolve(process.cwd(), "src/app/config"));
-/* 数据库连接文件 */
+const {DB_MASTER, LIMIT_FIND} = global;
+ /* 数据库连接文件 */
 const mongoose = require('mongoose');
 /**
  * 主从数据库
@@ -83,8 +81,9 @@ module.exports = (docName, doc) => {
 
 	const detail_Pres = (paramDetail) => new Promise(async(resolve, reject) => {
 		try {
+			// let {match, select, populate} = paramDetail;
 			let paramObj = await readPre.detailFilter_Pobj(doc, paramDetail);
-
+			console.log(222, paramObj);
 			let {query={}, projection, populate} = paramObj;
 
 			let object = await COLread0.findOne(query, projection)

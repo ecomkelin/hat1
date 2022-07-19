@@ -1,18 +1,16 @@
-const path = require('path');
-const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
 const Controller = require("../../../dbModels/1_person/User/Controller");
 
 module.exports = async(ctx, next) => {
     try{
-        if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
+        if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
         let payload = ctx.request.payload;
         let crtObj = ctx.request.body;
 
         let res = await Controller.createManyCT(payload, crtObj);
-        return resJson.success(ctx, res, next);
+        return global.success(ctx, res, next);
     } catch(e) {
-        return resJson.errs(ctx, e, next);
+        return global.errs(ctx, e, next);
     }
 };
 

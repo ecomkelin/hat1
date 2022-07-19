@@ -1,3 +1,4 @@
+V 6.3.4 整合env.js
 V 6.3.4 引入global概念
 V 6.3.3 page中的payload访问权及401状态
 V 6.3.2 writePre 优化

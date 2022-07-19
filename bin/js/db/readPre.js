@@ -1,11 +1,9 @@
 const {ObjectId} = global;
 const {isObjectId} = require("../isType");
 
-const readList = require("../../config/readList");
-const readDetail = require("../../config/readDetail");
 exports.listFilter_Pobj = (doc, paramList) => new Promise(async(resolve, reject) => {
     try {    
-        let paramObj = await obtainFormat_Pobj(doc, paramList, readList);
+        let paramObj = await obtainFormat_Pobj(doc, paramList, global.readList);
         return resolve(paramObj);
     } catch(e) {
         return reject(e);
@@ -14,14 +12,10 @@ exports.listFilter_Pobj = (doc, paramList) => new Promise(async(resolve, reject)
 
 exports.detailFilter_Pobj = (doc, paramDetail={}) => new Promise(async(resolve, reject) => {
     try {
-        if(!isObjectId(paramDetail._id)) return resolve({status: 400, message: "请传递正确的id信息"});
-        delete paramDetail.skip;
-        delete paramDetail.limit;
-        delete paramDetail.sort;
-
-        let paramObj = await obtainFormat_Pobj(doc, paramDetail, readDetail);
-        if(!paramObj.query) paramObj.query = {};
-        paramObj.query._id = paramDetail._id;
+        let {match, select={}, populate} = paramDetail;
+        paramDetail.filter = {match: paramDetail.match};
+        delete paramDetail.match;
+        let paramObj = await obtainFormat_Pobj(doc, paramDetail, global.readDetail);
 
         return resolve(paramObj);
     } catch(e) {
@@ -55,11 +49,9 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
     try {
         let paramTemp = {};
         let {filter, select={}, skip, limit, sort, populate} = paramObj;
-    
         if(filter) {
             let matchObj = {"$or" : []};
             let {search, match, includes={}, excludes={}, lte={}, gte={}, at_before={}, at_after={}} = filter;
-    
             if(search) {
                 if(!search.fields) return reject({
                     status: 400,
@@ -180,7 +172,6 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
             paramTemp.skip = skip;
         }
     
-        paramTemp.limit = 0; // 在此只判断数值
         if(limit) {
             if(isNaN(limit) || limit < 0) {
                 return reject({

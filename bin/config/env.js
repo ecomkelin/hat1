@@ -48,6 +48,59 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 ObjectId = Schema.Types.ObjectId;
 
+/* ======================================== 数据库接口 ======================================== */
+readDetail = {
+    "match": {
+        "_id": "要查找的 ObjectId",
+    },
+    "select": {
+        "$key<field>": "$content< 1 / -1 / String > 映射"
+    },
+
+    "populate": "$content < String / Object / [Object] > 详情查看 mongoose populate" 
+};
+
+readList = {
+    "paramObj": {
+        "filter": {
+            "search": {
+                "fields": "$<String> / <[String]> 需要匹配的字段",
+                "keywords": "<String> 对fields的模糊匹配 不分大小写"
+            },
+            "match": {
+                "$key": "$value 完全匹配的值不区分大小写",
+            },
+            "includes": {
+                "$key": "$[ObjectId] 完全匹配的数据",
+            },
+            "excludes": {
+                "$key": "排除匹配的 $[ObjectId]",
+            },
+            "gte": {
+                "$key": "$<Number / Float> 大于此值的 field"
+            },
+            "lte": {
+                "$key": "$content<Number / Float> 小于此值的 field"
+            },
+            "at_before": {
+                "$key": "$content<Date> 在此时间之前的数据"
+            },
+            "at_after": {
+                "$key": "$content<Date> 在此时间之后的数据"
+            },
+        },
+        "select": {
+            "$key<field>": "$content< 1 / -1 / String > 映射"
+        },
+        "skip": "$content<Number> 跳过 Number 条数据 查找",
+        "limit": "$content<Number> 查找 Number 条数据",
+        "sort": {
+            "$key<field>": "$content< 1 / -1> 排序"
+        },
+        "populate": "$content < String / Object / [Object] > 详情查看 mongoose populate" 
+    }
+};
+
 
 /* ======================================== 常量 ======================================== */
 LIMIT_FIND = 50;		// 系统中 默认调取的数据量
@@ -60,3 +113,47 @@ MONTH = {
     1: "JAN", 2: "FEB", 3: "MAR", 4: "APR", 5: "MAY", 6: "JUN",
     7: "JUL", 8: "AUG", 9: "SEP", 10: "OCT", 11: "NOV", 12: "DEC"
 };
+
+
+/* ======================================== 路由白名单 ======================================== */
+WHITE_URL = [
+	"/api/v1/user/init",
+	"/api/authorize/user/login",
+	"/api/authorize/user/refresh",
+];
+
+
+
+
+
+
+
+
+
+/* ======================================== response ======================================== */
+api = (ctx, api, next) => {
+    ctx.status = 200;
+    ctx.body = {status: 200, api};
+}
+
+success = (ctx, ctxBody, next) => {
+    ctx.status = 200;
+    ctx.body = {status: 200, ...ctxBody};
+}
+noAccess = (ctx) => {
+    ctx.status = 401;
+    ctx.body = {status: 401, message: `您没有访问 [${ctx.url}] 的权限`}
+}
+errs = (ctx, e, next) => {
+    let error = e.stack
+    let status = e.status || 500;
+    ctx.status = status;
+
+    if(error) {
+        ctx.body = {status, error};
+        if(status === 500) console.error("[errs] e.stack: ", error);
+    } else {
+        ctx.body = {status, ...e};
+        if(status === 500) console.error("[errs] e: ", e);
+    }
+}

@@ -1,18 +1,16 @@
-const path = require('path');
-const resJson = require(path.resolve(process.cwd(), "bin/response/resJson"));
-const Controller = require(path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Controller"));
+const Controller = require("../../../dbModels/1_person/User/Controller");
 
 module.exports = async(ctx, next) => {
     try{
-        if(ctx.request.query.api == 1) return resJson.api(ctx, api, next);
+        if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
         let payload = ctx.request.payload;
         let updObj = ctx.request.body;
 
         let res = await Controller.modifyCT(payload, updObj);
-        return resJson.success(ctx, res);
+        return global.success(ctx, res);
     } catch(e) {
-        return resJson.errs(ctx, e, next);
+        return global.errs(ctx, e, next);
     }
 }
 

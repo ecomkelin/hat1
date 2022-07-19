@@ -1,34 +1,6 @@
 const {ObjectId} = global;
 const {isObjectId} = require("../isType");
 
-exports.listFilter_Pobj = (doc, paramList) => new Promise(async(resolve, reject) => {
-    try {    
-        let paramObj = await obtainFormat_Pobj(doc, paramList, global.readList);
-        return resolve(paramObj);
-    } catch(e) {
-        return reject(e);
-    }
-});
-
-exports.detailFilter_Pobj = (doc, paramDetail={}) => new Promise(async(resolve, reject) => {
-    try {
-        let {match, select={}, populate} = paramDetail;
-        paramDetail.filter = {match: paramDetail.match};
-        delete paramDetail.match;
-        let paramObj = await obtainFormat_Pobj(doc, paramDetail, global.readDetail);
-
-        return resolve(paramObj);
-    } catch(e) {
-        return reject(e);
-    }
-})
-
-
-
-
-
-
-
 const obt_docField = (doc, field) => {
     if(field === "_id") return {type: ObjectId};
     if(!doc) return null;
@@ -44,19 +16,56 @@ const obt_docField = (doc, field) => {
     };
     return null;
 }
+const setProject = (doc, param, select={}) => {
+    let message = null;
+    for(key in select) {
+        let docField = obt_docField(doc, key);
+        if(!docField) {
+            message = `[paramObj.select 的 ${key}] 不是该数据的字段`;
+            break;
+        }
 
-const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, reject) => {
+        if(docField.is_hideRead) {
+            delete select[key];
+        } else {
+            if(select[key] != 1) {
+                select[select[key]] = "$"+key;
+                delete select[key];
+            }
+        }
+    }
+    for(key in doc) {
+        if(doc[key].is_hideRead) delete select[key];
+    }
+    param.projection = select;
+}
+const setPopulate = (doc, param, populate) => {
+    if((typeof populate) === 'string') {
+    
+    } else if(populate instanceof Array) {
+        
+    } else if(populate instanceof Object) {
+
+    } else {
+        return reject({
+            status: 400,
+            message: `[paramObj.populate] 参数错误`,
+        });
+    }
+    param.populate = populate;
+}
+exports.readMany = (doc, paramObj) => new Promise((resolve, reject) => {
     try {
-        let paramTemp = {};
+        let param = {};
         let {filter, select={}, skip, limit, sort, populate} = paramObj;
         if(filter) {
-            let matchObj = {"$or" : []};
+            let matchObj = paramObj.match || {};
+            if(!matchObj["$or"]) matchObj["$or"] = [];
             let {search, match, includes={}, excludes={}, lte={}, gte={}, at_before={}, at_after={}} = filter;
             if(search) {
                 if(!search.fields) return reject({
                     status: 400,
                     message: "数据层 paramObj.filter.search 参数错误 需要传递 [search.fields] 参数",
-                    readPreApi
                 });
                 search.keywords = String(search.keywords).replace(/(\s*$)/g, "").replace( /^\s*/, '');
                 if(!search.keywords) {
@@ -71,17 +80,15 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                         if(!docField) return reject({
                             status: 400,
                             message: `[paramObj.filter.search.fields]: 数据库中无 此字段： [${field}] `,
-                            readPreApi
                         });
                         if(docField.type !== String) return reject({
                             status: 400,
                             message: `数据层readPre [paramObj.filter.search.fields 的值 ${field}] 错误, 应该传递类型为<String>的<field>`,
-                            readPreApi
                         });
                         matchObj["$or"].push({[field]: { $regex: keywords, $options: '$i' }});
                     }
                 }
-                paramTemp.search = search;
+                param.search = search;
             }
             if(matchObj["$or"].length === 0) delete matchObj["$or"];
             for(key in match) {
@@ -90,18 +97,21 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 if(docField.type === ObjectId && !isObjectId(match[key]) ) return reject({
                     status: 400,
                     message: `数据层readPre [paramObj.filter.match.${key}] 类型为 ObjectId, 请您检查`,
-                    readPreApi
                 });
                 matchObj[key] = match[key];
             }
             for(key in includes) {
                 let docField = obt_docField(doc, key);
                 if(!docField) continue;
-                if(docField.type === ObjectId && !isObjectId(includes[key]) ) return reject({
-                    status: 400,
-                    message: `[paramObj.filter.includes.${key}] 类型为 ObjectId`,
-                    readPreApi
-                });
+                if(docField.type === ObjectId ) {
+                    let vals = includes[key];
+                    for(let i=0; i<vals.length; i++) {
+                        if(!isObjectId(vals[i])) return reject({
+                            status: 400,
+                            message: `[paramObj.filter.includes.${key}] 类型为 ObjectId`,
+                        });
+                    }
+                }
                 matchObj[key] = {"$in": includes[key]};
             }
             for(key in excludes) {
@@ -110,7 +120,6 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 if(docField.type === ObjectId && !isObjectId(excludes[key]) ) return reject({
                     status: 400,
                     message: `[paramObj.filter.excludes.${key}] 类型为 ObjectId`,
-                    readPreApi
                 });
                 matchObj[key] = {"$nin": excludes[key]};
             }
@@ -120,7 +129,6 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 if(docField.type !==  Number) return reject({
                     status: 400,
                     message: `[paramObj.filter.lte 的 key ${key}] 必须为Number类型`,
-                    readPreApi
                 });
                 matchObj[key] = {"$lte": lte[key]};
             }
@@ -131,7 +139,6 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 if(docField.type !==  Number) return reject({
                     status: 400,
                     message: `[paramObj.filter.gte 的 key ${key}] 必须为Number类型`,
-                    readPreApi
                 });
                 
                 matchObj[key] = {"$gte": gte[key]};
@@ -142,7 +149,6 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 if(docField.type !==  Date) return reject({
                     status: 400,
                     message: `[paramObj.filter.at_before 的 key ${key}] 必须为 Date 类型`,
-                    readPreApi
                 });
                 let before = (new Date(at_before[key]).setHours(23,59,59,999));
                 matchObj[key] = {"$lte": before};
@@ -153,23 +159,25 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 if(docField.type !==  Date) return reject({
                     status: 400,
                     message: `[paramObj.filter.at_after 的 key ${key}] 必须为 Date 类型`,
-                    readPreApi
                 });
                 let after = (new Date(at_after[key]).setHours(0,0,0,0));
                 matchObj[key] = {"$gte": after};
             }
-            paramTemp.query = matchObj;
+            param.match = matchObj;
         }
-    
+
+        let message = null;
+        message = setProject(doc, param, select);
+        if(message) return reject({status: 400, message});
+
         if(skip) {
             if(isNaN(skip) || skip < 0) {
                 if(docField.type !==  Date) return reject({
                     status: 400,
                     message: `[paramObj.skip] 必须为大于0的 Number 类型`,
-                    readPreApi
                 });
             }
-            paramTemp.skip = skip;
+            param.skip = skip;
         }
     
         if(limit) {
@@ -177,66 +185,55 @@ const obtainFormat_Pobj = (doc, paramObj, readPreApi) => new Promise((resolve, r
                 return reject({
                     status: 400,
                     message: `[paramObj.limit] 必须为大于0的 Number 类型`,
-                    readPreApi
                 });
             }
-            paramTemp.limit = limit;
+            param.limit = limit;
         } 
-    
-        for(key in select) {
-            let docField = obt_docField(doc, key);
-            if(!docField) return reject({
-                status: 400,
-                message: `[paramObj.select 的 ${key}] 不是该数据的字段`,
-                readPreApi
-            });
-
-            if(docField.is_hideRead) {
-                delete select[key];
-            } else {
-                if(select[key] != 1) {
-                    select[select[key]] = "$"+key;
-                    delete select[key];
-                }
-            }
-        }
-        for(key in doc) {
-            if(doc[key].is_hideRead) delete select[key];
-        }
-        paramTemp.projection = select;
     
         if(sort) {
             for(key in sort) {
                 if(!obt_docField(doc, key)) return reject({
                     status: 400,
                     message: `[paramObj.sort 的 ${key}] 不是该数据的字段`,
-                    readPreApi
                 });
                 if(sort[key] !== -1 && sort[key] !== "-1") {
                     sort[key] = 1
                 }
             }
-            paramTemp.sort = sort;
+            param.sort = sort;
         }
     
         if(populate) {
-            if((typeof populate) === 'string') {
-    
-            } else if(populate instanceof Array) {
-                
-            } else if(populate instanceof Object) {
-    
-            } else {
-                return reject({
-                    status: 400,
-                    message: `[paramObj.populate] 参数错误`,
-                    readPreApi
-                });
-            }
-            paramTemp.populate = populate;
+            message = setProject(doc, param, select);
+            if(message) return reject({status: 400, message});
         }
-        return resolve(paramTemp);
+
+        return resolve(param);
     } catch(e) {
         return reject(e);
     }
 })
+
+
+exports.readOne = (doc, paramObj) => new Promise(async(resolve, reject) => {
+    try {
+        let param = {};
+        let {match={}, select, populate} = paramObj;
+        if(!match._id) return reject({status: 400, message: "请输入数据的 _id"});
+        param.match = paramObj.match;
+
+        let message = null;
+
+        message = setProject(doc, param, select);
+        if(message) return reject({status: 400, message});
+
+        if(populate) {
+            message = setProject(doc, param, select);
+            if(message) return reject({status: 400, message});
+        }
+
+        return resolve(param);
+    } catch(e) {
+        return reject(e);
+    }
+});

@@ -5,9 +5,10 @@ module.exports = async(ctx, next) => {
         if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
         let payload = ctx.request.payload;
-        let updObj = ctx.request.body;
+        let paramObj = ctx.request.body;
 
-        let res = await Controller.modifyCT(payload, updObj);
+        // let {_id, update} = paramObj;
+        let res = await Controller.modifyCT(payload, paramObj);
         return global.success(ctx, res);
     } catch(e) {
         return global.errs(ctx, e, next);

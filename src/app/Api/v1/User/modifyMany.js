@@ -5,13 +5,9 @@ module.exports = async(ctx, next) => {
         if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
         let payload = ctx.request.payload;
-        let {filter={}, update} = ctx.request.body;
-        let {ids, match={}} = filter;
-        let matchObj = {
-            ...match,
-            _id: {"$in": ids}
-        }
-        let res = await Controller.modifyManyCT(payload, matchObj, update);
+
+        let paramObj = ctx.request.body;
+        let res = await Controller.modifyManyCT(payload, paramObj);
         return global.success(ctx, res);
     } catch(e) {
         return global.errs(ctx, e, next);

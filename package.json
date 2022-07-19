@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "debug": "cross-env NODE_ENV=debug nodemon --inspect=9229 ./bin/server/index.js",
-    "dev": "cross-env NODE_ENV=dev nodemon --inspect=9229 ./bin/server/index.js",
+    "dev": "cross-env NODE_ENV=dev nodemon ./bin/server/index.js",
     "start": "pm2 start pm2.conf.json",
     "stop": "pm2 stop pm2.conf.json",
     "delete": "pm2 delete pm2.conf.json",

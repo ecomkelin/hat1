@@ -35,5 +35,4 @@ const getModelName = (dirPath, paths, n, maskFiles) => {
     });
 }
 getModelName(MdPath, ['dbModels'], 0, ['Model.js'])
-// console.log(docNameObj)
 module.exports = docNameObj;

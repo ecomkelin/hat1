@@ -4,7 +4,7 @@ module.exports = async(ctx, next) => {
     try{
         if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
-        let res = await Controller.removeManyCT();
+        let res = await Controller.removeAllCT();
         return global.success(ctx, res, next);
     } catch(e) {
         return global.errs(ctx, e, next);

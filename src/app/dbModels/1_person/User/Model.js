@@ -20,7 +20,7 @@ const doc = {
     Roles: [{type: ObjectId, ref: docNameObj.Role}],
     auths: [{type: String}],                                                    // 用户权限 可选
     // 特殊的 为了身份验证
-    is_admin: {type: Boolean, default: false, true_unique: true},              // 每个公司有且只有一个为true
+    is_admin: {type: Boolean, default: false, true_unique: true, is_auto: true, is_fixed: true},    // 每个公司有且只有一个为true
     rankNum: {type: Number, default: 1, minNum: 1, maxNum: 9, is_change: true},  // 等级制度 修改用户时 只能修改自己或比自己等级低的用户
 };
 

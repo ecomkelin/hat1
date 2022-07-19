@@ -10,7 +10,7 @@ exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 		let headersToken = ctx.request.headers['authorization'];
 		let payload = await jwtMD.obtainPayload_Pobj(headersToken, true);
 		if(!payload) return reject({status: 400, message: "refresh payload 为空 错误"});
-		let object = await Model.findOne_Pobj({query: {_id: payload._id}});
+		let object = await Model.findOne_Pobj({match: {_id: payload._id}});
 		if(!object) return reject({status: 400, message: "授权错误, 请重新登录"});
 		
 		let token = await jwtMD.obtain_headersInfo(headersToken);
@@ -77,7 +77,7 @@ const obtainObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
 				match.phone = phoneNum ? phonePre+phoneNum : undefined;
 			}
 
-			let object = await Model.findOne_Pobj({query: match, project: {}});
+			let object = await Model.findOne_Pobj({match, project: {}});
 			if(!object) return reject({status: 400, message: "账号错误"});
 			await bcryptMD.matchBcrypt_Pnull(hat.pwd, object.pwd);
 			return resolve(object);

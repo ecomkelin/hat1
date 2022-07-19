@@ -6,10 +6,9 @@ module.exports = async(ctx, next) => {
         if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
         let payload = ctx.request.payload;
-        let match = ctx.request.body;
+        let _id = ctx.request.body;
 
-
-        let res = await Controller.removeCT(payload , match);
+        let res = await Controller.removeCT(payload , _id);
         return global.success(ctx, res, next);
     } catch(e) {
         return global.errs(ctx, e, next);

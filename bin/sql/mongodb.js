@@ -45,16 +45,17 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const list_Pres = (paramList={}) => new Promise(async(resolve, reject) => {
+	const list_Pres = (paramObj={}) => new Promise(async(resolve, reject) => {
 		try {
-			let paramObj = await readPre.listFilter_Pobj(doc, paramList);
+			// let {filter, select={}, skip, limit, sort, populate} = paramObj;
+			let param = await readPre.readMany(doc, paramObj);
 
-			let {query={}, projection, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = paramObj;
+			let {match={}, projection, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = param;
 			if(!sort) sort = {sortNum: -1, at_upd: -1};
 	
-			let count = await COLread0.countDocuments(query);
+			let count = await COLread0.countDocuments(match);
 	
-			let objects = await COLread0.find(query, projection)
+			let objects = await COLread0.find(match, projection)
 				.skip(skip).limit(limit)
 				.sort(sort)
 				.populate(populate);
@@ -62,43 +63,46 @@ module.exports = (docName, doc) => {
 			let object = null;
 			let {fields, keywords} = search;
 			if(objects.length > 0 && fields && keywords) {
-				query["$or"] = [];
+				match["$or"] = [];
 				fields.forEach(field => {
-					query["$or"].push({[field]: { $regex: keywords, $options: '$i' }})
+					match["$or"].push({[field]: { $regex: keywords, $options: '$i' }})
 				});
-				object = await COLread0.findOne(query, projection).populate(populate);
+				object = await COLread0.findOne(match, projection).populate(populate);
 			}
 
 			return resolve({
 				message: "获取数据列表成功", 
 				data: {count, objects, object, skip, limit},
-				paramObj
+				param
 			});
 		} catch(e) {
 			return reject(e);
 		}
 	});
 
-	const detail_Pres = (paramDetail) => new Promise(async(resolve, reject) => {
+	const detail_Pobj = (paramObj={}) => new Promise(async(resolve, reject) => {
 		try {
-			// let {match, select, populate} = paramDetail;
-			let paramObj = await readPre.detailFilter_Pobj(doc, paramDetail);
-			console.log(222, paramObj);
-			let {query={}, projection, populate} = paramObj;
+			// let {match, select, populate} = paramObj;
+			param = await readPre.readOne(doc, paramObj);
+			let {match={}, projection, populate} = param;
 
-			let object = await COLread0.findOne(query, projection)
+			let object = await COLread0.findOne(match, projection)
 				.populate(populate);
-			if(!object) return resolve({status: 400, message: "数据库中无此数据"});
-			return resolve({message: "查看数据详情成功", data: {object}, paramObj});
+			if(!object) {
+				let noAuth_object = await COLread0.findOne({_id: match._id}, {_id: 1});
+				if(noAuth_object) return reject({status: 400, message: "您没有权限访问此数据"});
+				return reject({status: 400, message: "没有匹配到此数据"});
+			}
+			return resolve(object);
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const findOne_Pobj = ({query={}, projection, populate}) => new Promise(async(resolve, reject) => {
+	const findOne_Pobj = ({match={}, projection, populate}) => new Promise(async(resolve, reject) => {
 		try {
-			if(query._id && !isObjectId(query._id)) return reject({status: 400, message: "_id为 ObjectId 类型"})
+			if(match._id && !isObjectId(match._id)) return reject({status: 400, message: "_id为 ObjectId 类型"})
 
-			let object = await COLread0.findOne(query, projection)
+			let object = await COLread0.findOne(match, projection)
 				.populate(populate);
 			return resolve(object);
 		} catch(e) {
@@ -108,23 +112,21 @@ module.exports = (docName, doc) => {
 
 	/* write 写入数据 一定要在主数据库中写 */
 	const COLwrite = COLmaster;
-	const create_Pres = (document) => new Promise(async(resolve, reject) => {
+	const create_Pres = (document, options={}) => new Promise(async(resolve, reject) => {
 		try {
-			await writePre.pass_Pnull(false, doc, document);
-			// 判断数据
+			let {is_pass = false} = options;
+			if(!is_pass) await writePre.pass_Pnull(false, doc, document);
+
 			await docSame.passNotExist_Pnull(COLread0, doc, document);	// 如果不存在就通过 存在就报错
 			let object = await COLwrite.create(document);
+			if(!object) return reject({status: 400, message: "创建数据失败"});
 			return resolve({data: {object}, message: "数据创建成功"});
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const createMany_Pres = (documents, options) => new Promise(async(resolve, reject) => {
+	const createMany_Pres = (documents) => new Promise(async(resolve, reject) => {
 		try {
-			for(let i=0; i<documents.length; i++) {
-				let document = documents[i];
-				await writePre.pass_Pnull(false, doc, document);
-			}
 			let objects = await COLwrite.insertMany(documents);
 			return resolve({data: {objects}});
 		} catch(e) {
@@ -132,42 +134,52 @@ module.exports = (docName, doc) => {
 		}
 	});
 
-	const modify_Pres = (filter={}, update) => new Promise(async(resolve, reject) => {
+	const modify_Pres = (match={}, update, is_pass=false) => new Promise(async(resolve, reject) => {
 		try {
-			// 写入 auto 数据
-			await writePre.pass_Pnull(true, doc, update);
-			// 判断数据
+			if(!is_pass) await writePre.pass_Pnull(true, doc, update);			// 写入数据是否符合
+
 			await docSame.passNotExist_Pnull(COLread0, doc, update);	// 如果不存在就通过 存在就报错
 			
-			console.debug("[debug: mongodb.js modify_Pres] <filter,update>: ", filter, update);
-			let object = await COLwrite.updateOne(filter, update);
-			return resolve({data: {object}});
+			let updateOne = await COLwrite.updateOne(match, update);
+			return resolve({updateOne});
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const modifyMany_Pres = (filter={}, update, options) => new Promise(async(resolve, reject) => {
+	const modifyMany_Pres = (paramObj, update) => new Promise(async(resolve, reject) => {
 		try {
-			let object = await COLwrite.updateMany(filter, update, options);
-			return resolve({data: {object}});
+			let param = await readPre.readMany(doc, paramObj);
+
+			let {match={}} = param;
+
+			let updateMany = await COLwrite.updateMany(match, update);
+			if(updateMany.matchedCount === 0) return resolve({status: 400, message: "没有更改任何数据"});
+			return resolve({updateMany});
 		} catch(e) {
 			reject(e);
 		}
 	});
 
-	const remove_Pres = (filter, options) => new Promise(async(resolve, reject) => {
+
+
+	const remove_Pres = (match) => new Promise(async(resolve, reject) => {
 		try {
-			let del = await COLwrite.deleteOne(filter);
+			let del = await COLwrite.deleteOne(match);
 			if(del.deletedCount === 0) return resolve({status: 400, message: "数据删除失败"});
-			return resolve({message: "数据删除成功", data: {del}});
+			return resolve({message: "数据删除成功", del});
 		} catch(e) {
 			reject(e);
 		}
 	});
-	const removeMany_Pres = (filter, options) => new Promise(async(resolve, reject) => {
+	const removeMany_Pres = (paramObj ={}) => new Promise(async(resolve, reject) => {
 		try {
-			let dels = await COLwrite.deleteMany(filter);
-			return resolve(dels);
+			let param = await readPre.readMany(doc, paramObj);
+
+			let {match={}} = param;
+
+			let deleteMany = await COLwrite.deleteMany(match);
+			if(deleteMany.deletedCount === 0) return resolve({status: 400, message: "没有删除任何数据"});
+			return resolve(deleteMany);
 		} catch(e) {
 			reject(e);
 		}
@@ -177,7 +189,7 @@ module.exports = (docName, doc) => {
 		doc, 
 		aggregate_Prom, 
 		list_Pres, 
-		detail_Pres, findOne_Pobj, 
+		detail_Pobj, findOne_Pobj, 
 		createMany_Pres, create_Pres,
 		modifyMany_Pres, modify_Pres,
 		remove_Pres, removeMany_Pres,

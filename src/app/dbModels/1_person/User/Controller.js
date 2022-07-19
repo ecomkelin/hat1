@@ -1,5 +1,5 @@
 const path = require('path');
-const {IS_DEV} = require(path.resolve(process.cwd(), "bin/config/env"));
+const {IS_DEV} = global;
 const {pass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/writePre"));
 const {pwd_Auto_Pstr, format_phoneInfo} = require("../FN_group");
 
@@ -81,7 +81,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         let message = noWriteAuth(payload, docObj);
         if(message) return reject({status: 400, message});
 
-        // is_change is_semiAuto 数据的处理
+        // is_change is_auto 数据的处理
         delete docObj.is_admin;
         // if(!docObj.pwd) return reject({status: 400, message: "请输入密码"});
         // let passObj = {pwd: docObj.pwd};
@@ -90,7 +90,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         // if(docObj.phone) passObj.phone = docObj.phone;
         await pass_Pnull(false, Model.doc, docObj, payload);
 
-        // is_change is_semiAuto 数据自动处理处;
+        // is_change is_auto 数据自动处理处;
         docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
         format_phoneInfo(docObj);
 
@@ -127,7 +127,7 @@ exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) =>
         // 找到原数据信息
         let Org = await Model.findOne_Pobj({query: match});
 
-        // is_change is_semiAuto 数据的处理
+        // is_change is_auto 数据的处理
         let passObj = {};
         if(docObj.pwd) passObj.pwd = docObj.pwd;
         if(docObj.rankNum) passObj.rankNum = docObj.rankNum;
@@ -135,7 +135,7 @@ exports.modifyCT = (payload, docObj={}) => new Promise(async(resolve, reject) =>
         if(docObj.phone) passObj.phone = docObj.phone;
         await pass_Pnull(true, Model.doc, passObj, payload);
         
-        // is_change is_semiAuto 数据自动处理处;
+        // is_change is_auto 数据自动处理处;
         if(docObj.pwd) docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
         format_phoneInfo(docObj, Org);
         if(docObj.is_admin === true) docObj.rankNum = 10;

@@ -1,4 +1,4 @@
-const {ObjectId} = require("../../config/type");
+const {ObjectId} = global;
 const {isObjectId} = require("../isType");
 
 const readList = require("../../config/readList");

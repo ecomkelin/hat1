@@ -56,7 +56,7 @@ exports.pass_Pnull = (is_upd, doc, docObj, payload) => new Promise(async(resolve
                 if(doc[key].is_fixed) continue; // 如果不可更改 则跳过 比如创建时间
             }
             if(is_before) {
-                if(doc[key].is_semiAuto && docObj[key]) return reject({status: 400, message:`writePre [docObj${key}] 不能前端传输数据`});
+                if(doc[key].is_auto && docObj[key]) return reject({status: 400, message:`writePre [docObj${key}] 不能前端传输数据`});
                 if(doc[key].is_autoPayload) docObj[key] = payload._id;
             }
 

@@ -2,7 +2,7 @@ const jsonwebtoken = require('jsonwebtoken');
 const path = require('path');
 const {
 	ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EX, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EX
-} = require(path.resolve(process.cwd(), "bin/config/env"));
+} = global;
 
 
 
@@ -45,18 +45,22 @@ exports.generatePayload = (obj)=> {
 	if(obj.phone) payload.phone = obj.phone;
 	if(obj.email) payload.email = obj.email;
 	
-	if(obj.is_admin) payload.is_admin = obj.is_admin;
-	if(obj.rankNum) payload.rankNum = obj.rankNum;
 	if(obj.Firm) payload.Firm = obj.Firm;
 	if(obj.Shop) payload.Shop = obj.Shop;
-	if(obj.auths) {
-		payload.auths = obj.auths;
-	}
-	if(obj.Roles) {
+
+	if(obj.type_auth === 'User') {
+		payload.type_auth = obj.type_auth;
+		payload.rankNum = obj.rankNum;
+		payload.is_admin = obj.is_admin;
+		payload.auths = [];
+		for(let i=0; i<obj.auths.length; i++) {
+			let auth = obj.auths[i].toLowerCase();
+			if(!payload.auths.includes(auth)) payload.auths.push(auth);
+		}
 		for(let i=0; i<obj.Roles.length; i++) {
 			let Role = obj.Roles[i];
 			for(let j=0; j<Role.auths.length; j++) {
-				let auth = Role.auths[j];
+				let auth = Role.auths[j].toLowerCase();
 				if(!payload.auths.includes(auth)) payload.auths.push(auth);
 			}
 		}

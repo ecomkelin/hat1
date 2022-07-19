@@ -2,8 +2,7 @@
  * @description  全局集合的数据特征集合
  * 
  */
-const path = require('path');
-const {ObjectId} = require(path.resolve(process.cwd(), "bin/config/type"));
+const {ObjectId} = global;
 
 
 // 数据库名称集合
@@ -44,7 +43,7 @@ module.exports = {
 /**
  * type mongodb数据库类型 
  * required [Boolean] 是否为必须填写的, 如果为 true 添加时必须要有此数据 (此字段为 mongoose 自带类型, 写入时 本系统 writePre中 也做了判定 )
- * is_semiAuto [Boolean] 是否为自动更新， 如果为 true 则前端不能给数据 给数据就报错. 需要后端给数据。 要在 本身 ${Controller}文件中控制
+ * is_auto [Boolean] 是否为自动更新， 如果为 true 则前端不能给数据 给数据就报错. 需要后端给数据。 要在 本身 ${Controller}文件中控制
  * is_autoPayload [Boolean] 是否为自动更新时间， 如果为 true 则前端不能给数据 给数据就报错。 writePre中 自动生成数据。 
  * 					比如 User_crt
  * is_autoDate [Boolean] 是否为自动更新时间， 如果为 true 则前端不能给数据 给数据就报错。 writePre中 自动生成数据。 
@@ -68,7 +67,7 @@ module.exports = {
 	// 折扣映射： Brand.uniq = ["Supplier"]; 添加折扣文档时 同一个供应商不能有相同的品牌
 	// const field = {
 	//     // type: ...
-	//     // is_semiAuto: ...
+	//     // is_auto: ...
 	//     // uniq: ['field1', 'field2']
 	// }
 	// field.uniq = ['field1', 'field2'];

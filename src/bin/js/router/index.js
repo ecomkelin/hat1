@@ -28,7 +28,7 @@ const allConfigRouter = (router, routerObjs) => {
  * @param {Number} n 路径的层级
  */
 const floorLevel = 0;   // 从第几层开始输入路由路径
-const payloadMD = require("../../payload");
+const AuthMiddle = require("../../payload/authMiddle");
 const postApis = (router, routerObjs, dirPath, paths, n) => {
     fs.readdirSync(dirPath).forEach(dirName => {
         let len = dirName.split('.').length;
@@ -44,7 +44,7 @@ const postApis = (router, routerObjs, dirPath, paths, n) => {
                     routerName += '/'+paths[j];
                 }
                 routerName += '/'+dirName.split('.')[0];
-                router.post(routerName, payloadMD, requ);
+                router.post(routerName, AuthMiddle, requ);
                 routerObjs.push(routerName);
             }
         }

@@ -1,6 +1,3 @@
-const path = require('path');
-const {IS_DEV} = require(path.resolve(process.cwd(), "bin/config/env"));
-
 const Model = require("./Model");
 /**
  * @param {*} payload 权限
@@ -9,7 +6,7 @@ const Model = require("./Model");
  */
 exports.removeAllCT = () => new Promise(async(resolve, reject) => {
     try{
-        if(!IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
+        if(!global.IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
         /* 删除数据 */
         let dels = await Model.removeMany_Pres({})
 

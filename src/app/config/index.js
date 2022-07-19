@@ -1,11 +1,15 @@
 /**
  * 为了统一暴露， 也为了方便 router api 查看
  */
-const path = require('path');
-const {LIMIT_FIND, PHONE_PRE, MONTH} = require(path.join(process.cwd(), "bin/config/const_var"));
-
+const {LIMIT_FIND, PHONE_PRE, MONTH} = global;
+const WHITE_URL = [
+	"/api/v1/user/init",
+	"/api/authorize/user/login",
+	"/api/authorize/user/refresh",
+]
 module.exports = {
 	LIMIT_FIND,
 	PHONE_PRE,
-	MONTH
+	MONTH,
+	WHITE_URL
 }

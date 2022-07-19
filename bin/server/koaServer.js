@@ -1,5 +1,5 @@
 const path = require('path');
-const {DIR_PUBLIC, DIR_UPLOAD} = require(path.resolve(process.cwd(), "bin/config/env"));
+const {DIR_PUBLIC, DIR_UPLOAD} = global;
 
 const koa = require('koa');
 const server = new koa();

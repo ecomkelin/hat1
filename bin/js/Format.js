@@ -1,5 +1,4 @@
-const path = require('path');
-const {PHONE_PRE} = require(path.join(process.cwd(), "bin/config/const_var"));
+const {PHONE_PRE} = global;
 
 format_phonePre = (phonePre) => {
 	if(!phonePre) return PHONE_PRE;

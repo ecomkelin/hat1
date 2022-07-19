@@ -1,6 +1,6 @@
 // 引入全局及组的 collection field
 const path = require('path');
-const {ObjectId} = require(path.resolve(process.cwd(), "bin/config/type"));
+const {ObjectId} = global;
 const doc_group = require("../doc_group");
 // #################################################################
 // global 最上面 group中间 本身最下
@@ -15,6 +15,8 @@ const doc = {
 
     code,
     // 权限信息
+    type_auth: {type: String, default: 'User', is_auto: true, is_fixed: true},   // <后台自动添加> User / Customer / Supplier
+
     Roles: [{type: ObjectId, ref: docNameObj.Role}],
     auths: [{type: String}],                                                    // 用户权限 可选
     // 特殊的 为了身份验证

@@ -219,7 +219,7 @@ exports.readOne = (doc, paramObj) => new Promise(async(resolve, reject) => {
     try {
         let param = {};
         let {match={}, select, populate} = paramObj;
-        if(!match._id) return reject({status: 400, message: "请输入数据的 _id"});
+        if(!match._id) return reject({status: 400, message: "查找detail数据时 请输入数据的 _id"});
         param.match = paramObj.match;
 
         let message = null;

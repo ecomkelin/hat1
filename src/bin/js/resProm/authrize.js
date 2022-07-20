@@ -8,14 +8,17 @@ const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/Format"));
 exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 	try {
 		let headersToken = ctx.request.headers['authorization'];
-		let payload = await jwtMD.obtainPayload_Pobj(headersToken, true);
-		if(!payload) return reject({status: 400, message: "refresh payload 为空 错误"});
-		let object = await Model.findOne_Pobj({match: {_id: payload._id}});
-		if(!object) return reject({status: 400, message: "授权错误, 请重新登录"});
-		
-		let token = await jwtMD.obtain_headersInfo(headersToken);
-		if(token !== object.refreshToken) return reject({status: 400, message: "refreshToken 不匹配, 请重新登陆"});
 
+		let payload = await jwtMD.obtainPayload_Pobj(headersToken, true);	// 解码 refreshToken 到 payload
+		if(!payload) return reject({status: 400, message: "refresh payload 为空 错误"});
+		let object = await Model.findOne_Pobj({match: {_id: payload._id}});	// 因为需要 refreshToken 所以不嫩用 detail_Pobj
+		if(!object) return reject({status: 400, message: "授权错误, 请重新登录"});
+
+		let refresh_Token = await jwtMD.obtain_headersInfo(headersToken);		//	前台传递的 refreshToken
+
+		if(refresh_Token !== object.refreshToken) return reject({status: 400, message: "refreshToken 不匹配, 请重新登陆"});
+
+		payload = jwtMD.generatePayload(object);		// 重新生成 payload
 		let {accessToken, refreshToken} = await getToken_Pobj(payload, Model);
 
 		return resolve({
@@ -49,7 +52,6 @@ const getToken_Pobj = (payload, Model) => new Promise(async(resolve, reject) => 
 	try {
 		let accessToken = jwtMD.generateToken(payload);
 		let refreshToken = jwtMD.generateToken(payload, true);
-
 		await Model.modify_Pres({_id: payload._id}, {refreshToken, at_login: new Date()});
 		return resolve({
 			accessToken, refreshToken
@@ -77,7 +79,7 @@ const obtainObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
 				match.phone = phoneNum ? phonePre+phoneNum : undefined;
 			}
 
-			let object = await Model.findOne_Pobj({match, project: {}});
+			let object = await Model.findOne_Pobj({match, project: {}});	// 因为要用code等其他信息匹配 所以不能用 detail_Pobj
 			if(!object) return reject({status: 400, message: "账号错误"});
 			await bcryptMD.matchBcrypt_Pnull(hat.pwd, object.pwd);
 			return resolve(object);

@@ -1,3 +1,4 @@
+V 6.5.1 基本完成User的增删改查 及登陆 refresh
 V 6.5.0 整理User功能
 V 6.3.4 整合env.js
 V 6.3.4 引入global概念

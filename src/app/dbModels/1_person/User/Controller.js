@@ -1,7 +1,9 @@
 const path = require('path');
+const {encryptHash_Pstr, matchBcrypt_Pnull} = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
+
 const {IS_DEV} = global;
 const {pass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/writePre"));
-const {pwd_Auto_Pstr, format_phoneInfo} = require("../FN_group");
+const {format_phoneInfo} = require("../FN_group");
 
 const Model = require("./Model");
 /**
@@ -14,11 +16,11 @@ const Model = require("./Model");
     try{
         if(!IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
         // 查看是否已经有了 is_admin
-        let Org = await Model.findOne_Pobj({match: {is_admin: true}, projection: {code: 1}});
+        let Org = await Model.findOne_Pobj({match: {is_admin: true}, projection: {code: 1}});   // 没有match._id 所以不能用 detail_Pobj
         if(Org) return reject({status: 400, message: `本系统已经有超级管理员 [${Org.code}], 如果您忘记密码, 请从数据库删除重新添加`});
 
         if(!docObj.pwd) return reject({status: 400, message: "User init: 请输入超级管理员的密码 "});
-        docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
+        docObj.pwd = await encryptHash_Pstr(docObj.pwd);
 
         docObj.is_admin = true;
         docObj.rankNum = 10;
@@ -87,7 +89,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         let is_pass = true;
 
         // is_change is_auto 数据自动处理处;
-        docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
+        docObj.pwd = await encryptHash_Pstr(docObj.pwd);
         format_phoneInfo(docObj);
         if(payload.Firm && payload.Firm._id) {
             docObj.Firm = payload.Firm._id;
@@ -119,7 +121,7 @@ exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, rejec
             await pass_Pnull(false, Model.doc, docObj, payload);
 
             // is_change is_auto 数据自动处理处;
-            docObj.pwd = await pwd_Auto_Pstr(docObj.pwd);
+            docObj.pwd = await encryptHash_Pstr(docObj.pwd);
             format_phoneInfo(docObj);
         }
 
@@ -153,10 +155,14 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
         Org = await Model.detail_Pobj({match});
 
         let flag_change = false;
-        for(key in update) {
-            if(Model.doc[key].is_change) continue;
-            if(update[key] !== Org[key]) {
-                flag_change = true;
+        if(update.pwd) {
+            flag_change = true;
+        } else {
+            for(key in update) {
+                if(Model.doc[key].is_change) continue;
+                if(update[key] !== Org[key]) {
+                    flag_change = true;
+                }
             }
         }
         if(!flag_change) return reject({status: 400, message: "您没有修改任何数据"});
@@ -167,7 +173,54 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
         let is_pass = true; // 已经通过了数据验证, 不需要再进行验证
 
         // is_change is_auto 数据自动处理处;
-        if(update.pwd) update.pwd = await pwd_Auto_Pstr(update.pwd);
+        if(update.pwd) update.pwd = await encryptHash_Pstr(update.pwd);
+        format_phoneInfo(update, Org);
+
+        // 修改数据
+        let res = await Model.modify_Pres(match, update, is_pass);
+        return resolve(res);
+    } catch(e) {
+        return reject(e);
+    }
+});
+exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
+    try{
+        let {update, pwdOrg} = paramObj;
+        if(!update) return reject({status: 400, message: "请输入 update 参数"});
+        // 有无权限 完成新数据
+        let message = noWriteAuth(payload, update);
+        if(message) return reject({status: 400, message});
+
+        let match = {_id: payload._id};
+
+        Org = await Model.findOne_Pobj({match});    // 因为要看 pwd 所以不能用 detail_Pobj
+        if(!Org) return reject({status: 400, message: "您的数据已经不在数据库中"})
+
+        let flag_change = false;
+        if(update.pwd) {
+            flag_change = true;
+        } else {
+            for(key in update) {
+                if(Model.doc[key].is_change) continue;
+                if(update[key] !== Org[key]) {
+                    flag_change = true;
+                }
+            }
+        }
+        if(!flag_change) return reject({status: 400, message: "您没有修改任何数据"});
+
+        // is_change is_auto 操作前的 数据的验证
+        let is_upd = true;  // 标识这是更新而不是新建
+        await pass_Pnull(is_upd, Model.doc, update, payload);
+        let is_pass = true; // 已经通过了数据验证, 不需要再进行验证
+
+        // is_change is_auto 数据自动处理处;
+        console.log(Org.pwd);
+        if(update.pwd) {
+            if(!pwdOrg) return reject({status: 400, message: "请输入您的原密码, 如果忘记请联系管理员"})
+            await matchBcrypt_Pnull(pwdOrg, Org.pwd);
+            update.pwd = await encryptHash_Pstr(update.pwd);
+        }
         format_phoneInfo(update, Org);
 
         // 修改数据
@@ -246,8 +299,18 @@ exports.removeManyCT = (payload, paramObj={}) => new Promise(async(resolve, reje
 
 
 
+exports.profileCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
+    try {
+        let {select, populate} = paramObj;
 
-
+        paramObj.match = {_id: payload._id};
+        // let {match, select, populate} = paramObj);
+        let object = await Model.detail_Pobj(paramObj);
+        return resolve({message: "数据读取成功", data:{object}});
+    } catch(e) {
+        return reject(e);
+    }
+})
 
 exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
@@ -260,7 +323,7 @@ exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
 
         // let {match, select, populate} = paramObj);
         let object = await Model.detail_Pobj(paramObj);
-       return resolve({message: "数据读取成功", data:{object}});
+        return resolve({message: "数据读取成功", data:{object}});
     } catch(e) {
         return reject(e);
     }

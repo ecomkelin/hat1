@@ -34,32 +34,36 @@ const formatDocKey_Pnull = (key, fieldObj, val, is_before) => new Promise((resol
     }
 });
 
-exports.pass_Pnull = (is_upd, doc, docObj, payload) => new Promise(async(resolve, reject) => {
+exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(async(resolve, reject) => {
     try {
+        // 如果是从 Control 传递过来的 则为 before 因为 Control有 payload 
+        // 否则 is_before 为false 因为 Model 么有 payload
         let is_before = payload ? true : false;
         for(key in docObj) {
-            if(is_upd) {
+            if(is_modify_writePre) {
                 if(key === '_id') continue;
                 if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
             }
             await formatDocKey_Pnull(key, doc[key], docObj[key], is_before);
         }
         for(key in doc) {
-            if(!is_upd) {
-                // 先判断是否可以为空
-                if(doc[key].required === true) {
-                    if(docObj[key] === null || docObj[key] === undefined) {
-                        return reject({status: 400, message:`writePre 创建时 必须添加 [docObj${key}] 字段`});
-                    }
-                }
-            } else {
-                if(doc[key].is_fixed) continue; // 如果不可更改 则跳过 比如创建时间
+            // 在新创建数据的情况下 判断每个必须的字段 如果前台没有给赋值 则报错
+            if(!is_modify_writePre && (doc[key].required === true) && (docObj[key] === null || docObj[key] === undefined)) {
+                return reject({status: 400, message:`writePre 创建时 必须添加 [docObj${key}] 字段`});
             }
+
+            // 在更新的情况下 如果不可更改 则跳过： 比如创建时间 后面的代码就不用执行了
+            if(is_modify_writePre && doc[key].is_fixed && (docObj[key] !== null && docObj[key] !== undefined)) {
+                // delete docObj[key];
+                // continue;
+                return reject({status: 400, message: `writePre 修改时 不可修改 is_fixed 为true 的字段 [${key}].`})
+            }
+
+            // 如果是 Control 给的数据 自动赋值一些payload数据
             if(is_before) {
                 if(doc[key].is_auto && docObj[key]) return reject({status: 400, message:`writePre [docObj.${key}]为后端赋值数据 前端不能传输数据`});
                 if(doc[key].is_autoPayload) docObj[key] = payload._id;
             }
-
             if(doc[key].is_autoDate) docObj[key] = new Date();      // 自动计时
         }
         return resolve(null);

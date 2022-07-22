@@ -1,5 +1,4 @@
 const jsonwebtoken = require('jsonwebtoken');
-const path = require('path');
 const {
 	ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EX, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EX
 } = global;
@@ -46,7 +45,6 @@ exports.generatePayload = (obj)=> {
 	if(obj.email) payload.email = obj.email;
 	
 	if(obj.Firm) payload.Firm = obj.Firm;
-	if(obj.Shop) payload.Shop = obj.Shop;
 
 	if(obj.type_auth === 'User') {
 		payload.type_auth = obj.type_auth;

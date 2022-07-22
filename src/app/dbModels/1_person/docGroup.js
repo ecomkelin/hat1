@@ -23,7 +23,6 @@ module.exports = {
         is_hideRead: true
     },
 
-	img_url: {type: String},
     phonePre: {
         type: String,
         trimLen: 4,
@@ -36,12 +35,12 @@ module.exports = {
         regexp: '^[0-9]*$',
     },
 
-	addrObjs: [{
-		City: {type: String},
+	addrs: [{
+		city: {type: String},
 		name: {type: String},
 		addr: {type: String},
-		postcode: {type: String},
-		phone: {type: String},
+		postcode: {type: String},   // 邮编
+		tel: {type: String},
 		note: {type: String},
 	}],
 

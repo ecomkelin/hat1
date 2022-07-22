@@ -22,6 +22,7 @@ module.exports = {
         minLen: 1,
         maxLen: 20
     },
+	img_url: {type: String},
 
 	is_usable: {type: Boolean, default: true},                  // 是否可用
 	sortNum: {type: Number},
@@ -37,7 +38,6 @@ module.exports = {
     // }],
 
 	Firm: {type: ObjectId, ref: docNameObj.Firm, is_fixed: true},              // 所属公司
-	Shop: {type: ObjectId, ref: docNameObj.Shop, is_fixed: true},              // 所属分公司
 };
 
 /**

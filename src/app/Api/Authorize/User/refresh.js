@@ -1,7 +1,6 @@
-const path = require('path');
-const Auth = require(path.resolve(process.cwd(), "src/bin/js/resProm/authrize"));
+const Auth = require(global.path.resolve(process.cwd(), "src/bin/js/resProm/authrize"));
 
-const Model = require(path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Model"));
+const Model = require(global.path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Model"));
 
 module.exports = async(ctx, next) => {
     try{

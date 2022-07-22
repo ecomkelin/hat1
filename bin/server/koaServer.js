@@ -1,4 +1,3 @@
-const path = require('path');
 const {DIR_PUBLIC, DIR_UPLOAD} = global;
 
 const koa = require('koa');
@@ -33,9 +32,8 @@ server.use(async(ctx, next) => {
         let person = '< ';
         let payload = ctx.request.payload;
         if(payload) {
-            let {Firm, Shop, code, name, type} = payload;
+            let {Firm, code, name, type} = payload;
             if(Firm) person += `[${Firm}]Firm `;
-            if(Shop) person += `[${Shop}]Shop `;
             if(code) person += `[${code}]code `;
             if(name) person += `[${name}]name `;
             if(type) person += `[${type}]type `;

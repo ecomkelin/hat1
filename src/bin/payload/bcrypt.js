@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs');
-const path = require('path');
 
 exports.encryptHash_Pstr = (str_bcrypt) => new Promise((resolve, reject) => {
 	str_bcrypt=String(str_bcrypt);

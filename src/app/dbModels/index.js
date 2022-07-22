@@ -8,13 +8,12 @@
 // 	"Role": "hat_Role_dbs",
 
 // 	"Firm_db": "hat_Firm_dbs",
-// 	"Shop_db": "hat_Shop_dbs",
 // 	"City": "hat_City_dbs",
 // }
 
 
 const fs = require('fs');
-const path = require('path');
+const {path} = global;
 const MdPath = path.join(process.cwd(), "src/app/dbModels/");
 const docNameObj = {};
 

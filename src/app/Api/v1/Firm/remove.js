@@ -1,12 +1,14 @@
-const Model = require("../../../dbModels/1_person/User/Model");
+const Controller = require("../../../dbModels/2_organize/Firm/Controller");
+
 
 module.exports = async(ctx, next) => {
     try{
         if(ctx.request.query.api == 1) return global.api(ctx, api, next);
 
-        if(!global.IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
+        let payload = ctx.request.payload;
+        let _id = ctx.request.body;
 
-        let res = await Model.removeMany_Pres({})
+        let res = await Controller.removeCT(payload , _id);
         return global.success(ctx, res, next);
     } catch(e) {
         return global.errs(ctx, e, next);

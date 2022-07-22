@@ -151,7 +151,6 @@ module.exports = (docName, doc) => {
 			let param = await readPre.readMany(doc, paramObj);
 
 			let {match={}} = param;
-
 			let updateMany = await COLwrite.updateMany(match, update);
 			if(updateMany.matchedCount === 0) return resolve({status: 400, message: "没有更改任何数据"});
 			return resolve({updateMany});

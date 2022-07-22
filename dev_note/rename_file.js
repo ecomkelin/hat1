@@ -1,7 +1,7 @@
 
 const multer = require("@koa/multer");
 const fs = require("fs");
-const path = require("path");
+const {path} = global;
 const dir_upload = path.join(process.cwd(), 'upload/');
 // const dd = dir_upload+'2000'+"a"
 

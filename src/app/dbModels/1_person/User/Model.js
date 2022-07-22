@@ -1,21 +1,21 @@
 // 引入全局及组的 collection field
-const path = require('path');
 const {ObjectId} = global;
-const doc_group = require("../doc_group");
-// #################################################################
-// global 最上面 group中间 本身最下
+const docGroup = require("../docGroup");
 const docNameObj = require("../../index");
 
 // 本身特殊的 field
-const code = {...doc_group.code};
+const code = {...docGroup.code};
 code.unique = true;
+
 // 打包成为集合
 const doc = {
-    ...doc_group,
+    ...docGroup,
 
     code,
+
     // 权限信息
-    type_auth: {type: String, default: 'User', is_auto: true, is_fixed: true},   // <后台自动添加> User / Customer / Supplier
+    // type_auth: 是什么身份类型登陆的的。 <后台自动添加> User / Customer / Supplier
+    type_auth: {type: String, default: 'User', is_auto: true, is_fixed: true}, 
 
     Roles: [{type: ObjectId, ref: docNameObj.Role}],
     auths: [{type: String}],                                                    // 用户权限 可选
@@ -27,7 +27,6 @@ const doc = {
 // 集合名称
 const docName = require("../..").User;
 
-// #################################################################
 // 暴露 方法 及 doc
-const Model = require(path.join(process.cwd(), "bin/sql/mongodb"))(docName, doc);
-module.exports = Model
+const Model = require(global.path.join(process.cwd(), "bin/sql/mongodb"))(docName, doc);
+module.exports = Model;

@@ -1,4 +1,4 @@
-const Model = require("../../../dbModels/1_person/User/Model");
+const Model = require("../../../dbModels/2_organize/Firm/Model");
 
 module.exports = async(ctx, next) => {
     try{

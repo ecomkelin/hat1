@@ -1,7 +1,7 @@
 /**
  * 环境变量
  */
-const path = require('path');
+path = require('path');
 
 /* ======================================== 系统 ======================================== */
 IS_PRD = (process.env.NODE_ENV === "production") ? true : false;

@@ -4,16 +4,16 @@ test("json 接口返回数据格式正确", async() => {
 
     const Create_res = await server.post('/v1/user/Create').send({
         "code": "0006",
-        "name": "lin111",
-        "pwd": "123456",
+        "name": "kelin",
+        "pwd": "aaaaaa",
         "phoneNum": "3888787897"
     });
     expect(Create_res.body.status).toBe(200);
 
     const res = await server.post('/v1/user/Create').send({
         "code": "0006",
-        "name": "lin111",
-        "pwd": "123456",
+        "name": "kelin",
+        "pwd": "aaaaaa",
         "phoneNum": "3888787897"
     });
     expect(res.body.status).toBe(400);

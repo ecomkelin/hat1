@@ -28,23 +28,25 @@ module.exports = {
 	sortNum: {type: Number},
 
 	at_crt: {type: Date, is_autoDate: true, is_fixed: true},
-    User_crt: {type: ObjectId, ref: docNameObj.User, is_autoPayload: true, is_fixed: true},       // 创建人
+    User_crt: {type: ObjectId, ref: docNameObj.User, autoPayload: "_id", is_fixed: true},       // 创建人
 
 	at_upd: {type: Date, is_autoDate: true},                                // [绝对] 最近一次更新时间 只要数文档更新
-	User_upd: {type: ObjectId, ref: docNameObj.User, is_autoPayload: true},    // 除了自己更新的人
+	User_upd: {type: ObjectId, ref: docNameObj.User, autoPayload: "_id"},    // 除了自己更新的人
     // updObjs: [{
     //     at_upd: {type: Date},
     //     User_upd: {type: ObjectId, ref: docNameObj.User},    		// 除了自己更新的人
     // }],
 
-	Firm: {type: ObjectId, ref: docNameObj.Firm, is_fixed: true},              // 所属公司
+	Firm: {type: ObjectId, ref: docNameObj.Firm, is_fixed: true, autoPayload: "Firm", required: true},              // 所属公司
 };
 
 /**
  * type mongodb数据库类型 
  * required [Boolean] 是否为必须填写的, 如果为 true 添加时必须要有此数据 (此字段为 mongoose 自带类型, 写入时 本系统 writePre中 也做了判定 )
+ * required_min [Number] 如果字段为数组 判断是否为必须填写的, 如果有数字 数组的长度不能小于 此Number值
+ * required_max [Number] 如果字段为数组 判断是否为必须填写的, 如果有数字 数组的长度不能大于 此Number值
  * is_auto [Boolean] 是否为自动更新， 如果为 true 则前端不能给数据 给数据就报错. 需要后端给数据。 要在 本身 ${Controller}文件中控制
- * is_autoPayload [Boolean] 是否为自动更新时间， 如果为 true 则前端不能给数据 给数据就报错。 writePre中 自动生成数据。 
+ * autoPayload [String] 是否为自动更新时间， 如果为 _id, Firm 则前端不能给数据 给数据就报错。 writePre中 自动生成数据。 
  * 					比如 User_crt
  * is_autoDate [Boolean] 是否为自动更新时间， 如果为 true 则前端不能给数据 给数据就报错。 writePre中 自动生成数据。 
  * 					比如 at_crt 即为 autoDate 又为fixed所以只有新建时自动添加

@@ -46,11 +46,12 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
             }
             await formatDocKey_Pnull(key, doc[key], docObj[key], is_before);
         }
-        for(key in doc) {
-            // 在新创建数据的情况下 判断每个必须的字段 如果前台没有给赋值 则报错
-            if(!is_modify_writePre && (doc[key].required === true) && (docObj[key] === null || docObj[key] === undefined)) {
-                return reject({status: 400, message:`writePre 创建时 必须添加 [docObj${key}] 字段`});
-            }
+        for(key in doc) {   
+            // 下面的三种情况顺序不能变 
+            // 1 如果是更新 遇到 is_fixed 直接跳过。也就是说 如果 at_crt 直接跳过 后面自动给数据就不变了
+            // 2 自动添加一些数据
+            // 3 新加的数据 autoPayload is_autoDate 先被赋值 所以required就没有问题
+
 
             // 在更新的情况下 如果不可更改 则跳过： 比如创建时间 后面的代码就不用执行了
             if(is_modify_writePre && doc[key].is_fixed && (docObj[key] !== null && docObj[key] !== undefined)) {
@@ -62,64 +63,37 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
             // 如果是 Control 给的数据 自动赋值一些payload数据
             if(is_before) {
                 if(doc[key].is_auto && docObj[key]) return reject({status: 400, message:`writePre [docObj.${key}]为后端赋值数据 前端不能传输数据`});
-                if(doc[key].is_autoPayload) docObj[key] = payload._id;
+                if(doc[key].autoPayload === "_id") {
+                    docObj[key] = payload._id;
+                } else if(doc[key].autoPayload === "Firm") {
+                    if(payload.Firm) docObj[key] = payload.Firm._id || payload.Firm;
+                }
             }
             if(doc[key].is_autoDate) docObj[key] = new Date();      // 自动计时
-        }
-        return resolve(null);
-    } catch(e) {
-        return reject(e);
-    }
-})
 
-exports.createPass_Pnull = (doc, crtObj) => new Promise(async(resolve, reject) => {
-    try {
-        for(key in crtObj) {
-            await formatDocKey_Pnull(key, doc[key], crtObj[key]);
-        }
-        for(key in doc) {
-            // 先判断是否可以为空
-            if(doc[key].required === true) {
-                if(crtObj[key] === null || crtObj[key] === undefined) {
-                    return reject({status: 400, message:`writePre 创建时 必须添加 [docObj${key}] 字段`});
+
+            // 在新创建数据的情况下 判断每个必须的字段 如果前台没有给赋值 则报错
+            if(!is_modify_writePre) {
+                if(doc[key] instanceof Array) {
+                    if(doc[key][0].required_min || doc[key][0].required_max) {
+                        if(!docObj[key]) {
+                            return reject({status: 400, message:`writePre 创建时 必须添加 [docObj.${key}] Array 字段`});
+                        } else if(docObj[key].length < doc[key][0].required_min) {
+                            return reject({status: 400, message:`writePre 创建时 [docObj.${key}] Array length不能小于 ${doc[key][0].required_min}`});
+                        } else if(docObj[key].length > doc[key][0].required_max) {
+                            return reject({status: 400, message:`writePre 创建时 [docObj.${key}] Array length不能大于 ${doc[key][0].required_max}`});
+                        }
+                    }
+                } else {
+                    if((doc[key].required === true) && (docObj[key] === null || docObj[key] === undefined)) {
+                        return reject({status: 400, message:`writePre 创建时 必须添加 [docObj.${key}] 字段`});
+                    }
                 }
             }
 
-            if(doc[key].is_autoDate) crtObj[key] = new Date();      // 自动计时
         }
         return resolve(null);
     } catch(e) {
         return reject(e);
     }
-    
 });
-
-exports.modifyPass_Pnull = (doc, updObj) => new Promise(async(resolve, reject) => {
-    try {
-        for(key in updObj) {
-            if(key === '_id') continue;
-            if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
-            await formatDocKey_Pnull(key, doc[key], updObj[key]);            
-        }
-        for(key in doc) {
-            if(doc[key].is_fixed) continue; // 如果不可更改 则跳过 比如创建时间
-            if(doc[key].is_autoDate) updObj[key] = new Date();      // 自动计时
-        }
-        return resolve(null);
-    } catch(e) {
-        return reject(e);
-    }
-})
-    
-
-
-
-
-exports.removePass_Pnull = (doc, id) => new Promise((resolve, reject) => {
-    try {
-        if(!isObjectId(id)) return reject({status: 400, message: `writePre 请传递正确的id信息`});
-        return resolve(null);
-    } catch(e) {
-        return reject(e);
-    }
-})

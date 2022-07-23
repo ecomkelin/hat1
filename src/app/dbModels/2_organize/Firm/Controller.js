@@ -3,7 +3,9 @@ const {pass_Pnull} = require(global.path.resolve(process.cwd(), "bin/js/db/write
 const Model = require("./Model");
 
 
+// 有无权限 完成 这部分字段的修改
 const noWriteAuth = (payload, docObj) => {
+    if(!docObj) return "请输入 操作字段";
     if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
 
     // 判断 payload身份 Model中的什么字段不能被 payload 权限修改
@@ -20,7 +22,8 @@ const noWriteAuth = (payload, docObj) => {
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
         if(payload.Firm) return "您无权添加一个新的公司, 请联系管理员";
-        // 有无权限 完成新数据
+
+        // 有无权限 添加 这部分字段
         let message = noWriteAuth(payload, docObj);
         if(message) return reject({status: 400, message});
 
@@ -29,9 +32,6 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         let is_pass = true;
 
         // is_change is_auto 数据自动处理处;
-        // if(payload.Firm && payload.Firm._id) {
-        //     docObj.Firm = payload.Firm._id;
-        // }
 
         // 写入
         let res = await Model.create_Pres(docObj, {is_pass});
@@ -79,8 +79,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
         let {_id, update} = paramObj;
         if(payload.Firm && payload.Firm._id) _id = payload.Firm._id;
 
-        if(!update) return reject({status: 400, message: "请输入 update 参数"});
-        // 有无权限 完成新数据
+        // 有无权限 完成 这部分字段的修改
         let message = noWriteAuth(payload, update);
         if(message) return reject({status: 400, message});
 

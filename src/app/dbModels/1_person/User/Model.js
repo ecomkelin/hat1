@@ -7,11 +7,16 @@ const docNameObj = require("../../index");
 const code = {...docGroup.code};
 code.unique = true;
 
+const Firm = {...docGroup.Firm};
+delete Firm.required;
+
+
 // 打包成为集合
 const doc = {
     ...docGroup,
 
     code,
+    Firm,
 
     // 权限信息
     // type_auth: 是什么身份类型登陆的的。 <后台自动添加> User / Customer / Supplier

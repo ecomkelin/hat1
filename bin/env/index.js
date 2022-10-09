@@ -13,6 +13,7 @@ require("./const3_node");
 require("./constant");
 require("./readConf");
 require("./res");
+require("./white_url");
 
 /* ======================================== 缓存信息 ======================================== */
 is_cache_Role=false;

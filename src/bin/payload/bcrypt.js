@@ -1,5 +1,10 @@
 const bcrypt = require('bcryptjs');
 
+/**
+ * 生成加密 密码
+ * @param {String} str_bcrypt 
+ * @returns 加密后的密码
+ */
 exports.encryptHash_Pstr = (str_bcrypt) => new Promise((resolve, reject) => {
 	str_bcrypt=String(str_bcrypt);
 	bcrypt.genSalt(parseInt(SALT_WORK_FACTOR), function(err, salt) {
@@ -11,6 +16,12 @@ exports.encryptHash_Pstr = (str_bcrypt) => new Promise((resolve, reject) => {
 	});
 });
 
+/**
+ * 匹配密码
+ * @param {String} str_bcrypt 加密前的密码
+ * @param {String} hash_bcrypt 加密后的密码
+ * @returns 如果成功 则返回空 否则返回错误
+ */
 exports.matchBcrypt_Pnull = (str_bcrypt, hash_bcrypt) => new Promise(async(resolve, reject) => {
 	try {
 		if(!str_bcrypt) return reject({status: 400, errMsg: "[密码错误]: 匹配时, 加密字符串不能为空" });

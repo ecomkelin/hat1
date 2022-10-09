@@ -4,6 +4,12 @@ const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/Format"));
 
 
 /* 用refreshToken刷新 accessToken */
+/**
+ * refreshToken 共用
+ * @param {*} ctx 
+ * @param {*} Model 
+ * @returns res 刷新是否成功
+ */
 exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 	try {
 		let headersToken = ctx.request.headers['authorization'];
@@ -13,12 +19,12 @@ exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 		let object = await Model.findOne_Pobj({match: {_id: payload._id}});	// 因为需要 refreshToken 所以不嫩用 detail_Pobj
 		if(!object) return reject({status: 400, errMsg: "授权错误, 请重新登录"});
 
-		let refresh_Token = await jwtMD.obtain_headersInfo(headersToken);		//	前台传递的 refreshToken
+		let refresh_Token = await jwtMD.obtToken_fromHeaders(headersToken);		//	前台传递的 refreshToken
 
 		if(refresh_Token !== object.refreshToken) return reject({status: 400, errMsg: "refreshToken 不匹配, 请重新登陆"});
 
 		payload = jwtMD.generatePayload(object);		// 重新生成 payload
-		let {accessToken, refreshToken} = await getToken_Pobj(payload, Model);
+		let {accessToken, refreshToken} = generateTokens(payload, Model);
 
 		return resolve({
 			data: {accessToken, refreshToken, payload},
@@ -29,14 +35,19 @@ exports.refresh_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
 	}
 });
 
-
+/**
+ * login 登录 共用
+ * @param {*} ctx 
+ * @param {*} Model 
+ * @returns res 登录是否成功
+ */
 exports.login_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
     try{
-		let object = await obtainObj_Pobj(ctx.request.body, Model);
+		let object = await obtLoginObj_Pobj(ctx.request.body, Model);
 
 		let payload = jwtMD.generatePayload(object);
 
-		let {accessToken, refreshToken} = await getToken_Pobj(payload, Model);
+		let {accessToken, refreshToken} = generateTokens(payload, Model);
 
 		return resolve({
 			data: {payload, accessToken, refreshToken},
@@ -47,21 +58,26 @@ exports.login_Pres = (ctx, Model) => new Promise(async(resolve, reject) => {
     }
 });
 
-const getToken_Pobj = (payload, Model) => new Promise(async(resolve, reject) => {
-	try {
-		let accessToken = jwtMD.generateToken(payload);
-		let refreshToken = jwtMD.generateToken(payload, true);
-		await Model.modify_Pres({_id: payload._id}, {refreshToken, at_login: new Date()});
-		return resolve({
-			accessToken, refreshToken
-		})
-	} catch(e) {
-		return reject(e);
-	}
-})
+/**
+ * 根据payload 生成 accessToken 和 refreshToken
+ * @param {*} payload 
+ * @param {*} Model 
+ * @returns 
+ */
+const generateTokens = (payload, Model) => {
+	let accessToken = jwtMD.generateToken(payload);
+	let refreshToken = jwtMD.generateToken(payload, true);
+	Model.modify_Pres({_id: payload._id}, {refreshToken, at_login: new Date()});
+	return { accessToken, refreshToken };
+}
 
-
-const obtainObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
+/**
+ * 根据账号中的 type_login 获取登录对象
+ * @param {*} body 
+ * @param {*} Model 
+ * @returns Object
+ */
+const obtLoginObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
 	try {
 		let type_login = body.type_login;
 		if(type_login === "hat") {

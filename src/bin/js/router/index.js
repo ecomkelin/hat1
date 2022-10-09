@@ -1,5 +1,4 @@
 const fs = require('fs');
-const {path} = global;
 const appPath = path.join(process.cwd(), "src/app/");
 
 

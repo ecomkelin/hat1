@@ -10,7 +10,7 @@ resSUCCESS = (ctx, ctxBody, next) => {
 }
 resNOACCESS = (ctx) => {
     ctx.status = 401;
-    ctx.body = {status: 401, message: `您没有访问 [${ctx.url}] 的权限`}
+    ctx.body = {status: 401, errMsg: `您没有访问 [${ctx.url}] 的权限`}
 }
 resERR = (ctx, e, next) => {
     let error = e.stack

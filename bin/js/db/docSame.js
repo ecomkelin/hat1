@@ -19,11 +19,11 @@
 				param[key] = docNew[key];
 			} else if(doc[key].uniq) {
 				let uniq = doc[key].uniq;		// 查看数据库模型中 field 的 uniq标识	比如 公司中员工账号唯一 code.uniq = ["Firm"]
-				if(!(uniq instanceof Array)) return reject({status: 400, message: `${type} 数据库 doc 的uniq值错误`});
+				if(!(uniq instanceof Array)) return reject({status: 400, errMsg: `${type} 数据库 doc 的uniq值错误`});
 				param[key] = docNew[key];			// 相当于 {code: '员工编号'}
 				for(let i=0; i<uniq.length; i++) {
 					let sKey = uniq[i];
-					if(docNew[sKey] === undefined) return reject({status: 400, message: `${type} 请传递 在新的 doc中传递 [${key}] 的值`});
+					if(docNew[sKey] === undefined) return reject({status: 400, errMsg: `${type} 请传递 在新的 doc中传递 [${key}] 的值`});
 					param[sKey] = docNew[sKey];		// 相当于 {Firm: 'FirmId'}
 				}
 				// 循环下来 
@@ -36,7 +36,7 @@
 				// 查看数据库模型中 field 的 true_uniq标识	
 				//比如 公司中员工账号唯一 is_default.true_uniq = ["Firm"] 整个公司只能有一个用户 的 is_default 为true
 				let true_uniq = doc[key].true_uniq;	
-				if(!(true_uniq instanceof Array)) return reject({status: 400, message: `${type} 数据库 doc 的true_uniq值错误`});
+				if(!(true_uniq instanceof Array)) return reject({status: 400, errMsg: `${type} 数据库 doc 的true_uniq值错误`});
 				param[key] = docNew[key];			// 相当于 {is_default: '是否为默认数据'}
 				for(let i=0; i<true_uniq.length; i++) {
 					let sKey = true_uniq[i];
@@ -71,7 +71,7 @@
 
 		let objSame = await DBcollection.findOne(query);
         if(objSame) return resolve(objSame);
-		return reject({status: 400, message: "没有相同信息的数据", paramObj: {match: query}});
+		return reject({status: 400, errMsg: "没有相同信息的数据", paramObj: {match: query}});
 	} catch(e) {
 		return reject(e);
 	}
@@ -82,7 +82,7 @@ exports.passNotExist_Pnull = (DBcollection, doc, docNew) => new Promise(async(re
 		if(query === null) return resolve(null);
 		if(docNew._id) query._id = {"$ne": docNew._id};			// 如果是更新 需要加入 $ne _id
 		let objSame = await DBcollection.findOne(query);
-        if(objSame) return reject({status: 400, message: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
+        if(objSame) return reject({status: 400, errMsg: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
 		return resolve(null);
 	} catch(e) {
 		return reject(e);

@@ -10,7 +10,7 @@ module.exports = async(ctx, next) => {
 
         // let {_id, select, populate} = paramObj);
         let res = await Controller.detailCT(payload, paramObj);
-        
+
         return resSUCCESS(ctx, res, next);
     } catch(e) {
         return resERR(ctx, e, next);

@@ -1,5 +1,4 @@
 // 引入全局及组的 collection field
-const {ObjectId} = global;
 const docGroup = require("../docGroup");
 const docNameObj = require("../../index");
 

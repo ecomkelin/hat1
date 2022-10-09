@@ -4,7 +4,7 @@ module.exports = async(ctx, next) => {
     try{
         if(ctx.request.query.api == 1) return resAPI(ctx, api, next);
 
-        if(!IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
+        if(!IS_DEV) return reject({status: 400, errMsg: "只有 开发状态 才可以使用此功能"});
 
         let res = await Model.removeMany_Pres({})
         return resSUCCESS(ctx, res, next);

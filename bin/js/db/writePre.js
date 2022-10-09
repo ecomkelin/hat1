@@ -31,7 +31,7 @@ const formatDocKey = (key, fieldObj, val, is_before) => {
         if(fieldObj.minNum && fieldObj.minNum > val) return `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`;
         if(fieldObj.maxNum &&  fieldObj.maxNum < val) return `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`;
     }
-    return resolve(null);
+    return null;
 }
 
 /**
@@ -50,13 +50,10 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
         for(key in docObj) {
             if(is_modify_writePre) {
                 if(key === '_id') continue;
-                if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
+                if(doc[key].is_fixed) return reject({status: 400, errMsg: `writePre [${key}]为不可修改数据`});
             }
             let errMsg = formatDocKey(key, doc[key], docObj[key], is_before);
-            if(errMsg) return reject({
-                status: 400,
-                message: errMsg
-            })
+            if(errMsg) return reject({ status: 400, errMsg})
         }
         for(key in doc) {   
             // 下面的三种情况顺序不能变 
@@ -69,12 +66,12 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
             if(is_modify_writePre && doc[key].is_fixed && (docObj[key] !== null && docObj[key] !== undefined)) {
                 // delete docObj[key];
                 // continue;
-                return reject({status: 400, message: `writePre 修改时 不可修改 is_fixed 为true 的字段 [${key}].`})
+                return reject({status: 400, errMsg: `writePre 修改时 不可修改 is_fixed 为true 的字段 [${key}].`})
             }
 
             // 如果是 Control 给的数据 自动赋值一些payload数据
             if(is_before) {
-                if(doc[key].is_auto && docObj[key]) return reject({status: 400, message:`writePre [docObj.${key}]为后端赋值数据 前端不能传输数据`});
+                if(doc[key].is_auto && docObj[key]) return reject({status: 400, errMsg:`writePre [docObj.${key}]为后端赋值数据 前端不能传输数据`});
                 if(doc[key].autoPayload === "_id") {
                     docObj[key] = payload._id;
                 } else if(doc[key].autoPayload === "Firm") {
@@ -88,23 +85,23 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
                 if(doc[key] instanceof Array) {
                     if(doc[key][0].required_min || doc[key][0].required_max) {
                         if(!docObj[key]) {
-                            return reject({status: 400, message:`writePre 创建时 必须添加 [docObj.${key}] Array 字段`});
+                            return reject({status: 400, errMsg:`writePre 创建时 必须添加 [docObj.${key}] Array 字段`});
                         } else if(docObj[key].length < doc[key][0].required_min) {
-                            return reject({status: 400, message:`writePre 创建时 [docObj.${key}] Array length不能小于 ${doc[key][0].required_min}`});
+                            return reject({status: 400, errMsg:`writePre 创建时 [docObj.${key}] Array length不能小于 ${doc[key][0].required_min}`});
                         } else if(docObj[key].length > doc[key][0].required_max) {
-                            return reject({status: 400, message:`writePre 创建时 [docObj.${key}] Array length不能大于 ${doc[key][0].required_max}`});
+                            return reject({status: 400, errMsg:`writePre 创建时 [docObj.${key}] Array length不能大于 ${doc[key][0].required_max}`});
                         }
                     }
                 } else {
                     if((doc[key].required === true) && (docObj[key] === null || docObj[key] === undefined)) {
-                        return reject({status: 400, message:`writePre 创建时 必须添加 [docObj.${key}] 字段`});
+                        return reject({status: 400, errMsg:`writePre 创建时 必须添加 [docObj.${key}] 字段`});
                     }
                 }
             }
 
             // 判断是否为 ObjectId类型
             if(doc[key].ref && docObj[key]) {
-                if(!isObjectId(docObj[key])) return reject({status: 400, message:`[docObj.${key}] 为ObjectId 类型`});
+                if(!isObjectId(docObj[key])) return reject({status: 400, errMsg:`[docObj.${key}] 为ObjectId 类型`});
             }
 
         }

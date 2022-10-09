@@ -13,7 +13,6 @@
 
 
 const fs = require('fs');
-const {path} = global;
 const MdPath = path.join(process.cwd(), "src/app/dbModels/");
 const docNameObj = {};
 

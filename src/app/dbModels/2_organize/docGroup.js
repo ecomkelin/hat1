@@ -18,5 +18,5 @@ module.exports = {
         road: {type: String},
         postcode: {type: String},
         note: {type: String},
-    },
+   },
 }

@@ -6,8 +6,13 @@ const {format_phoneInfo} = require("../FN_group");
 const Model = require("./Model");
 
 
-
-const noWriteAuth = (payload, docObj) => {
+/**
+ * 如果有返回值 则 无权限写入数据
+ * @param {*} payload 
+ * @param {*} docObj 
+ * @returns 
+ */
+const noAuth_write = (payload, docObj) => {
     if(!docObj) return "请输入 update 参数";
     if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
 
@@ -45,11 +50,11 @@ const noWriteAuth = (payload, docObj) => {
  */
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
-        // if(!docObj.Roles) return reject({status: 400, message: "请传递 用户角色"});
+        // if(!docObj.Roles) return reject({status: 400, errMsg: "请传递 用户角色"});
         if(!docObj.auths) docObj.auths = [];
         // 有无权限 完成新数据
-        let message = noWriteAuth(payload, docObj);
-        if(message) return reject({status: 400, message});
+        let errMsg = noAuth_write(payload, docObj);
+        if(errMsg) return reject({status: 400, errMsg});
         
         // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
         await pass_Pnull(false, Model.doc, docObj, payload);
@@ -72,14 +77,14 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
 
 exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, reject) => {
     try{
-        // if(!docObj.Roles) return reject({status: 400, message: "请传递 用户角色"});
-        let message = null;
+        // if(!docObj.Roles) return reject({status: 400, errMsg: "请传递 用户角色"});
+        let errMsg = null;
         for(let i=0; i<docObjs.length; i++) {
             let docObj = docObjs[i];
             if(!docObj.auths) docObj.auths = [];
             // 有无权限 完成新数据
-            message = noWriteAuth(payload, docObj);
-            if(message) return reject({status: 400, message});
+            errMsg = noAuth_write(payload, docObj);
+            if(errMsg) return reject({status: 400, errMsg});
 
             // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
             await pass_Pnull(false, Model.doc, docObj, payload);
@@ -103,20 +108,17 @@ exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, rejec
 const setMatch = (payload, match) => {
     if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
     match.rankNum = {"$lt": payload.rankNum};                           // 把没有权限修改的用户过滤掉
-    // 如果是公司用户 则只可修改本公司的用户
-    if(payload.Firm) {
-        match.Firm = payload.Firm; 
-        if(payload.Firm._id) match.Firm = payload.Firm._id;
-    }
 
+    // 如果是公司用户 则只可修改本公司的用户
+    if(payload.Firm) match.Firm = payload.Firm._id || payload.Firm;
 }
 exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         let {_id, update} = paramObj;
 
         // 有无权限 完成新数据
-        let message = noWriteAuth(payload, update);
-        if(message) return reject({status: 400, message});
+        let errMsg = noAuth_write(payload, update);
+        if(errMsg) return reject({status: 400, errMsg});
 
         let match = {_id: _id};
         setMatch(payload, match);
@@ -134,7 +136,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
                 }
             }
         }
-        if(!flag_change) return reject({status: 400, message: "您没有修改任何数据"});
+        if(!flag_change) return reject({status: 400, errMsg: "您没有修改任何数据"});
 
         // is_change is_auto 操作前的 数据的验证
         let is_modify_writePre = true;
@@ -155,15 +157,15 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
 exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         let {update, pwdOrg} = paramObj;
-        if(!update) return reject({status: 400, message: "请输入 update 参数"});
+        if(!update) return reject({status: 400, errMsg: "请输入 update 参数"});
         // 有无权限 完成新数据
-        let message = noWriteAuth(payload, update);
-        if(message) return reject({status: 400, message});
+        let errMsg = noAuth_write(payload, update);
+        if(errMsg) return reject({status: 400, errMsg});
 
         let match = {_id: payload._id};
 
         Org = await Model.findOne_Pobj({match});    // 因为要看 pwd 所以不能用 detail_Pobj
-        if(!Org) return reject({status: 400, message: "您的数据已经不在数据库中"})
+        if(!Org) return reject({status: 400, errMsg: "您的数据已经不在数据库中"})
 
         let flag_change = false;
         if(update.pwd) {
@@ -176,7 +178,7 @@ exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, rejec
                 }
             }
         }
-        if(!flag_change) return reject({status: 400, message: "您没有修改任何数据"});
+        if(!flag_change) return reject({status: 400, errMsg: "您没有修改任何数据"});
 
         // is_change is_auto 操作前的 数据的验证
         let is_modify_writePre = true;  // 标识这是更新而不是新建
@@ -185,7 +187,7 @@ exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, rejec
 
         // is_change is_auto 数据自动处理处;
         if(update.pwd) {
-            if(!pwdOrg) return reject({status: 400, message: "请输入您的原密码, 如果忘记请联系管理员"})
+            if(!pwdOrg) return reject({status: 400, errMsg: "请输入您的原密码, 如果忘记请联系管理员"})
             await matchBcrypt_Pnull(pwdOrg, Org.pwd);
             update.pwd = await encryptHash_Pstr(update.pwd);
         }
@@ -203,7 +205,7 @@ exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, rejec
 exports.modifyManyCT = (payload, paramObj) => new Promise(async(resolve, reject) => {
     try{
         let {update} = paramObj;
-        if(!update) return reject({status: 400, message: "请传递 update 数据"});
+        if(!update) return reject({status: 400, errMsg: "请传递 update 数据"});
         let match = {};
         setMatch(payload, match);
         paramObj.match = match;
@@ -282,10 +284,11 @@ exports.profileCT = (payload, paramObj={}) => new Promise(async(resolve, reject)
 
 exports.detailCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
-        let {_id, select, populate} = paramObj;
+        let {_id, match={}, select, populate} = paramObj;
 
         // 根据 payload 过滤 match select
-        let match = {_id: _id};
+        if(_id) match._id = _id;
+
         setMatch(payload, match);
         paramObj.match = match;
 

@@ -4,7 +4,7 @@ const Model = require("./Model");
 
 
 // 有无权限 完成 这部分字段的修改
-const noWriteAuth = (payload, docObj) => {
+const noAuth_write = (payload, docObj) => {
     if(!docObj) return "请输入 操作字段";
     if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
 
@@ -24,8 +24,8 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         if(payload.Firm) return "您无权添加一个新的公司, 请联系管理员";
 
         // 有无权限 添加 这部分字段
-        let message = noWriteAuth(payload, docObj);
-        if(message) return reject({status: 400, message});
+        let errMsg = noAuth_write(payload, docObj);
+        if(errMsg) return reject({status: 400, errMsg});
 
         // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
         await pass_Pnull(false, Model.doc, docObj, payload);
@@ -46,12 +46,12 @@ exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, rejec
     try{
         if(payload.Firm) return "您无权添加新的公司, 请联系管理员";
 
-        let message = null;
+        let errMsg = null;
         for(let i=0; i<docObjs.length; i++) {
             let docObj = docObjs[i];
             // 有无权限 完成新数据
-            message = noWriteAuth(payload, docObj);
-            if(message) return reject({status: 400, message});
+            errMsg = noAuth_write(payload, docObj);
+            if(errMsg) return reject({status: 400, errMsg});
 
             // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
             await pass_Pnull(false, Model.doc, docObj, payload);
@@ -83,8 +83,8 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
         if(payload.Firm && payload.Firm._id) _id = payload.Firm._id;
 
         // 有无权限 完成 这部分字段的修改
-        let message = noWriteAuth(payload, update);
-        if(message) return reject({status: 400, message});
+        let errMsg = noAuth_write(payload, update);
+        if(errMsg) return reject({status: 400, errMsg});
 
         let match = {_id: _id};
         setMatch(payload, match);
@@ -98,7 +98,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
                 flag_change = true;
             }
         }
-        if(!flag_change) return reject({status: 400, message: "您没有修改任何数据"});
+        if(!flag_change) return reject({status: 400, errMsg: "您没有修改任何数据"});
 
         // is_change is_auto 操作前的 数据的验证
         let is_modify_writePre = true;
@@ -120,7 +120,7 @@ exports.modifyManyCT = (payload, paramObj) => new Promise(async(resolve, reject)
         if(payload.Firm) return "您无权批量修改公司, 请联系管理员";
 
         let {update} = paramObj;
-        if(!update) return reject({status: 400, message: "请传递 update 数据"});
+        if(!update) return reject({status: 400, errMsg: "请传递 update 数据"});
         let match = {};
         setMatch(payload, match);
         paramObj.match = match;

@@ -5,17 +5,17 @@ const appPath = path.join(process.cwd(), "src/app/");
 /* ======================== get /dbs 文档名称路由(展示所有文档名称) ======================== */
 exports.allModelsRouter = (router) => {
     let dbs_Config = require(path.join(process.cwd(), "src/app/dbModels"));
-    let dbsRouter = "/dbs";
-    router.get(dbsRouter, ctx => ctx.body= { status: 200, dbModels: Object.keys(dbs_Config) } );
-    routerObjs.push(dbsRouter);
+    let url = "/dbs";
+    router.get(url, ctx => ctx.body= { status: 200, dbModels: Object.keys(dbs_Config) } );
+    routerObjs.push("get - " + url);
 }
 
 /* ======================== get /config 文档名称路由(展示所有文档名称) ======================== */
 exports.allConfigRouter = (router) => {
     let Config = require(path.join(process.cwd(), "src/app/config"));
-    let confRouter = "/config";
-    router.get(confRouter, ctx => ctx.body = {status: 200, Config});
-    routerObjs.push(confRouter);
+    let url = "/config";
+    router.get(url, ctx => ctx.body = {status: 200, Config});
+    routerObjs.push("get - " + url);
 }
 
 
@@ -38,9 +38,9 @@ const getModels = (router, dirPath, paths, n, maskFiles) => {
                 let file = dirPath+ dirName;
                 if(fs.existsSync(file)) {
                     let requ = require(file);
-                    let routerName = '/'+paths[0]+'/'+paths[n];
-                    router.get(routerName, ctx => ctx.body= { status: 200, doc: requ.doc }  );
-                    routerObjs.push(routerName)
+                    let url = '/'+paths[0]+'/'+paths[n];
+                    router.get(url, ctx => ctx.body= { status: 200, doc: requ.doc }  );
+                    routerObjs.push("get - " + url)
                 }
             }
         }
@@ -73,13 +73,13 @@ exports.rtModels = (router, dirName, maskFiles) => {
              let file = dirPath+ dirName;
              if(fs.existsSync(file)) {
                  let requ = require(file);
-                 let routerName = '';
+                 let url = '';
                  for(let j=floorLevel; j<=n;j++) {
-                     routerName += '/'+paths[j];
+                     url += '/'+paths[j];
                  }
-                 routerName += '/'+dirName.split('.')[0];
-                 router.post(routerName, AuthMiddle, requ);
-                 routerObjs.push(routerName);
+                 url += '/'+dirName.split('.')[0];
+                 router.post(url, AuthMiddle, requ);
+                 routerObjs.push("post - " + url);
              }
          }
      });
@@ -96,18 +96,14 @@ exports.rtModels = (router, dirName, maskFiles) => {
 /**
  * @param {router} router 路由中间件
  * @param {*} dirPath 当前绝对路径
- * @param {*} paths 经过的所有 路径的 文件夹名称
- * @param {*} n 路径的层级
- * @param {*} maskFiles 如果false 则全部读取，  否则要为数组
  */
- const getRouters = (router, dirPath, paths, n) => {
+ const getRouters = (router, dirPath) => {
     fs.readdirSync(dirPath).forEach(dirName => {
-        let len = dirName.split('.').length;
-        if(len === 1) {       // 如果是文件夹 则进一步读取内容
-            paths[n+1] = dirName;
-            getRouters(router, path.join(dirPath+dirName+'/'), paths, n+1);
-        } else if(len === 2) {                                    // 如果是文件则 则加载
-            if(dirName === 'router.js') {
+        let fns = dirName.split('.');
+        if(fns.length === 1) {       // 如果是文件夹 则进一步读取内容
+            getRouters(router, path.join(dirPath+dirName+'/'));
+        } else if(fns.length === 3) { // 如果有两个点的文件 则加载
+            if(fns[1] === "router" && fns[2] === "js") {   // 加载文件名的规则是 ***.router.js
                 let file = dirPath+ dirName;
                 if(fs.existsSync(file)) {
                     let r = require(file);
@@ -119,7 +115,7 @@ exports.rtModels = (router, dirName, maskFiles) => {
 }
 exports.rtRouters = (router, dirName) => {
     let dirPath = appPath + dirName + "/";
-    getRouters(router, dirPath, [dirName], 0);
+    getRouters(router, dirPath);
 }
 
 

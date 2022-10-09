@@ -4,6 +4,6 @@
  */
 WHITE_URL = [
 	"/auto/v1/user/init",
-	"/auth/user/login",
-	"/auth/user/refresh",
+	"/auto/auth/user/login",
+	"/auto/auth/user/refresh",
 ];

@@ -18,19 +18,16 @@ JSrouter.allModelsRouter(router);
 /** get('/config') 路由 展示后端的一些配置数据 */
 JSrouter.allConfigRouter(router);
 
-/** ============================== 包含的其他路由 ============================== */
+/** ============================== 多路由配置  ============================== */
 /** get("/dbModels/***") 获取 *** 数据库document 文档中的所有字段对象 */ 
 JSrouter.rtModels(router, 'dbModels', ['Model.js']);
 
-/** 'Auto' 是读取的文件夹 自动读取文件夹下的所有文件 并自动命名路由 */
-JSrouter.rtAutos(router, 'Auto');
+/** 'Auto' post("/auto/XXX/XXX") 是读取的文件夹 自动读取文件夹下的所有文件 并自动命名路由 */
+JSrouter.rtAutos(router, 'auto');
 
-/** 'Auto' 是读取的文件夹 自动读取文件夹下的所有文件 并自动命名路由 */
-JSrouter.rtAutos(router, 'Auth');
-
-/** "Api"是读取的文件夹下所有的路由文件 手动添加路由器 */
-JSrouter.rtRouters(router, 'Api');
-/** ============================== 包含的其他路由 ============================== */
+/** "Api" 自定义类型 是读取的文件夹下所有的路由文件 手动添加路由器 */
+JSrouter.rtRouters(router, 'api/router');
+/** ============================== 多路由配置 ============================== */
 
 
 router.get('/routers', ctx => ctx.body = {status: 200, routerObjs});    // /routers 路由 查看所有路由api

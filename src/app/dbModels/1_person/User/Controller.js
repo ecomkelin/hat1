@@ -1,6 +1,6 @@
-const {encryptHash_Pstr, matchBcrypt_Pnull} = require(global.path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
+const {encryptHash_Pstr, matchBcrypt_Pnull} = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
 
-const {pass_Pnull} = require(global.path.resolve(process.cwd(), "bin/js/db/writePre"));
+const {pass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/writePre"));
 const {format_phoneInfo} = require("../FN_group");
 
 const Model = require("./Model");
@@ -10,7 +10,7 @@ const Model = require("./Model");
 const noWriteAuth = (payload, docObj) => {
     if(!docObj) return "请输入 update 参数";
     if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
-    console.log(111, payload.is_admin);
+
     if(payload.is_admin !== true) {
         if(docObj.Roles) {
             for(let i=0; i<docObj.Roles.length; i++) {
@@ -70,7 +70,6 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     }
 });
 
-
 exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, reject) => {
     try{
         // if(!docObj.Roles) return reject({status: 400, message: "请传递 用户角色"});
@@ -104,7 +103,11 @@ exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, rejec
 const setMatch = (payload, match) => {
     if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
     match.rankNum = {"$lt": payload.rankNum};                           // 把没有权限修改的用户过滤掉
-    if(payload.Firm && payload.Firm._id) match.Firm = payload.Firm._id; // 如果是公司用户 则只可修改本公司的用户
+    // 如果是公司用户 则只可修改本公司的用户
+    if(payload.Firm) {
+        match.Firm = payload.Firm; 
+        if(payload.Firm._id) match.Firm = payload.Firm._id;
+    }
 
 }
 exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {

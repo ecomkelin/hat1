@@ -1,11 +1,11 @@
 const Model = require("../../../dbModels/1_person/User/Model");
-const {encryptHash_Pstr} = require(global.path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
+const {encryptHash_Pstr} = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
 
 module.exports = async(ctx, next) => {
     try{
-        if(ctx.request.query.api == 1) return global.api(ctx, api, next);
+        if(ctx.request.query.api == 1) return resAPI(ctx, api, next);
 
-        if(!global.IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
+        if(!IS_DEV) return reject({status: 400, message: "只有 开发状态 才可以使用此功能"});
 
         let docObj = ctx.request.body;
 
@@ -21,9 +21,9 @@ module.exports = async(ctx, next) => {
 
         let res = await Model.create_Pres(docObj);
 
-        return global.success(ctx, res, next);
+        return resSUCCESS(ctx, res, next);
     } catch(e) {
-        return global.errs(ctx, e, next);
+        return resERR(ctx, e, next);
     }
 };
 

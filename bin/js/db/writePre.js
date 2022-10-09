@@ -3,37 +3,45 @@
     也会跳过一些不合理的要求 比如 post时 给了多出的数据库的字段
 */
 
-const {isObjectId} = require("../isType");
+/**
+ * 
+ * @param {*} key 数据库字段名称
+ * @param {*} fieldObj 数据库模型中字段的对象
+ * @param {*} val 要写入或修改的值
+ * @param {*} is_before // 基本Controller传递过来的是 true,  mongodb传过来的数据是 false
+ * @returns 
+ */
+const formatDocKey = (key, fieldObj, val, is_before) => {
+    if(!fieldObj) return `writePre 没有[${key}] 此字段`;
 
-const formatDocKey_Pnull = (key, fieldObj, val, is_before) => new Promise((resolve, reject) => {
-    try {
-        if(!fieldObj) return reject({status: 400, message: `writePre 没有[${key}] 此字段`});
+    if(!is_before && fieldObj.is_change) return null; // 一些变化的数据 不在变化后判断 直接返回空通过
 
-        if(!is_before && fieldObj.is_change) return resolve(null); // 一些变化的数据 不在变化后判断 直接返回空通过
-
-        if(val && fieldObj.type === String) {
-            if(fieldObj.trimLen && fieldObj.trimLen !== val.length) return reject({status: 400, message: `writePre [${key}] 字段的字符串长度必须为 [${fieldObj.trimLen}]`});
-            if(fieldObj.minLen && fieldObj.minLen > val.length) return reject({status: 400, message: `writePre [${key}] 字段的字符串长度为： [${fieldObj.minLen} ~ ${fieldObj.maxLen}]`});
-            if(fieldObj.maxLen &&  fieldObj.maxLen < val.length)return reject({status: 400, message: `writePre [${key}] 字段的字符串长度为： [${fieldObj.minLen} ~ ${fieldObj.maxLen}]`});
-            if(fieldObj.regexp) {
-                let regexp = new RegExp(fieldObj.regexp);
-                if(!regexp.test(val)) {
-                    return reject({status: 400, message: `writePre [${key}] 的规则： [${fieldObj.regErrMsg}]`});
-                }
-            }
+    if(val && fieldObj.type === String) {
+        if(fieldObj.trimLen && fieldObj.trimLen !== val.length) return `writePre [${key}] 字段的字符串长度必须为 [${fieldObj.trimLen}]`;
+        if(fieldObj.minLen && fieldObj.minLen > val.length) return `writePre [${key}] 字段的字符串长度为： [${fieldObj.minLen} ~ ${fieldObj.maxLen}]`;
+        if(fieldObj.maxLen &&  fieldObj.maxLen < val.length)return `writePre [${key}] 字段的字符串长度为： [${fieldObj.minLen} ~ ${fieldObj.maxLen}]`;
+        if(fieldObj.regexp) {
+            let regexp = new RegExp(fieldObj.regexp);
+            if(!regexp.test(val)) return `writePre [${key}] 的规则： [${fieldObj.regErrMsg}]`;
         }
-
-        if(fieldObj.type === Number && !isNaN(parseInt(val))) {
-            val = parseInt(val);
-            if(fieldObj.minNum && fieldObj.minNum > val) return reject({status: 400, message: `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`});
-            if(fieldObj.maxNum &&  fieldObj.maxNum < val) return reject({status: 400, message: `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`});
-        }
-        return resolve(null);
-    } catch(e) {
-        return reject(e);
     }
-});
 
+    if(fieldObj.type === Number && !isNaN(parseInt(val))) {
+        val = parseInt(val);
+        if(fieldObj.minNum && fieldObj.minNum > val) return `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`;
+        if(fieldObj.maxNum &&  fieldObj.maxNum < val) return `writePre [${key}] 字段的取值范围为： [${fieldObj.minNum}, ${fieldObj.maxNum}]`;
+    }
+    return resolve(null);
+}
+
+/**
+ * 
+ * @param {*} is_modify_writePre  是否为修改 如果是false则是post
+ * @param {*} doc       // 数据库文档
+ * @param {*} docObj    // 要写入或修改的文档
+ * @param {*} payload   // 身份 如果无 则说明是 mongodb.js 在使用, 如果有 则是从Controller文件访问过来的
+ * @returns 
+ */
 exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(async(resolve, reject) => {
     try {
         // 如果是从 Control 传递过来的 则为 before 因为 Control有 payload 
@@ -44,7 +52,11 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
                 if(key === '_id') continue;
                 if(doc[key].is_fixed) return reject({status: 400, message: `writePre [${key}]为不可修改数据`});
             }
-            await formatDocKey_Pnull(key, doc[key], docObj[key], is_before);
+            let errMsg = formatDocKey(key, doc[key], docObj[key], is_before);
+            if(errMsg) return reject({
+                status: 400,
+                message: errMsg
+            })
         }
         for(key in doc) {   
             // 下面的三种情况顺序不能变 
@@ -71,7 +83,6 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
             }
             if(doc[key].is_autoDate) docObj[key] = new Date();      // 自动计时
 
-
             // 在新创建数据的情况下 判断每个必须的字段 如果前台没有给赋值 则报错
             if(!is_modify_writePre) {
                 if(doc[key] instanceof Array) {
@@ -89,6 +100,11 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
                         return reject({status: 400, message:`writePre 创建时 必须添加 [docObj.${key}] 字段`});
                     }
                 }
+            }
+
+            // 判断是否为 ObjectId类型
+            if(doc[key].ref && docObj[key]) {
+                if(!isObjectId(docObj[key])) return reject({status: 400, message:`[docObj.${key}] 为ObjectId 类型`});
             }
 
         }

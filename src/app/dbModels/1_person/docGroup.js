@@ -15,12 +15,12 @@ module.exports = {
         minLen: 6,
         maxLen: 12,
         is_change: true, // 存储数据库之前会变化
-        is_hideRead: true, //   不可读
+        is_UnReadable: true, //   不可读
     },
     refreshToken: {
         type: String,
         is_auto: true,
-        is_hideRead: true
+        is_UnReadable: true
     },
 
     phonePre: {

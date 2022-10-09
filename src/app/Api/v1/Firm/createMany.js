@@ -2,15 +2,15 @@ const Controller = require("../../../dbModels/2_organize/Firm/Controller");
 
 module.exports = async(ctx, next) => {
     try{
-        if(ctx.request.query.api == 1) return global.api(ctx, api, next);
+        if(ctx.request.query.api == 1) return resAPI(ctx, api, next);
 
         let payload = ctx.request.payload;
         let crtObj = ctx.request.body;
 
         let res = await Controller.createManyCT(payload, crtObj);
-        return global.success(ctx, res, next);
+        return resSUCCESS(ctx, res, next);
     } catch(e) {
-        return global.errs(ctx, e, next);
+        return resERR(ctx, e, next);
     }
 };
 

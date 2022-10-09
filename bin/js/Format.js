@@ -1,5 +1,3 @@
-const {PHONE_PRE} = global;
-
 format_phonePre = (phonePre) => {
 	if(!phonePre) return PHONE_PRE;
 

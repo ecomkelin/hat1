@@ -2,16 +2,16 @@ const Controller = require("../../../dbModels/0_role/Role/Controller");
 
 module.exports = async(ctx, next) => {
     try{
-        if(ctx.request.query.api == 1) return global.api(ctx, api, next);
+        if(ctx.request.query.api == 1) return resAPI(ctx, api, next);
 
         let payload = ctx.request.payload;
         let paramObj = ctx.request.body;
 
         // let {_id, update} = paramObj;
         let res = await Controller.modifyCT(payload, paramObj);
-        return global.success(ctx, res);
+        return resSUCCESS(ctx, res);
     } catch(e) {
-        return global.errs(ctx, e, next);
+        return resERR(ctx, e, next);
     }
 }
 

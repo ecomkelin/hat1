@@ -4,13 +4,15 @@
   "description": "basic System",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint --ext .js ./src",
+    "test": "cross-env NODE_ENV=test DB_MASTER=mongodb://localhost/hat1 jest --runInBand --forceExit --colors",
     "debug": "cross-env NODE_ENV=debug nodemon --inspect=9229 ./bin/server/index.js",
     "dev": "cross-env NODE_ENV=dev nodemon ./bin/server/index.js",
+    "prd": "cross-env NODE_ENV=production nodemon ./bin/server/index.js",
     "start": "pm2 start pm2.conf.json",
     "stop": "pm2 stop pm2.conf.json",
-    "delete": "pm2 delete pm2.conf.json",
-    "test": "cross-env NODE_ENV=test DB_MASTER=mongodb://localhost/hat1 jest --runInBand --forceExit --colors",
-    "lint": "eslint --ext .js ./src"
+    "delete": "pm2 delete pm2.conf.json"
+    
   },
   "keywords": [],
   "author": "",

@@ -58,7 +58,7 @@ module.exports = {
  * regexp [正则表达式] (所属字段必须为 String 类型) 字段要符合的正则表达式
  * is_change [Boolean] 保存之前要更改数据 (如果时需要改变的 则此字段需要在 ${Controller}文件中控制 writePre会根据此字段不判定)
  * 
- * is_hideRead [Boolean] 不可读取此数据 比如 密码  (readPre中 判定此参数)
+ * is_UnReadable [Boolean] 不可读取此数据 比如 密码  (readPre中 判定此参数)
  * 
  * unique [Boolean] 是否是唯一的, 如果为 true 则本字段中有且只有一个此值 (此字段为 mongoose 自带类型 本系统 在 docSame 中 也做了判定)
  * true_unique [Boolean] 是否是唯一的, 如果为 true 则本字段中有且只有一个为真

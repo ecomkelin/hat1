@@ -2,7 +2,6 @@
  * @description: 链接数据库, 打包mongoose语法, 每个Model引入
  * @author: kelin
  */
-const {DB_MASTER, LIMIT_FIND} = global;
  /* 数据库连接文件 */
 const mongoose = require('mongoose');
 /**
@@ -23,7 +22,6 @@ const Schema = mongoose.Schema;
 const writePre = require("../js/db/writePre");
 const readPre = require("../js/db/readPre");
 const docSame = require("../js/db/docSame");
-const {isObjectId} = require("../js/isType");
 // 暴露mongodb的方法 以及model的doc即所有field
 /**
  * @param {由models中各个数据库中Model文件提供 系统初始化的时候就被加载到各个Model文件中去 不会根据每次访问重新加载COLmaster及方法}
@@ -48,9 +46,13 @@ module.exports = (docName, doc) => {
 	const list_Pres = (paramObj={}) => new Promise(async(resolve, reject) => {
 		try {
 			// let {filter, select={}, skip, limit, sort, populate} = paramObj;
-			let param = await readPre.readMany(doc, paramObj);
+			let param = readPre.obtParam_ManyPre(doc, paramObj);
+			if(param.errMsg) return reject({
+				status: 400,
+				message: param.errMsg
+			})
 
-			let {match={}, projection, skip=0, limit=LIMIT_FIND, sort={}, populate, search={}} = param;
+			let {match={}, projection, skip=0, limit=LIMIT_FIND, sort, populate, search={}} = param;
 			if(!sort) sort = {sortNum: -1, at_upd: -1};
 	
 			let count = await COLread0.countDocuments(match);
@@ -82,8 +84,11 @@ module.exports = (docName, doc) => {
 
 	const detail_Pobj = (paramObj={}) => new Promise(async(resolve, reject) => {
 		try {
-			// let {match, select, populate} = paramObj;
-			param = await readPre.readOne(doc, paramObj);
+			let param = readPre.obtParam_OnePre(doc, paramObj);
+			if(param.errMsg) return reject({
+				status: 400,
+				message: param.errMsg
+			})
 			let {match={}, projection, populate} = param;
 
 			let object = await COLread0.findOne(match, projection)
@@ -148,7 +153,11 @@ module.exports = (docName, doc) => {
 	});
 	const modifyMany_Pres = (paramObj, update) => new Promise(async(resolve, reject) => {
 		try {
-			let param = await readPre.readMany(doc, paramObj);
+			let param = readPre.obtParam_ManyPre(doc, paramObj);
+			if(param.errMsg) return reject({
+				status: 400,
+				message: param.errMsg
+			})
 
 			let {match={}} = param;
 			let updateMany = await COLwrite.updateMany(match, update);
@@ -172,7 +181,11 @@ module.exports = (docName, doc) => {
 	});
 	const removeMany_Pres = (paramObj ={}) => new Promise(async(resolve, reject) => {
 		try {
-			let param = await readPre.readMany(doc, paramObj);
+			let param = readPre.obtParam_ManyPre(doc, paramObj);
+			if(param.errMsg) return reject({
+				status: 400,
+				message: param.errMsg
+			})
 
 			let {match={}} = param;
 

@@ -1,4 +1,4 @@
-const {pass_Pnull} = require(global.path.resolve(process.cwd(), "bin/js/db/writePre"));
+const {pass_Pnull} = require(path.resolve(process.cwd(), "bin/js/db/writePre"));
 
 const Model = require("./Model");
 
@@ -71,8 +71,11 @@ exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, rejec
 const setMatch = (payload, match) => {
     if(!payload.rankNum) return "您的 payload 信息错误, 请检查您的 token信息";
 
-    if(payload.Firm && payload.Firm._id) match._id = payload.Firm._id; // 如果是公司用户 则只可修改本公司的用户
-
+    // 如果是公司用户 则只可修改本公司的用户
+    if(payload.Firm) {
+        match._id = payload.Firm; 
+        if(payload.Firm._id) match._id = payload.Firm._id;
+    }
 }
 exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{

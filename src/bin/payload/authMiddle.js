@@ -4,7 +4,7 @@ module.exports = async(ctx, next) => {
 	try {
 		if(ctx.request.query.api == 1) return next(); // 查看api
 		ctx.url = ctx.url.toLowerCase();
-		if(global.WHITE_URL.includes(ctx.url)) return next();
+		if(WHITE_URL.includes(ctx.url)) return next();
 
 		let payload = await jwtMD.obtainPayload_Pobj(ctx.request.headers['authorization']);
 		ctx.request.payload = payload;
@@ -14,9 +14,9 @@ module.exports = async(ctx, next) => {
 			if(payload.auths && payload.auths.includes(ctx.url)) return next();
 		}
 
-		return global.noAccess(ctx);
+		return resNOACCESS(ctx);
 		// return next();
 	} catch(e) {
-		return global.errs(ctx, e, next);
+		return resERR(ctx, e, next);
 	}
 }

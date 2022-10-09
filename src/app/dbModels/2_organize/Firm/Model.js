@@ -17,5 +17,5 @@ const doc = {
 const docName = require("../..").Firm;
 
 // 暴露 方法 及 doc
-const Model = require(global.path.join(process.cwd(), "bin/sql/mongodb"))(docName, doc);
+const Model = require(path.join(process.cwd(), "bin/sql/mongodb"))(docName, doc);
 module.exports = Model;

@@ -1,14 +1,14 @@
-const Auth = require(global.path.resolve(process.cwd(), "src/bin/js/resProm/authrize"));
+const Auth = require(path.resolve(process.cwd(), "src/bin/js/resProm/authrize"));
 
-const Model = require(global.path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Model"));
+const Model = require(path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Model"));
 
 module.exports = async(ctx, next) => {
     try{
-      if(ctx.request.query.api == 1) return global.api(ctx, api, next);
+      if(ctx.request.query.api == 1) return resAPI(ctx, api, next);
       let res = await Auth.refresh_Pres(ctx, Model);
-      return global.success(ctx, res, next);
+      return resSUCCESS(ctx, res, next);
     } catch(e) {
-        return global.errs(ctx, e, next);
+        return resERR(ctx, e, next);
     }
 };
 

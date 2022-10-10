@@ -1,3 +1,9 @@
+/* ================ 数据库类型 ================ */
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+ObjectId = Schema.Types.ObjectId;
+
+
 /* ======================================== 常量 ======================================== */
 LIMIT_FIND = parseInt(process.env.LIMIT_FIND) || 50; // 系统中 默认调取的数据量
 

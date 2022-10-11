@@ -10,7 +10,7 @@
 const router = require('@koa/router')();
 
 routerObjs = [];  // 为了展示所有路由 不加const使其成为 global变量
-const JSrouter = require("./bin/js/router");
+const JSrouter = require("./method");
 
 /** get('/dbs') 路由 展示所有数据库的 document 名称 */
 JSrouter.allModelsRouter(router); 

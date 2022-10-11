@@ -53,7 +53,7 @@ server.use(async(ctx, next) => {
 
 // const routerUser = require('./router/User');
 // server.use(routerUser.routes());
-const router = require("../../src");
+const router = require("./router");
 server.use(router.routes());
 
 server.use(router.allowedMethods()); // 比如 post: login 用户使用了 get 则报 405

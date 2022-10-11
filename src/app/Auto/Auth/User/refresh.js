@@ -1,4 +1,4 @@
-const Auth = require(path.resolve(process.cwd(), "src/bin/js/resProm/authrize"));
+const Auth = require("../login.refresh");
 
 const Model = require(path.resolve(process.cwd(), "src/app/dbModels/1_person/User/Model"));
 

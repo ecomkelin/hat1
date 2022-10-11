@@ -1,5 +1,5 @@
-const jwtMD = require("../../payload/jwt");
-const bcryptMD = require(path.resolve(process.cwd(), "src/bin/payload/bcrypt"));
+const jwtMD = require(path.join(process.cwd(), "bin/js/encryption/jwt"));
+const bcryptMD = require(path.resolve(process.cwd(), "bin/js/encryption/bcrypt"));
 const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/Format"));
 
 

@@ -1,10 +1,8 @@
 /**
  * 
- * @param {*} doc 文档模型
- * @param {*} docNew 需要创建或更新的文档
- * @param {*} query 指针类型的数据： 重要 要操作的数据
- * @param {*} type 判断是创建还是更新内容
- * @returns 如果错误就返回错误信息
+ * @param {Object} doc 文档模型
+ * @param {Object} docNew 需要创建或更新的文档
+ * @returns [Object] query
  */
  const filterParam_Pobj = (doc, docNew) => new Promise((resolve, reject) => {
 	try {
@@ -55,17 +53,16 @@
 		return reject(e);
 	}
 })
-/**
- * 
- * @param {*} DBcollection: 数据库模型
- * @param {*} doc: 模型 模型field
- * @param {*} docNew: 要创建或修改的 文档数据
- * @returns 如果数据库中有相同的数据 则返回相应文档
- */
 
+/**
+ * 如果有 则通过
+ * @param {Model Object} DBcollection: modeleDB
+ * @param {Object} doc: 数据库模型 模型field
+ * @param {Object} docNew: 要创建或修改的 文档数据
+ * @returns [Object DB] 如果数据库中没有数据 则返回没有的错误信息, 如果有 则成功该信息
+ */
  exports.passExist_Pobj = (DBcollection, doc, docNew) => new Promise(async(resolve, reject) => {
 	try {
-				
 		let query = await filterParam_Pobj(doc, docNew);
 		if(docNew._id) query._id = {"$ne": docNew._id};			// 如果是更新 需要加入 $ne _id
 
@@ -76,11 +73,20 @@
 		return reject(e);
 	}
 })
+
+/**
+ * 如果没有则通过
+ * @param {Model Object} DBcollection 
+ * @param {Object} doc 数据库文档
+ * @param {Object} docNew 前台传入的数据
+ * @returns [null] 如果数据库中有相同的数据 则返回相应文档
+ */
 exports.passNotExist_Pnull = (DBcollection, doc, docNew) => new Promise(async(resolve, reject) => {
 	try {
 		let query = await filterParam_Pobj(doc, docNew);
 		if(query === null) return resolve(null);
 		if(docNew._id) query._id = {"$ne": docNew._id};			// 如果是更新 需要加入 $ne _id
+
 		let objSame = await DBcollection.findOne(query);
         if(objSame) return reject({errMsg: "数据库中已有相同数据", data: {objSame}, paramObj: {match: query}});
 		return resolve(null);

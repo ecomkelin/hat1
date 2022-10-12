@@ -19,15 +19,15 @@ const db_master = mongoose.createConnection(DB_MASTER, { useNewUrlParser: true, 
  * 数据库方法打包文件
  */
 const Schema = mongoose.Schema;
-const writePre = require("../js/db/writePre");
-const readPre = require("../js/db/readPre");
-const docSame = require("../js/db/docSame");
+const writePre = require("./writePre");
+const readPre = require("./readPre");
+const docSame = require("./docSame");
 // 暴露mongodb的方法 以及model的doc即所有field
 /**
- * @param {由models中各个数据库中Model文件提供 系统初始化的时候就被加载到各个Model文件中去 不会根据每次访问重新加载COLmaster及方法}
+ * 由models中各个数据库中Model文件提供 系统初始化的时候就被加载到各个Model文件中去 不会根据每次访问重新加载COLmaster及方法
  * @param {数据库名称} docName 
  * @param {文档中的field} doc 添加数据库 用于添加到此Model中暴露出去
- * @returns 暴露各种数据库方法
+ * @returns [Function] 暴露各种数据库方法
  */
 module.exports = (docName, doc) => {
 	const COLmaster = db_master.model(docName, new Schema(doc));
@@ -46,7 +46,7 @@ module.exports = (docName, doc) => {
 	const list_Pres = (paramObj={}) => new Promise(async(resolve, reject) => {
 		try {
 			// let {filter, select={}, skip, limit, sort, populate} = paramObj;
-			let param = readPre.obtParam_ManyPre(doc, paramObj);
+			let param = readPre.obtParam_readManyPre(doc, paramObj);
 			if(param.errMsg) return reject({ errMsg: param.errMsg })
 
 			let {match={}, projection, skip=0, limit=LIMIT_FIND, sort, populate, search={}} = param;
@@ -81,8 +81,9 @@ module.exports = (docName, doc) => {
 
 	const detail_Pobj = (paramObj={}) => new Promise(async(resolve, reject) => {
 		try {
-			let param = readPre.obtParam_OnePre(doc, paramObj);
+			let param = readPre.obtParam_readOnePre(doc, paramObj);
 			if(param.errMsg) return reject({ errMsg: param.errMsg })
+
 			let {match={}, projection, populate} = param;
 
 			let object = await COLread0.findOne(match, projection)
@@ -114,7 +115,7 @@ module.exports = (docName, doc) => {
 	const create_Pres = (document, options={}) => new Promise(async(resolve, reject) => {
 		try {
 			let {is_pass = false} = options;
-			if(!is_pass) await writePre.pass_Pnull(false, doc, document);
+			if(!is_pass) await writePre.writePass_Pnull(doc, document);
 
 			await docSame.passNotExist_Pnull(COLread0, doc, document);	// 如果不存在就通过 存在就报错
 			let object = await COLwrite.create(document);
@@ -135,7 +136,7 @@ module.exports = (docName, doc) => {
 
 	const modify_Pres = (match={}, update, is_pass=false) => new Promise(async(resolve, reject) => {
 		try {
-			if(!is_pass) await writePre.pass_Pnull(true, doc, update);			// 写入数据是否符合
+			if(!is_pass) await writePre.writePass_Pnull(doc, update, {is_modify: true});			// 写入数据是否符合
 
 			await docSame.passNotExist_Pnull(COLread0, doc, update);	// 如果不存在就通过 存在就报错
 			
@@ -147,7 +148,7 @@ module.exports = (docName, doc) => {
 	});
 	const modifyMany_Pres = (paramObj, update) => new Promise(async(resolve, reject) => {
 		try {
-			let param = readPre.obtParam_ManyPre(doc, paramObj);
+			let param = readPre.obtParam_readManyPre(doc, paramObj);
 			if(param.errMsg) return reject({ errMsg: param.errMsg })
 
 			let {match={}} = param;
@@ -172,7 +173,7 @@ module.exports = (docName, doc) => {
 	});
 	const removeMany_Pres = (paramObj ={}) => new Promise(async(resolve, reject) => {
 		try {
-			let param = readPre.obtParam_ManyPre(doc, paramObj);
+			let param = readPre.obtParam_readManyPre(doc, paramObj);
 			if(param.errMsg) return reject({ errMsg: param.errMsg })
 
 			let {match={}} = param;

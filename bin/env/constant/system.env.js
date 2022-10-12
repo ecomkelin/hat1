@@ -3,11 +3,11 @@
 IS_PRD = (process.env.NODE_ENV === "production") ? true : false;
 IS_DEV = (process.env.NODE_ENV === "dev") ? true : false;
 IS_DEBUG = (process.env.NODE_ENV === "debug") ? true : false;
-if(IS_PRD) {
-    console.log = () => {};
-    console.debug = () => {};
-} else if(IS_DEV) {
-    console.debug = () => {};
+if (IS_PRD) {
+    console.log = () => { };
+    console.debug = () => { };
+} else if (IS_DEV) {
+    console.debug = () => { };
 }
 
 /** 系统名称 端口 */

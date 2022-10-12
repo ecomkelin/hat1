@@ -3,7 +3,7 @@ const jsonwebtoken = require('jsonwebtoken');
 /**
  * 根据 headers 中的 bear token 截取要使用的token
  * @param {String} headersToken bear空格token
- * @returns token
+ * @returns [String] token
  */
 exports.obtToken_fromHeaders = (headersToken) => {
 	if(!headersToken) return null;
@@ -16,7 +16,7 @@ exports.obtToken_fromHeaders = (headersToken) => {
  * 根据token 获取 payload
  * @param {String} headersToken 接收 headers 中的 bear token
  * @param {Boolean} is_refresh 是否为 refresh
- * @returns payload
+ * @returns [Object] payload
  */
 exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(resolve, reject) => {
 	try {
@@ -36,8 +36,8 @@ exports.obtainPayload_Pobj = (headersToken, is_refresh)=> new Promise(async(reso
 /**
  * 根据 payload 生成 token
  * @param {Object} payload 根据payload对象生成token
- * @param {*} is_refresh 是否为refresh
- * @returns {String} token
+ * @param {Boolean} is_refresh 是否为refresh
+ * @returns [String] token
  */
 exports.generateToken = (payload, is_refresh=null)=> {
 	let token_secret = is_refresh ? REFRESH_TOKEN_SECRET : ACCESS_TOKEN_SECRET;
@@ -48,7 +48,7 @@ exports.generateToken = (payload, is_refresh=null)=> {
 /**
  * 根据 对象 obj 生成 payload
  * @param {Object} obj 根据obj生成 payload
- * @returns payload
+ * @returns [Object] payload
  */
 exports.generatePayload = (obj)=> {
 	let payload = {};

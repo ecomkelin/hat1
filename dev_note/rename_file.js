@@ -26,8 +26,5 @@ const upload = multer({
     }
 })
 router.post("/avatar", upload.single('myfile'), async(ctx, next) => {
-    ctx.body = {
-        data: ctx.req.file
-    }
-
+    resSUCESS(ctx, { data: ctx.req.file });
 });

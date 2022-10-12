@@ -30,6 +30,6 @@ JSrouter.rtRouters(router, 'api/router');
 /** ============================== 多路由配置 ============================== */
 
 
-router.get('/routers', ctx => ctx.body = {status: 200, routerObjs});    // /routers 路由 查看所有路由api
+router.get('/routers', ctx => resSUCCESS(ctx, {routerObjs}));    // /routers 路由 查看所有路由api
 
 module.exports = router;

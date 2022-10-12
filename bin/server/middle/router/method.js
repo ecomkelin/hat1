@@ -2,9 +2,9 @@
 const jwtMD = require(path.join(process.cwd(), "bin/js/encryption/jwt"));
 /**
  * 权限中间件
- * @param {*} ctx 
- * @param {*} next 
- * @returns 
+ * @param {Object} ctx 
+ * @param {Function} next 
+ * @returns [Function] next() | resNOACCESS(ctx)
  */
 const AuthMiddle = async(ctx, next) => {
 	try {
@@ -52,7 +52,7 @@ const appPath = path.join(process.cwd(), "src/app/");
 exports.allModelsRouter = (router) => {
     let dbs_Config = require(path.join(process.cwd(), "src/app/dbModels"));
     let url = "/dbs";
-    router.get(url, ctx => ctx.body= { status: 200, dbModels: Object.keys(dbs_Config) } );
+    router.get(url, ctx => resSUCCESS(ctx,{ dbModels: Object.keys(dbs_Config) } ));
     routerObjs.push("get - " + url);
 }
 
@@ -60,41 +60,47 @@ exports.allModelsRouter = (router) => {
 exports.allConfigRouter = (router) => {
     let Config = require(path.join(process.cwd(), "src/app/config"));
     let url = "/config";
-    router.get(url, ctx => ctx.body = {status: 200, Config});
+    router.get(url, ctx => resSUCCESS(ctx, {Config}));
     routerObjs.push("get - " + url);
 }
 
 
 /* ====================================== get 自动加载 Model文件路由 ====================================== */
 /**
- * @param {router} router 路由中间件
- * @param {*} dirPath 当前绝对路径
- * @param {*} paths 经过的所有 路径的 文件夹名称
- * @param {*} n 路径的层级
- * @param {*} maskFiles 如果false 则全部读取，  否则要为数组
+ * @param {Router} router 路由中间件
+ * @param {String} dirPath 当前绝对路径
+ * @param {Array} paths Array[String] 经过的所有 路径的 文件夹名称
+ * @param {Number} n 路径的层级
+ * @param {Array} inFiles 如果false 则全部读取，  否则要为数组
  */
-const getModels = (router, dirPath, paths, n, maskFiles) => {
+const getModels = (router, dirPath, paths, n, inFiles) => {
     fs.readdirSync(dirPath).forEach(dirName => {
         let len = dirName.split('.').length;
         if(len === 1) {       // 如果是文件夹 则进一步读取内容
             paths[n+1] = dirName;
-            getModels(router, path.join(dirPath+dirName+'/'), paths, n+1, maskFiles);
+            getModels(router, path.join(dirPath+dirName+'/'), paths, n+1, inFiles);
         } else if(len === 2) {                                    // 如果是文件则 则加载
-            if(maskFiles.includes(dirName)) {
+            if(inFiles.includes(dirName)) {
                 let file = dirPath+ dirName;
                 if(fs.existsSync(file)) {
                     let requ = require(file);
                     let url = '/'+paths[0]+'/'+paths[n];
-                    router.get(url, ctx => ctx.body= { status: 200, doc: requ.doc }  );
+                    router.get(url, ctx => resSUCCESS(ctx, { doc: requ.doc } ) );
                     routerObjs.push("get - " + url)
                 }
             }
         }
     });
 }
-exports.rtModels = (router, dirName, maskFiles) => {
+/**
+ * 
+ * @param {Router} router 
+ * @param {String} dirName 根目录
+ * @param {Array} inFiles 根目录下 只要名字为此的文件都包含
+ */
+exports.rtModels = (router, dirName, inFiles) => {
     let dirPath = appPath + dirName + "/";
-    getModels(router, dirPath, [dirName], 0, maskFiles);
+    getModels(router, dirPath, [dirName], 0, inFiles);
 }
 
 
@@ -102,7 +108,7 @@ exports.rtModels = (router, dirName, maskFiles) => {
 /* ====================================== Post 自动加载文件路由 ====================================== */
 /**
  * 
- * @param {router} router 路由中间件
+ * @param {Router} router 路由中间件
  * @param {Path} dirPath 当前绝对路径
  * @param {Array} paths 经过的所有 路径的 文件夹名称
  * @param {Number} n 路径的层级
@@ -118,7 +124,7 @@ exports.rtModels = (router, dirName, maskFiles) => {
          } else if(len === 2){                                    // 如果是文件则 则加载
              let file = dirPath+ dirName;
              if(fs.existsSync(file)) {
-                 let requ = require(file);
+                 let requ = require(file);  // 加载每个文件
                  let url = '';
                  for(let j=floorLevel; j<=n;j++) {
                      url += '/'+paths[j];
@@ -127,6 +133,7 @@ exports.rtModels = (router, dirName, maskFiles) => {
                  router.post(url, AuthMiddle, requ);
                  routerObjs.push("post - " + url);
              }
+             // 也就是说 如果 是 XXX.XXX.js 则不加载
          }
      });
  }
@@ -140,8 +147,8 @@ exports.rtModels = (router, dirName, maskFiles) => {
 
 /* ====================================== 自定义文件路由 ====================================== */
 /**
- * @param {router} router 路由中间件
- * @param {*} dirPath 当前绝对路径
+ * @param {Router} router 路由中间件
+ * @param {String} dirPath 当前绝对路径
  */
  const getRouters = (router, dirPath) => {
     fs.readdirSync(dirPath).forEach(dirName => {
@@ -149,8 +156,8 @@ exports.rtModels = (router, dirName, maskFiles) => {
         if(fns.length === 1) {       // 如果是文件夹 则进一步读取内容
             getRouters(router, path.join(dirPath+dirName+'/'));
         } else if(fns.length === 3) { // 如果有两个点的文件 则加载
-            if(fns[1] === "router" && fns[2] === "js") {   // 加载文件名的规则是 ***.router.js
-                let file = dirPath+ dirName;
+            if(fns[1] === "router" && fns[2] === "js") {   // 文件名的规则是 ***.router.js
+                let file = dirPath+ dirName;    // 加载相应文件
                 if(fs.existsSync(file)) {
                     let r = require(file);
                     router.use(r.routes());     // 把特定路由 的 路径注册到 路由文件中

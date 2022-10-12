@@ -6,9 +6,8 @@ const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/method/For
 /* 用refreshToken刷新 accessToken */
 /**
  * refreshToken 共用
- * @param {*} ctx 
- * @param {*} Model 
- * @returns res 刷新是否成功
+ * @param {Object} ctx 
+ * @param {Object} Model 
  */
 exports.refresh = (Model) => async(ctx, next) => {
 	try {
@@ -41,9 +40,8 @@ exports.refresh = (Model) => async(ctx, next) => {
 
 /**
  * login 登录 共用
- * @param {*} ctx 
- * @param {*} Model 
- * @returns res 登录是否成功
+ * @param {Object} ctx 
+ * @param {Object} Model 
  */
 exports.login = (Model) => async(ctx, next) => {
     try{
@@ -66,9 +64,9 @@ exports.login = (Model) => async(ctx, next) => {
 
 /**
  * 根据payload 生成 accessToken 和 refreshToken
- * @param {*} payload 
- * @param {*} Model 
- * @returns 
+ * @param {Object} payload 
+ * @param {Object} Model 
+ * @returns [Object] accessToken, refreshToken
  */
 const generateTokens = (payload, Model) => {
 	let accessToken = jwtMD.generateToken(payload);
@@ -79,9 +77,9 @@ const generateTokens = (payload, Model) => {
 
 /**
  * 根据账号中的 type_login 获取登录对象
- * @param {*} body 
- * @param {*} Model 
- * @returns Object
+ * @param {Object} body 
+ * @param {Object} Model 
+ * @returns [Object]
  */
 const obtLoginObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => {
 	try {

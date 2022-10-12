@@ -1,3 +1,8 @@
+/**
+ * 格式化电话号码前缀 为+XX
+ * @param {String} phonePre 
+ * @returns [String]
+ */
 exports.format_phonePre = (phonePre) => {
 	if(!phonePre) return PHONE_PRE;
 

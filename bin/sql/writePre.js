@@ -4,12 +4,12 @@
 */
 
 /**
- * 
- * @param {*} key 数据库字段名称
- * @param {*} fieldObj 数据库模型中字段的对象
- * @param {*} val 要写入或修改的值
- * @param {*} is_before // 基本Controller传递过来的是 true,  mongodb传过来的数据是 false
- * @returns 
+ * 格式化 文档 根据数据库field对象 格式化前台发送的数据
+ * @param {String} key 数据库字段名称
+ * @param {Object} fieldObj 数据库模型中字段的对象
+ * @param {String} val 要写入或修改 到此字段 的值 前端传递的 docObj[key]
+ * @param {Boolean} is_before // 基本Controller传递过来的是 true,  mongodb传过来的数据是 false
+ * @returns [null | String] 如果不为空 则错误
  */
 const formatDocKey = (key, fieldObj, val, is_before) => {
     if(!fieldObj) return `writePre 没有[${key}] 此字段`;
@@ -35,20 +35,22 @@ const formatDocKey = (key, fieldObj, val, is_before) => {
 }
 
 /**
- * 
- * @param {*} is_modify_writePre  是否为修改 如果是false则是post
- * @param {*} doc       // 数据库文档
- * @param {*} docObj    // 要写入或修改的文档
- * @param {*} payload   // 身份 如果无 则说明是 mongodb.js 在使用, 如果有 则是从Controller文件访问过来的
- * @returns 
+ * 数据写入数据库之前 检查是否能通过
+ * @param {Object} doc       // 数据库文档
+ * @param {Object} docObj    // 要写入或修改的文档
+ * @param {Object} options: {is_modify=false, payload} = options
+    * @param {Boolean} is_modify  是否为修改 如果是false则是post
+    * @param {Object} payload   // 身份 如果无 则说明是 mongodb.js 在使用, 如果有 则是从Controller文件访问过来的
+ * @returns [null]
  */
-exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(async(resolve, reject) => {
+exports.writePass_Pnull = (doc, docObj, options={}) => new Promise(async(resolve, reject) => {
     try {
+        let {is_modify=false, payload} = options;
         // 如果是从 Control 传递过来的 则为 before 因为 Control有 payload 
         // 否则 is_before 为false 因为 Model 么有 payload
         let is_before = payload ? true : false;
         for(key in docObj) {
-            if(is_modify_writePre) {
+            if(is_modify) {
                 if(key === '_id') continue;
                 if(doc[key].is_fixed) return reject({errMsg: `writePre [${key}]为不可修改数据`});
             }
@@ -63,7 +65,7 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
 
 
             // 在更新的情况下 如果不可更改 则跳过： 比如创建时间 后面的代码就不用执行了
-            if(is_modify_writePre && doc[key].is_fixed && (docObj[key] !== null && docObj[key] !== undefined)) {
+            if(is_modify && doc[key].is_fixed && (docObj[key] !== null && docObj[key] !== undefined)) {
                 // delete docObj[key];
                 // continue;
                 return reject({errMsg: `writePre 修改时 不可修改 is_fixed 为true 的字段 [${key}].`})
@@ -81,7 +83,7 @@ exports.pass_Pnull = (is_modify_writePre, doc, docObj, payload) => new Promise(a
             if(doc[key].is_autoDate) docObj[key] = new Date();      // 自动计时
 
             // 在新创建数据的情况下 判断每个必须的字段 如果前台没有给赋值 则报错
-            if(!is_modify_writePre) {
+            if(!is_modify) {
                 if(doc[key] instanceof Array) {
                     if(doc[key][0].required_min || doc[key][0].required_max) {
                         if(!docObj[key]) {

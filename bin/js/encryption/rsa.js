@@ -25,7 +25,7 @@ class Rsa {
      * @param {string} plaintext - Cleartext to encode.
      * @param {string|buffer} publicCertificate - A PEM encoded public certificate.
      *
-     * @returns {string} Base64-encoded ciphertext.
+     * @returns [String] Base64-encoded ciphertext.
      */
     static encrypt(plaintext, publicCertificate) {
         return publicEncrypt({
@@ -42,7 +42,7 @@ class Rsa {
      * @param {string} ciphertext - Was previously encrypted string using the corresponding public certificate.
      * @param {string|buffer} privateKeyCertificate - A PEM encoded private key certificate.
      *
-     * @returns {string} Utf-8 plaintext.
+     * @returns [String] Utf-8 plaintext.
      */
     static decrypt(ciphertext, privateKeyCertificate) {
         return privateDecrypt({
@@ -53,12 +53,12 @@ class Rsa {
     }
 
     /**
-     * Creates and returns a `Sign` string that uses `sha256WithRSAEncryption`.
+     * Creates and a `Sign` string that uses `sha256WithRSAEncryption`.
      *
      * @param {string|buffer} message - Content will be `crypto.Sign`.
      * @param {string|buffer} privateKeyCertificate - A PEM encoded private key certificate.
      *
-     * @returns {string} Base64-encoded signature.
+     * @returns [String] Base64-encoded signature.
      */
     static sign(message, privateKeyCertificate) {
         return createSign(sha256WithRSAEncryption).update(message).sign(
@@ -74,7 +74,7 @@ class Rsa {
      * @param {string} signature - The base64-encoded ciphertext.
      * @param {string|buffer} publicCertificate - A PEM encoded public certificate.
      *
-     * @returns {boolean} True is passed, false is failed.
+     * @returns [Boolean] True is passed, false is failed.
      */
     static verify(message, signature, publicCertificate) {
         return createVerify(sha256WithRSAEncryption).update(message).verify(

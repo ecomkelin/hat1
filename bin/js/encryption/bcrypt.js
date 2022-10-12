@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 /**
  * 生成加密 密码
  * @param {String} str_bcrypt 
- * @returns 加密后的密码
+ * @returns [String] 加密后的密码
  */
 exports.encryptHash_Pstr = (str_bcrypt) => new Promise((resolve, reject) => {
 	str_bcrypt=String(str_bcrypt);
@@ -20,7 +20,7 @@ exports.encryptHash_Pstr = (str_bcrypt) => new Promise((resolve, reject) => {
  * 匹配密码
  * @param {String} str_bcrypt 加密前的密码
  * @param {String} hash_bcrypt 加密后的密码
- * @returns 如果成功 则返回空 否则返回错误
+ * @returns [null] 如果成功 则返回空 否则返回错误
  */
 exports.matchBcrypt_Pnull = (str_bcrypt, hash_bcrypt) => new Promise(async(resolve, reject) => {
 	try {

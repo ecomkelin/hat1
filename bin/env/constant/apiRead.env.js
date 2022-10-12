@@ -8,7 +8,7 @@ readONE = {
         "$key<field>": "$content< 1 / -1 / String > 映射"
     },
 
-    "populate": "$content < String / Object / [Object] > 详情查看 mongoose populate" 
+    "populate": "$content < String / Object / [Object] > 详情查看 mongoose populate"
 };
 
 readMANY = {
@@ -48,6 +48,6 @@ readMANY = {
         "sort": {
             "$key<field>": "$content< 1 / -1> 排序"
         },
-        "populate": "$content < String / Object / [Object] > 详情查看 mongoose populate" 
+        "populate": "$content < String / Object / [Object] > 详情查看 mongoose populate"
     }
 };

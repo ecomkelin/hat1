@@ -1,8 +1,8 @@
 /**
  * 获取 doc模型中 field 对象
- * @param {required, Object} doc 
- * @param {required, String} field 
- * @returns 
+ * @param {Object} doc required, 
+ * @param {String} field required, 
+ * @returns [Object] 如果返回的对象中 有errMsg属性 那么就说明是错误的
  */
 const obt_docFieldObj = (doc, field) => {
     if(!doc) return {errMsg: " obt_docFieldObj 中的 doc不能为空"};   // 如果没有doc则返回空
@@ -29,34 +29,34 @@ const obt_docFieldObj = (doc, field) => {
 }
 
 /**
- * 
- * @param {*} doc 
- * @param {*} param 
- * @param {*} select 
+ * 设置 select 或者说 project 
+ * @param {Object} param 返回的read参数 把select/project参数设置到此处
+ * @param {Object} doc 数据库模型
+ * @param {Object} select 前台已经给的 select 参数
+ * returns [null | String] 如果有返回值 则说明没有通过 
  */
-const setProject = (doc, param, select={}) => {
+const setProject = (param, doc, select={}) => {
+    /** 筛选前端给的合理性 */
     for(key in select) {
         let docField = obt_docFieldObj(doc, key);
         if(docField.errMsg) return `[paramObj.select 的 ${key}] 不是该数据的字段`+docField.errMsg;
 
-        if(docField.is_UnReadable) { // 如果 字段不可读 则直接从读取数据中删除 比如pwd
-            if(IS_STRICT) {
-                if(select[key] == 1) return `[paramObj.select 的 ${key}] 不能显示`;
-            } else {
-                delete select[key];
-            }
-        } else {
+        if(docField.is_UnReadable) { // 如果 字段不可读
+            if(IS_STRICT)  if(select[key] == 1) return `[paramObj.select 的 ${key}] 不能显示`;
+            else delete select[key];
+        } else { // 字段 可读
             if(select[key] != 1) {  // 如果不为1 则为变更 字段名称
                 select[select[key]] = "$"+key;
                 delete select[key];
             }
         }
     }
-
+    /** 如果前端没有给select 后端自动过滤不可读的字段 */
     for(key in doc) {   // 如果没有select 则需要自动去掉不可读的数据
         if(doc[key].is_UnReadable) delete select[key];
     }
     param.projection = select;
+    return null;
 }
 const setPopulate = (doc, param, populate) => {
     if((typeof populate) === 'string') {
@@ -73,11 +73,11 @@ const setPopulate = (doc, param, populate) => {
 
 /**
  * // 批量 读取 更新 删除时 获取param
- * @param {required, 要操作的数据模型} doc 
- * @param {required, 前台想要操作的方式} paramObj 
- * @returns 
+ * @param {Object} doc required, 要操作的数据模型
+ * @param {Object} paramObj required, 前台想要操作的方式
+ * @returns [Object] 根据数据库 返回新的读取参数 形参不传递信息了, 如果对象中有 errMsg属性 则说明错误
  */
-exports.obtParam_ManyPre = (doc, paramObj) => {
+exports.obtParam_readManyPre = (doc, paramObj) => {
     let param = {};     // 最终返回的数据 参数
     let {filter, select={}, skip, limit, sort, populate} = paramObj;
     if(filter) {    // 
@@ -207,7 +207,7 @@ exports.obtParam_ManyPre = (doc, paramObj) => {
         param.match = matchObj;
     }
 
-    let errMsg = setProject(doc, param, select);
+    let errMsg = setProject(param, doc, select);
     if(errMsg) return { errMsg };
 
     if(skip) {
@@ -230,14 +230,20 @@ exports.obtParam_ManyPre = (doc, paramObj) => {
     }
 
     if(populate) {
-        let errMsg = setProject(doc, param, select);
+        let errMsg = setProject(param, doc, select);
         if(errMsg) return {errMsg};
     }
 
     return param;
 }
 
-exports.obtParam_OnePre = (doc, paramObj) => {
+/**
+ * // 读取 更新 删除时 获取param
+ * @param {Object} doc required, 要操作的数据模型
+ * @param {Object} paramObj required, 前台想要操作的方式
+ * @returns [Object] 根据数据库 返回新的读取参数 形参不传递信息了, 如果对象中有 errMsg属性 则说明错误
+ */
+exports.obtParam_readOnePre = (doc, paramObj) => {
     let param = {};
     let {match={}, select, populate} = paramObj;
     if(!match._id) return {errMsg: "查找detail数据时 请输入数据的 _id"};
@@ -245,11 +251,11 @@ exports.obtParam_OnePre = (doc, paramObj) => {
 
     let errMsg = null;
 
-    errMsg = setProject(doc, param, select);
+    errMsg = setProject(param, doc, select);
     if(errMsg) return {errMsg};
 
     if(populate) {
-        errMsg = setProject(doc, param, select);
+        errMsg = setProject(param, doc, select);
         if(errMsg) return {errMsg};
     }
 

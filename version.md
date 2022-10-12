@@ -1,3 +1,4 @@
+V 7.1.2 调整 resERR 400 及 authLogin
 V 7.1.1 src/bin 目录内容调整
 V 7.1.0 重写数组方法
 V 7.0.3 手动路由

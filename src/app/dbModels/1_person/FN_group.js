@@ -1,4 +1,4 @@
-const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/Format"));
+const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/method/Format"));
 
 const new_phoneInfo = (docObj) => {
     if(docObj.phoneNum) {

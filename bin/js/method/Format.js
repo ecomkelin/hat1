@@ -1,4 +1,4 @@
-format_phonePre = (phonePre) => {
+exports.format_phonePre = (phonePre) => {
 	if(!phonePre) return PHONE_PRE;
 
     phonePre = String(phonePre);
@@ -21,8 +21,4 @@ format_phonePre = (phonePre) => {
 		return "+"+phonePre[2]+phonePre[3];
 	}
 	return PHONE_PRE;
-}
-
-module.exports = {
-    format_phonePre
 }

@@ -47,10 +47,7 @@ module.exports = (docName, doc) => {
 		try {
 			// let {filter, select={}, skip, limit, sort, populate} = paramObj;
 			let param = readPre.obtParam_ManyPre(doc, paramObj);
-			if(param.errMsg) return reject({
-				status: 400,
-				errMsg: param.errMsg
-			})
+			if(param.errMsg) return reject({ errMsg: param.errMsg })
 
 			let {match={}, projection, skip=0, limit=LIMIT_FIND, sort, populate, search={}} = param;
 			if(!sort) sort = {sortNum: -1, at_upd: -1};
@@ -85,18 +82,15 @@ module.exports = (docName, doc) => {
 	const detail_Pobj = (paramObj={}) => new Promise(async(resolve, reject) => {
 		try {
 			let param = readPre.obtParam_OnePre(doc, paramObj);
-			if(param.errMsg) return reject({
-				status: 400,
-				errMsg: param.errMsg
-			})
+			if(param.errMsg) return reject({ errMsg: param.errMsg })
 			let {match={}, projection, populate} = param;
 
 			let object = await COLread0.findOne(match, projection)
 				.populate(populate);
 			if(!object) {
 				let noAuth_object = await COLread0.findOne({_id: match._id}, {_id: 1});
-				if(noAuth_object) return reject({status: 400, errMsg: "您没有权限访问此数据"});
-				return reject({status: 400, errMsg: "没有匹配到此数据"});
+				if(noAuth_object) return reject({errMsg: "您没有权限访问此数据"});
+				return reject({errMsg: "没有匹配到此数据"});
 			}
 			return resolve(object);
 		} catch(e) {
@@ -105,7 +99,7 @@ module.exports = (docName, doc) => {
 	});
 	const findOne_Pobj = ({match={}, projection, populate}) => new Promise(async(resolve, reject) => {
 		try {
-			if(match._id && !isObjectId(match._id)) return reject({status: 400, errMsg: "_id为 ObjectId 类型"})
+			if(match._id && !isObjectId(match._id)) return reject({errMsg: "_id为 ObjectId 类型"})
 
 			let object = await COLread0.findOne(match, projection)
 				.populate(populate);
@@ -124,7 +118,7 @@ module.exports = (docName, doc) => {
 
 			await docSame.passNotExist_Pnull(COLread0, doc, document);	// 如果不存在就通过 存在就报错
 			let object = await COLwrite.create(document);
-			if(!object) return reject({status: 400, errMsg: "创建数据失败"});
+			if(!object) return reject({errMsg: "创建数据失败"});
 			return resolve({data: {object}, message: "数据创建成功"});
 		} catch(e) {
 			reject(e);
@@ -154,14 +148,11 @@ module.exports = (docName, doc) => {
 	const modifyMany_Pres = (paramObj, update) => new Promise(async(resolve, reject) => {
 		try {
 			let param = readPre.obtParam_ManyPre(doc, paramObj);
-			if(param.errMsg) return reject({
-				status: 400,
-				errMsg: param.errMsg
-			})
+			if(param.errMsg) return reject({ errMsg: param.errMsg })
 
 			let {match={}} = param;
 			let updateMany = await COLwrite.updateMany(match, update);
-			if(updateMany.matchedCount === 0) return resolve({status: 400, errMsg: "没有更改任何数据"});
+			if(updateMany.matchedCount === 0) return resolve({errMsg: "没有更改任何数据"});
 			return resolve({updateMany});
 		} catch(e) {
 			reject(e);
@@ -173,7 +164,7 @@ module.exports = (docName, doc) => {
 	const remove_Pres = (match) => new Promise(async(resolve, reject) => {
 		try {
 			let del = await COLwrite.deleteOne(match);
-			if(del.deletedCount === 0) return resolve({status: 400, errMsg: "数据删除失败"});
+			if(del.deletedCount === 0) return resolve({errMsg: "数据删除失败"});
 			return resolve({message: "数据删除成功", del});
 		} catch(e) {
 			reject(e);
@@ -182,15 +173,12 @@ module.exports = (docName, doc) => {
 	const removeMany_Pres = (paramObj ={}) => new Promise(async(resolve, reject) => {
 		try {
 			let param = readPre.obtParam_ManyPre(doc, paramObj);
-			if(param.errMsg) return reject({
-				status: 400,
-				errMsg: param.errMsg
-			})
+			if(param.errMsg) return reject({ errMsg: param.errMsg })
 
 			let {match={}} = param;
 
 			let deleteMany = await COLwrite.deleteMany(match);
-			if(deleteMany.deletedCount === 0) return resolve({status: 400, errMsg: "没有删除任何数据"});
+			if(deleteMany.deletedCount === 0) return resolve({errMsg: "没有删除任何数据"});
 			return resolve(deleteMany);
 		} catch(e) {
 			reject(e);

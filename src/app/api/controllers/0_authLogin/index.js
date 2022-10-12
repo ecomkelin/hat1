@@ -88,7 +88,7 @@ const obtLoginObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => 
 		let type_login = body.type_login;
 		if(type_login === "hat") {
 			let hat = body.hat;
-			if(!hat) return reject({status: 400, errMsg: "请输入正确的 hat 参数 "});
+			if(!hat) return reject({errMsg: "请输入正确的 hat 参数 "});
 			let match = {};
 			if(hat.code) {
 				match.code = hat.code.replace(/^\s*/g,"");
@@ -101,11 +101,11 @@ const obtLoginObj_Pobj = (body, Model) => new Promise(async(resolve, reject) => 
 			}
 
 			let object = await Model.findOne_Pobj({match, project: {}});	// 因为要用code等其他信息匹配 所以不能用 detail_Pobj
-			if(!object) return reject({status: 400, errMsg: "账号错误"});
+			if(!object) return reject({errMsg: "账号错误"});
 			await bcryptMD.matchBcrypt_Pnull(hat.pwd, object.pwd);
 			return resolve(object);
 		} else {
-			return reject({status: 400, errMsg: "请输入正确的 [type_login] 类型为String ['hat', 'google', 'facebook', 'weixin'] "});
+			return reject({errMsg: "请输入正确的 [type_login] 类型为String ['hat', 'google', 'facebook', 'weixin'] "});
 		}
 	} catch(e) {
 		return reject(e);

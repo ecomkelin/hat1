@@ -50,11 +50,11 @@ const noAuth_write = (payload, docObj) => {
  */
 exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
-        // if(!docObj.Roles) return reject({status: 400, errMsg: "请传递 用户角色"});
+        // if(!docObj.Roles) return reject({errMsg: "请传递 用户角色"});
         if(!docObj.auths) docObj.auths = [];
         // 有无权限 完成新数据
         let errMsg = noAuth_write(payload, docObj);
-        if(errMsg) return reject({status: 400, errMsg});
+        if(errMsg) return reject({errMsg});
         
         // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
         await pass_Pnull(false, Model.doc, docObj, payload);
@@ -77,14 +77,14 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
 
 exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, reject) => {
     try{
-        // if(!docObj.Roles) return reject({status: 400, errMsg: "请传递 用户角色"});
+        // if(!docObj.Roles) return reject({errMsg: "请传递 用户角色"});
         let errMsg = null;
         for(let i=0; i<docObjs.length; i++) {
             let docObj = docObjs[i];
             if(!docObj.auths) docObj.auths = [];
             // 有无权限 完成新数据
             errMsg = noAuth_write(payload, docObj);
-            if(errMsg) return reject({status: 400, errMsg});
+            if(errMsg) return reject({errMsg});
 
             // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
             await pass_Pnull(false, Model.doc, docObj, payload);
@@ -118,7 +118,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
 
         // 有无权限 完成新数据
         let errMsg = noAuth_write(payload, update);
-        if(errMsg) return reject({status: 400, errMsg});
+        if(errMsg) return reject({errMsg});
 
         let match = {_id: _id};
         setMatch(payload, match);
@@ -136,7 +136,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
                 }
             }
         }
-        if(!flag_change) return reject({status: 400, errMsg: "您没有修改任何数据"});
+        if(!flag_change) return reject({errMsg: "您没有修改任何数据"});
 
         // is_change is_auto 操作前的 数据的验证
         let is_modify_writePre = true;
@@ -157,15 +157,15 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
 exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, reject) => {
     try{
         let {update, pwdOrg} = paramObj;
-        if(!update) return reject({status: 400, errMsg: "请输入 update 参数"});
+        if(!update) return reject({errMsg: "请输入 update 参数"});
         // 有无权限 完成新数据
         let errMsg = noAuth_write(payload, update);
-        if(errMsg) return reject({status: 400, errMsg});
+        if(errMsg) return reject({errMsg});
 
         let match = {_id: payload._id};
 
         Org = await Model.findOne_Pobj({match});    // 因为要看 pwd 所以不能用 detail_Pobj
-        if(!Org) return reject({status: 400, errMsg: "您的数据已经不在数据库中"})
+        if(!Org) return reject({errMsg: "您的数据已经不在数据库中"})
 
         let flag_change = false;
         if(update.pwd) {
@@ -178,7 +178,7 @@ exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, rejec
                 }
             }
         }
-        if(!flag_change) return reject({status: 400, errMsg: "您没有修改任何数据"});
+        if(!flag_change) return reject({errMsg: "您没有修改任何数据"});
 
         // is_change is_auto 操作前的 数据的验证
         let is_modify_writePre = true;  // 标识这是更新而不是新建
@@ -187,7 +187,7 @@ exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, rejec
 
         // is_change is_auto 数据自动处理处;
         if(update.pwd) {
-            if(!pwdOrg) return reject({status: 400, errMsg: "请输入您的原密码, 如果忘记请联系管理员"})
+            if(!pwdOrg) return reject({errMsg: "请输入您的原密码, 如果忘记请联系管理员"})
             await matchBcrypt_Pnull(pwdOrg, Org.pwd);
             update.pwd = await encryptHash_Pstr(update.pwd);
         }
@@ -205,7 +205,7 @@ exports.myselfPutCT = (payload, paramObj={}) => new Promise(async(resolve, rejec
 exports.modifyManyCT = (payload, paramObj) => new Promise(async(resolve, reject) => {
     try{
         let {update} = paramObj;
-        if(!update) return reject({status: 400, errMsg: "请传递 update 数据"});
+        if(!update) return reject({errMsg: "请传递 update 数据"});
         let match = {};
         setMatch(payload, match);
         paramObj.match = match;

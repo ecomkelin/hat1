@@ -1,3 +1,4 @@
+V 7.1.3 去掉程序里的所有 status: 400
 V 7.1.2 调整 resERR 400 及 authLogin
 V 7.1.1 src/bin 目录内容调整
 V 7.1.0 重写数组方法

@@ -22,7 +22,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
     try{
         // 有无权限 完成新数据
         let errMsg = noAuth_write(payload, docObj);
-        if(errMsg) return reject({status: 400, errMsg});
+        if(errMsg) return reject({errMsg});
 
         // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
         await pass_Pnull(false, Model.doc, docObj, payload);
@@ -48,7 +48,7 @@ exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, rejec
             let docObj = docObjs[i];
             // 有无权限 完成新数据
             errMsg = noAuth_write(payload, docObj);
-            if(errMsg) return reject({status: 400, errMsg});
+            if(errMsg) return reject({errMsg});
 
             // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
             await pass_Pnull(false, Model.doc, docObj, payload);
@@ -81,7 +81,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
 
         // 有无权限 完成新数据
         let errMsg = noAuth_write(payload, update);
-        if(errMsg) return reject({status: 400, errMsg});
+        if(errMsg) return reject({errMsg});
 
         let match = {_id: _id};
         setMatch(payload, match);
@@ -95,7 +95,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
                 flag_change = true;
             }
         }
-        if(!flag_change) return reject({status: 400, errMsg: "您没有修改任何数据"});
+        if(!flag_change) return reject({errMsg: "您没有修改任何数据"});
 
         // is_change is_auto 操作前的 数据的验证
         let is_modify_writePre = true;
@@ -116,7 +116,7 @@ exports.modifyManyCT = (payload, paramObj) => new Promise(async(resolve, reject)
     try{
 
         let {update} = paramObj;
-        if(!update) return reject({status: 400, errMsg: "请传递 update 数据"});
+        if(!update) return reject({errMsg: "请传递 update 数据"});
         let match = {};
         setMatch(payload, match);
         paramObj.match = match;

@@ -1,7 +1,7 @@
 {
     "apps": {
         "name": "hat1",
-        "script": "bin/server/index.js",
+        "script": "index.js",
         "watch": true,
         "ignore_watch": [
             "node_modules",

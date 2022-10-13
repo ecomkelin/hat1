@@ -16,3 +16,4 @@ isAllObjectId = (ids) => {
 }
 
 writePass_Pnull = require(path.resolve(process.cwd(), "bin/sql/writePre")).writePass_Pnull;
+mongoModel = require(path.resolve(process.cwd(), "bin/sql/mongodb"));

@@ -21,5 +21,5 @@ const docModel = {
 const docName = require("../..").Role;
 
 // 暴露 方法 及 docModel
-const Model = require(path.join(process.cwd(), "bin/sql/mongodb"))(docName, docModel);
+const Model = mongoModel(docName, docModel);
 module.exports = Model;

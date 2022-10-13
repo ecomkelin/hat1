@@ -1,5 +1,5 @@
 /* =============================================== 中间件 =============================================== */
-const jwtMD = require(path.join(process.cwd(), "bin/js/encryption/jwt"));
+const jwtMD = require(path.join(process.cwd(), "core/encryption/jwt"));
 /**
  * 权限中间件
  * @param {Object} ctx 

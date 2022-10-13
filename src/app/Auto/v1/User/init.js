@@ -1,6 +1,6 @@
 const Model = require("../../../dbModels/1_person/User/Model");
 
-const {encryptHash_Pstr} = require(path.resolve(process.cwd(), "bin/js/encryption/bcrypt"));
+const {encryptHash_Pstr} = require(path.resolve(process.cwd(), "core/encryption/bcrypt"));
 
 module.exports = async(ctx, next) => {
     try{

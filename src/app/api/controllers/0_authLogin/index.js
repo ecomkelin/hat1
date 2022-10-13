@@ -1,6 +1,6 @@
-const jwtMD = require(path.join(process.cwd(), "bin/js/encryption/jwt"));
-const bcryptMD = require(path.resolve(process.cwd(), "bin/js/encryption/bcrypt"));
-const {format_phonePre} = require(path.resolve(process.cwd(), "bin/js/method/Format"));
+const jwtMD = require(path.join(process.cwd(), "core/encryption/jwt"));
+const bcryptMD = require(path.resolve(process.cwd(), "core/encryption/bcrypt"));
+const {format_phonePre} = require(path.resolve(process.cwd(), "core/method/Format"));
 
 
 /* 用refreshToken刷新 accessToken */

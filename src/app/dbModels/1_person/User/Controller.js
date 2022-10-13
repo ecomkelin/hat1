@@ -1,4 +1,4 @@
-const {encryptHash_Pstr, matchBcrypt_Pnull} = require(path.resolve(process.cwd(), "bin/js/encryption/bcrypt"));
+const {encryptHash_Pstr, matchBcrypt_Pnull} = require(path.resolve(process.cwd(), "core/encryption/bcrypt"));
 
 const {format_phoneInfo} = require("../FN_group");
 

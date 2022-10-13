@@ -25,7 +25,7 @@ exports.createCT = (payload, docObj) => new Promise(async(resolve, reject) => {
         if(errMsg) return reject({errMsg});
 
         // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
-        await writePass_Pnull(Model.doc, docObj, {payload});
+        await writePass_Pnull(Model.docModel, docObj, {payload});
         let is_pass = true;
 
         // is_change is_auto 数据自动处理处;
@@ -51,7 +51,7 @@ exports.createManyCT = (payload, docObjs=[]) => new Promise(async(resolve, rejec
             if(errMsg) return reject({errMsg});
 
             // 查看 前台数据 docObj 正确性 并且 对 is_change is_auto 数据的处理
-            await writePass_Pnull(Model.doc, docObj, {payload});
+            await writePass_Pnull(Model.docModel, docObj, {payload});
 
             // is_change is_auto 数据自动处理处;
         }
@@ -90,7 +90,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
 
         let flag_change = false;
         for(key in update) {
-            if(Model.doc[key].is_change) continue;
+            if(Model.docModel[key].is_change) continue;
             if(update[key] !== Org[key]) {
                 flag_change = true;
             }
@@ -98,7 +98,7 @@ exports.modifyCT = (payload, paramObj={}) => new Promise(async(resolve, reject) 
         if(!flag_change) return reject({errMsg: "您没有修改任何数据"});
 
         // is_change is_auto 操作前的 数据的验证
-        await writePass_Pnull(Model.doc, update, {is_modify: true, payload});
+        await writePass_Pnull(Model.docModel, update, {is_modify: true, payload});
         let is_pass = true; // 已经通过了数据验证, 不需要再进行验证
 
         // is_change is_auto 数据自动处理处;
@@ -124,7 +124,7 @@ exports.modifyManyCT = (payload, paramObj) => new Promise(async(resolve, reject)
         delete update.img_url;
 
         // is_change is_auto 操作前的 数据的验证
-        await writePass_Pnull(Model.doc, update, {is_modify: true, payload});
+        await writePass_Pnull(Model.docModel, update, {is_modify: true, payload});
 
         let res = await Model.modifyMany_Pres(paramObj, update);
         return resolve(res);

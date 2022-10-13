@@ -85,7 +85,7 @@ const getModels = (router, dirPath, paths, n, inFiles) => {
                 if(fs.existsSync(file)) {
                     let requ = require(file);
                     let url = '/'+paths[0]+'/'+paths[n];
-                    router.get(url, ctx => resSUCCESS(ctx, { doc: requ.doc } ) );
+                    router.get(url, ctx => resSUCCESS(ctx, { docModel: requ.docModel } ) );
                     routerObjs.push("get - " + url)
                 }
             }

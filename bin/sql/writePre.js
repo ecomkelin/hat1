@@ -36,14 +36,14 @@ const formatDocKey = (key, fieldObj, val, is_before) => {
 
 /**
  * 数据写入数据库之前 检查是否能通过
- * @param {Object} doc       // 数据库文档
+ * @param {Object} docModel       // 数据库文档
  * @param {Object} docObj    // 要写入或修改的文档
  * @param {Object} options: {is_modify=false, payload} = options
     * @param {Boolean} is_modify  是否为修改 如果是false则是post
     * @param {Object} payload   // 身份 如果无 则说明是 mongodb.js 在使用, 如果有 则是从Controller文件访问过来的
  * @returns [null]
  */
-exports.writePass_Pnull = (doc, docObj, options={}) => new Promise(async(resolve, reject) => {
+exports.writePass_Pnull = (docModel, docObj, options={}) => new Promise(async(resolve, reject) => {
     try {
         let {is_modify=false, payload} = options;
         // 如果是从 Control 传递过来的 则为 before 因为 Control有 payload 
@@ -52,12 +52,12 @@ exports.writePass_Pnull = (doc, docObj, options={}) => new Promise(async(resolve
         for(key in docObj) {
             if(is_modify) {
                 if(key === '_id') continue;
-                if(doc[key].is_fixed) return reject({errMsg: `writePre [${key}]为不可修改数据`});
+                if(docModel[key].is_fixed) return reject({errMsg: `writePre [${key}]为不可修改数据`});
             }
-            let errMsg = formatDocKey(key, doc[key], docObj[key], is_before);
+            let errMsg = formatDocKey(key, docModel[key], docObj[key], is_before);
             if(errMsg) return reject({errMsg})
         }
-        for(key in doc) {   
+        for(key in docModel) {   
             // 下面的三种情况顺序不能变 
             // 1 如果是更新 遇到 is_fixed 直接跳过。也就是说 如果 at_crt 直接跳过 后面自动给数据就不变了
             // 2 自动添加一些数据
@@ -65,7 +65,7 @@ exports.writePass_Pnull = (doc, docObj, options={}) => new Promise(async(resolve
 
 
             // 在更新的情况下 如果不可更改 则跳过： 比如创建时间 后面的代码就不用执行了
-            if(is_modify && doc[key].is_fixed && (docObj[key] !== null && docObj[key] !== undefined)) {
+            if(is_modify && docModel[key].is_fixed && (docObj[key] !== null && docObj[key] !== undefined)) {
                 // delete docObj[key];
                 // continue;
                 return reject({errMsg: `writePre 修改时 不可修改 is_fixed 为true 的字段 [${key}].`})
@@ -73,36 +73,36 @@ exports.writePass_Pnull = (doc, docObj, options={}) => new Promise(async(resolve
 
             // 如果是 Control 给的数据 自动赋值一些payload数据
             if(is_before) {
-                if(doc[key].is_auto && docObj[key]) return reject({errMsg:`writePre [docObj.${key}]为后端赋值数据 前端不能传输数据`});
-                if(doc[key].autoPayload === "_id") {
+                if(docModel[key].is_auto && docObj[key]) return reject({errMsg:`writePre [docObj.${key}]为后端赋值数据 前端不能传输数据`});
+                if(docModel[key].autoPayload === "_id") {
                     docObj[key] = payload._id;
-                } else if(doc[key].autoPayload === "Firm") {
+                } else if(docModel[key].autoPayload === "Firm") {
                     if(payload.Firm) docObj[key] = payload.Firm._id || payload.Firm;
                 }
             }
-            if(doc[key].is_autoDate) docObj[key] = new Date();      // 自动计时
+            if(docModel[key].is_autoDate) docObj[key] = new Date();      // 自动计时
 
             // 在新创建数据的情况下 判断每个必须的字段 如果前台没有给赋值 则报错
             if(!is_modify) {
-                if(doc[key] instanceof Array) {
-                    if(doc[key][0].required_min || doc[key][0].required_max) {
+                if(docModel[key] instanceof Array) {
+                    if(docModel[key][0].required_min || docModel[key][0].required_max) {
                         if(!docObj[key]) {
                             return reject({errMsg:`writePre 创建时 必须添加 [docObj.${key}] Array 字段`});
-                        } else if(docObj[key].length < doc[key][0].required_min) {
-                            return reject({errMsg:`writePre 创建时 [docObj.${key}] Array length不能小于 ${doc[key][0].required_min}`});
-                        } else if(docObj[key].length > doc[key][0].required_max) {
-                            return reject({errMsg:`writePre 创建时 [docObj.${key}] Array length不能大于 ${doc[key][0].required_max}`});
+                        } else if(docObj[key].length < docModel[key][0].required_min) {
+                            return reject({errMsg:`writePre 创建时 [docObj.${key}] Array length不能小于 ${docModel[key][0].required_min}`});
+                        } else if(docObj[key].length > docModel[key][0].required_max) {
+                            return reject({errMsg:`writePre 创建时 [docObj.${key}] Array length不能大于 ${docModel[key][0].required_max}`});
                         }
                     }
                 } else {
-                    if((doc[key].required === true) && (docObj[key] === null || docObj[key] === undefined)) {
+                    if((docModel[key].required === true) && (docObj[key] === null || docObj[key] === undefined)) {
                         return reject({errMsg:`writePre 创建时 必须添加 [docObj.${key}] 字段`});
                     }
                 }
             }
 
             // 判断是否为 ObjectId类型
-            if(doc[key].ref && docObj[key]) {
+            if(docModel[key].ref && docObj[key]) {
                 if(!isObjectId(docObj[key])) return reject({errMsg:`[docObj.${key}] 为ObjectId 类型`});
             }
 

@@ -1,16 +1,16 @@
 /**
  * 获取 doc模型中 field 对象
- * @param {Object} doc required, 
+ * @param {Object} docModel required, 
  * @param {String} field required, 
  * @returns [Object] 如果返回的对象中 有errMsg属性 那么就说明是错误的
  */
-const obt_docFieldObj = (doc, field) => {
-    if(!doc) return {errMsg: " obt_docFieldObj 中的 doc不能为空"};   // 如果没有doc则返回空
+const obt_docFieldObj = (docModel, field) => {
+    if(!docModel) return {errMsg: " obt_docFieldObj 中的 doc不能为空"};   // 如果没有doc则返回空
     if(!field) return {errMsg: " obt_fieldFieldObj 中的 field不能为空"};   // 如果没有doc则返回空
 
     if(field === "_id") return {type: ObjectId};  // 如果 field 是 _id 则返回 ObjectId类型
 
-    if(doc[field]) return doc[field];   // 如果存在此 filed 直接返回
+    if(docModel[field]) return docModel[field];   // 如果存在此 filed 直接返回
 
     /** field 中有可能包含点('.')  */
     let keys = field.split('.');
@@ -18,27 +18,27 @@ const obt_docFieldObj = (doc, field) => {
 
     /** 有可能为多级对象  */
     let [key1, key2] = keys;
-    if(!doc[key1]) return {errMsg: "doc中 无此对象"}; // 如果第一层没有 则返回空
-    let fld = doc[key1];
-    if(fld instanceof Object) { // 判断 doc[key1]是否为对象 如果不为对象则跳过 返回空
+    if(!docModel[key1]) return {errMsg: "doc中 无此对象"}; // 如果第一层没有 则返回空
+    let fld = docModel[key1];
+    if(fld instanceof Object) { // 判断 docModel[key1]是否为对象 如果不为对象则跳过 返回空
         let fd = (fld instanceof Array) ? fld[0][key2] : fld[key2]; // 判断doc[key1]是否为数组 获取下一层
         if(fd) return fd;
-        return {errMsg: `doc[${key1}] 中没有 ${key2} 这个对象`}
+        return {errMsg: `docModel[${key1}] 中没有 ${key2} 这个对象`}
     };
-    return {errMsg: `doc[${key1}] 不是对象`};  // 如果 doc[key1] 不是对象 则错误
+    return {errMsg: `docModel[${key1}] 不是对象`};  // 如果 docModel[key1] 不是对象 则错误
 }
 
 /**
  * 设置 select 或者说 project 
  * @param {Object} param 返回的read参数 把select/project参数设置到此处
- * @param {Object} doc 数据库模型
+ * @param {Object} docModel 数据库模型
  * @param {Object} select 前台已经给的 select 参数
  * returns [null | String] 如果有返回值 则说明没有通过 
  */
-const setProject = (param, doc, select={}) => {
+const setProject = (param, docModel, select={}) => {
     /** 筛选前端给的合理性 */
     for(key in select) {
-        let docField = obt_docFieldObj(doc, key);
+        let docField = obt_docFieldObj(docModel, key);
         if(docField.errMsg) return `[paramObj.select 的 ${key}] 不是该数据的字段`+docField.errMsg;
 
         if(docField.is_UnReadable) { // 如果 字段不可读
@@ -52,13 +52,13 @@ const setProject = (param, doc, select={}) => {
         }
     }
     /** 如果前端没有给select 后端自动过滤不可读的字段 */
-    for(key in doc) {   // 如果没有select 则需要自动去掉不可读的数据
-        if(doc[key].is_UnReadable) delete select[key];
+    for(key in docModel) {   // 如果没有select 则需要自动去掉不可读的数据
+        if(docModel[key].is_UnReadable) delete select[key];
     }
     param.projection = select;
     return null;
 }
-const setPopulate = (doc, param, populate) => {
+const setPopulate = (docModel, param, populate) => {
     if((typeof populate) === 'string') {
     
     } else if(populate instanceof Array) {
@@ -73,11 +73,11 @@ const setPopulate = (doc, param, populate) => {
 
 /**
  * // 批量 读取 更新 删除时 获取param
- * @param {Object} doc required, 要操作的数据模型
+ * @param {Object} docModel required, 要操作的数据模型
  * @param {Object} paramObj required, 前台想要操作的方式
  * @returns [Object] 根据数据库 返回新的读取参数 形参不传递信息了, 如果对象中有 errMsg属性 则说明错误
  */
-exports.obtParam_readManyPre = (doc, paramObj) => {
+exports.obtParam_readManyPre = (docModel, paramObj) => {
     let param = {};     // 最终返回的数据 参数
     let {filter, select={}, skip, limit, sort, populate} = paramObj;
     if(filter) {    // 
@@ -94,7 +94,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
                 search.fields  = (search.fields instanceof Array) ? search.fields : [search.fields];
                 for(i in search.fields) {
                     let field = search.fields[i];
-                    let docField = obt_docFieldObj(doc, field);
+                    let docField = obt_docFieldObj(docModel, field);
                     if(docField.errMsg) return { errMsg: '[paramObj.filter.search.fields]: '+docField.errMsg};
 
                     if(docField.type !== String) return { errMsg: `数据层readPre [paramObj.filter.search.fields 的值 ${field}] 错误, 应该传递类型为<String>的<field>` };
@@ -105,7 +105,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
         }
         if(matchObj["$or"].length === 0) delete matchObj["$or"];
         for(key in match) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
                 if(IS_STRICT) {
                     return {errMsg: docField.errMsg};
@@ -118,7 +118,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
             matchObj[key] = match[key];
         }
         for(key in includes) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
                 if(IS_STRICT) {
                     return {errMsg: docField.errMsg};
@@ -136,7 +136,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
             matchObj[key] = {"$in": includes[key]};
         }
         for(key in excludes) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
                 if(IS_STRICT) {
                     return {errMsg: docField.errMsg};
@@ -149,7 +149,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
             matchObj[key] = {"$nin": excludes[key]};
         }
         for(key in lte) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
                 if(IS_STRICT) {
                     return {errMsg: docField.errMsg};
@@ -163,7 +163,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
         }
     
         for(key in gte) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
                 if(IS_STRICT) {
                     return {errMsg: docField.errMsg};
@@ -177,7 +177,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
             matchObj[key] = {"$gte": gte[key]};
         }
         for(key in at_before) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
                 if(IS_STRICT) {
                     return {errMsg: docField.errMsg};
@@ -191,7 +191,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
             matchObj[key] = {"$lte": before};
         }
         for(key in at_after) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
                 if(IS_STRICT) {
                     return {errMsg: docField.errMsg};
@@ -207,7 +207,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
         param.match = matchObj;
     }
 
-    let errMsg = setProject(param, doc, select);
+    let errMsg = setProject(param, docModel, select);
     if(errMsg) return { errMsg };
 
     if(skip) {
@@ -222,7 +222,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
 
     if(sort) {
         for(key in sort) {
-            let docField = obt_docFieldObj(doc, key);
+            let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) return  { errMsg: `[paramObj.sort 的 ${key}] 不是该数据的字段- `+docField.errMsg };
             if(sort[key] !== -1 && sort[key] !== "-1")  sort[key] = 1;
         }
@@ -230,7 +230,7 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
     }
 
     if(populate) {
-        let errMsg = setProject(param, doc, select);
+        let errMsg = setProject(param, docModel, select);
         if(errMsg) return {errMsg};
     }
 
@@ -239,11 +239,11 @@ exports.obtParam_readManyPre = (doc, paramObj) => {
 
 /**
  * // 读取 更新 删除时 获取param
- * @param {Object} doc required, 要操作的数据模型
+ * @param {Object} docModel required, 要操作的数据模型
  * @param {Object} paramObj required, 前台想要操作的方式
  * @returns [Object] 根据数据库 返回新的读取参数 形参不传递信息了, 如果对象中有 errMsg属性 则说明错误
  */
-exports.obtParam_readOnePre = (doc, paramObj) => {
+exports.obtParam_readOnePre = (docModel, paramObj) => {
     let param = {};
     let {match={}, select, populate} = paramObj;
     if(!match._id) return {errMsg: "查找detail数据时 请输入数据的 _id"};
@@ -251,11 +251,11 @@ exports.obtParam_readOnePre = (doc, paramObj) => {
 
     let errMsg = null;
 
-    errMsg = setProject(param, doc, select);
+    errMsg = setProject(param, docModel, select);
     if(errMsg) return {errMsg};
 
     if(populate) {
-        errMsg = setProject(param, doc, select);
+        errMsg = setProject(param, docModel, select);
         if(errMsg) return {errMsg};
     }
 

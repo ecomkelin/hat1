@@ -9,7 +9,7 @@ code.uniq = ["Firm"];
 const name = {...docGlobal.name};
 name.uniq = ["Firm"];
 // 打包成为集合
-const doc = {
+const docModel = {
     ...docGlobal,
 
     code,
@@ -20,6 +20,6 @@ const doc = {
 // 集合名称
 const docName = require("../..").Role;
 
-// 暴露 方法 及 doc
-const Model = require(path.join(process.cwd(), "bin/sql/mongodb"))(docName, doc);
+// 暴露 方法 及 docModel
+const Model = require(path.join(process.cwd(), "bin/sql/mongodb"))(docName, docModel);
 module.exports = Model;

@@ -1,3 +1,4 @@
+V 7.2.1 model的命名调整
 V 7.2.0 index 拆到主文件 bin/js 变为 core文件
         src应用文件 不访问bin目录 可以用到core文件内容
 V 7.1.5 DB Model 命名修正

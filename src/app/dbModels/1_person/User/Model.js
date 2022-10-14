@@ -1,18 +1,18 @@
 // 引入全局及组的 collection field
-const docGroup = require("../docGroup");
+const groupModel = require("../groupModel");
 const docNameObj = require("../../index");
 
 // 本身特殊的 field
-const code = {...docGroup.code};
+const code = {...groupModel.code};
 code.unique = true;
 
-const Firm = {...docGroup.Firm};
+const Firm = {...groupModel.Firm};
 delete Firm.required;
 
 
 // 打包成为集合
 const docModel = {
-    ...docGroup,
+    ...groupModel,
 
     code,
     Firm,

@@ -2,7 +2,7 @@
  * @description: 
  */
 
-const doc_global = require("../docGlobal");
+const doc_global = require("../globalModel");
 module.exports = {
     // 登录信息
     ...doc_global,

@@ -1,6 +1,6 @@
 const {encryptHash_Pstr, matchBcrypt_Pnull} = require(path.resolve(process.cwd(), "core/encryption/bcrypt"));
 
-const {format_phoneInfo} = require("../FN_group");
+const {format_phoneInfo} = require("../controllerGroup");
 
 const Model = require("./Model");
 

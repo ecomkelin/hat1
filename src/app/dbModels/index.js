@@ -33,5 +33,6 @@ const getModelName = (dirPath, paths, n, inFiles) => {
         }
     });
 }
+
 getModelName(MdPath, ['dbModels'], 0, ['Model.js'])
 module.exports = docNameObj;

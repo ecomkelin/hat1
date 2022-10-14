@@ -51,7 +51,7 @@ const appPath = path.join(process.cwd(), "src/app/");
 /* ======================== get /dbs 文档名称路由(展示所有文档名称) ======================== */
 exports.allModelsRouter = (router) => {
     let dbs_Config = require(path.join(process.cwd(), "src/app/dbModels"));
-    let url = "/dbs";
+    let url = "/dbModels";
     router.get(url, ctx => resSUCCESS(ctx,{ dbModels: Object.keys(dbs_Config) } ));
     routerObjs.push("get - " + url);
 }

@@ -1,16 +1,16 @@
 // 引入全局及组的 collection field
-const docGlobal = require("../../docGlobal");
+const globalModel = require("../../globalModel");
 
 // 本身特殊的 field
-delete docGlobal.Role;
+delete globalModel.Role;
 
-const code = {...docGlobal.code};
+const code = {...globalModel.code};
 code.uniq = ["Firm"];
-const name = {...docGlobal.name};
+const name = {...globalModel.name};
 name.uniq = ["Firm"];
 // 打包成为集合
 const docModel = {
-    ...docGlobal,
+    ...globalModel,
 
     code,
     name,

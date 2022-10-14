@@ -1,14 +1,14 @@
 // 引入全局及组的 collection field
-const docGroup = require("../docGroup");
+const groupModel = require("../groupModel");
 
 // 本身特殊的 field
-delete docGroup.Firm;
+delete groupModel.Firm;
 
-const code = {...docGroup.code};
+const code = {...groupModel.code};
 code.unique = true;
 // 打包成为集合
 const docModel = {
-    ...docGroup,
+    ...groupModel,
 
     code,
 };

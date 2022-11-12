@@ -151,29 +151,23 @@ exports.obtParam_readManyPre = (docModel, paramObj) => {
         for(key in lte) {
             let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
-                if(IS_STRICT) {
-                    return {errMsg: docField.errMsg};
-                } else {
-                    continue;
-                }
+                if(IS_STRICT) return {errMsg: docField.errMsg};
+                else continue;
             }
 
-            if(docField.type !==  Number) return { errMsg: `[paramObj.filter.lte 的 key ${key}] 必须为Number类型` };
+            if(!docField.type) return { errMsg: `[paramObj.filter.lte 的 key ${key}] 必须为基础类型` };
             matchObj[key] = {"$lte": lte[key]};
         }
-    
+
         for(key in gte) {
             let docField = obt_docFieldObj(docModel, key);
             if(docField.errMsg) {
-                if(IS_STRICT) {
-                    return {errMsg: docField.errMsg};
-                } else {
-                    continue;
-                }
+                if(IS_STRICT) return {errMsg: docField.errMsg};
+                else  continue;
             }
 
-            if(docField.type !==  Number) return { errMsg: `[paramObj.filter.gte 的 key ${key}] 必须为Number类型` };
-            
+            if(!docField.type) return { errMsg: `[paramObj.filter.gte 的 key ${key}] 必须为基础类型` };
+
             matchObj[key] = {"$gte": gte[key]};
         }
         for(key in at_before) {

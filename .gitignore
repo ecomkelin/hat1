@@ -1,4 +1,6 @@
+.env
 logs
 document
 node_modules
+dev_note
 public

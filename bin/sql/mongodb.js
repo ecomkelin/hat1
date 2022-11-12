@@ -25,12 +25,21 @@ const docSame = require("./docSame");
 // 暴露mongodb的方法 以及model的doc即所有field
 /**
  * 由models中各个数据库中Model文件提供 系统初始化的时候就被加载到各个Model文件中去 不会根据每次访问重新加载master_DB及方法
- * @param {数据库名称} docName 
- * @param {文档中的field} docModel 添加数据库 用于添加到此Model中暴露出去
+ * @param {String} docName 数据库名称
+ * @param {Object} docModel 文档中的field 添加数据库 用于添加到此Model中暴露出去
+ * @param {Object} option 数据库集群操作
+ * 	没有options做形参 因为要区别于其内部方法的形参options 会方便读代码 避免冲突 let {writeConcern, read} = option
+ * 		@param {Object} writeConcern 数据库集群写操作 {w, j, wtimeout} = writeConcern;
+ * 			@param {String | Number} w : ["majority" | "all"] | Number 写入多少节点数，才成功返回
+ * 			@param {Boolean} j : journal 如果是true 写入日志文件后才算成功， false写入内存就算成功
+ * 				选择true 进一步增加数据安全的做法 如果数据库节点宕机后可以快速恢复刚才的写操作
+ * 			@param {Number} wtimeout : 单位 毫秒 等待多久 其他节点没有返回 主节点就返回数据（会报错 说哪个节点还没有收到）
+ * 		@param {String} read 数据库集群读操作 ["primary" | "primaryPreferred" | "secondary" | "secondaryPreferred" | "nearest"]
+ * 		
  * @returns [Function] 暴露各种数据库方法
  */
-module.exports = (docName, docModel) => {
-	const master_DB = db_master.model(docName, new Schema(docModel));
+module.exports = (docName, docModel, option={}) => {
+	const master_DB = db_master.model(docName, new Schema(docModel, option));
 	// const slave1_DB = db_slave1.model(docName, new Schema(docModel));
 
 	/* read 一般在从数据库读数据 简单的暂时先用一个数据 如果读写分离就要用从数据库  COLread* = db_slave* */
